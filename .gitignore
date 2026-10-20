@@ -18,6 +18,7 @@
 *.db
 *.sqlite
 *.sqlite3
+*.sql
 *.sql.gz
 *.dump
 

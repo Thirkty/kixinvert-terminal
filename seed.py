@@ -3,7 +3,7 @@ import asyncio
 
 sys.stdout.reconfigure(encoding='utf-8')
 from db import engine, Base, SessionLocal
-from models import Portfolio, Asset, Position, MarketQuote
+from models import User, Portfolio, Asset, Position, MarketQuote
 from services.rates_service import fetch_current_rates
 from services.bvc_service import fetch_bvc_market_data, BVC_METADATA
 
@@ -27,12 +27,31 @@ async def seed_data():
         quotes = await fetch_bvc_market_data(db, rates['bcv'], rates['usdt'])
         print(f"📈 {len(quotes)} cotizaciones BVC cargadas en PostgreSQL.")
 
-        # 3. Create initial Portfolio if empty
-        portfolio = db.query(Portfolio).first()
+        # 3. Create initial User & Portfolio if empty
+        user = db.query(User).filter(User.username == "ferna").first()
+        if not user:
+            print("👤 Creando usuario principal 'ferna'...")
+            import security
+            user = User(
+                username="ferna",
+                email="fernandodaniel272006@gmail.com",
+                full_name="Fernando Daniel",
+                password_hash=security.hash_password("Hermana045*"),
+                broker="KixBroker BVC",
+                risk_profile="Agresivo",
+                subscription_tier="pro",
+                telegram_chat_id="6119366121",
+                telegram_alerts_enabled=True
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+        portfolio = db.query(Portfolio).filter(Portfolio.user_id == user.id).first()
         if not portfolio:
             portfolio = Portfolio(
-                id=1,
                 name="Portafolio Inversión BVC",
+                user_id=user.id,
                 cash_ves=12500.0,
                 cash_usd=25.0
             )
