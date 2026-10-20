@@ -121,6 +121,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def on_startup():
+    from db import SessionLocal
+    asyncio.create_task(telegram_service.telegram_polling_worker(SessionLocal))
+
 # Mount static files directory securely
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 if not os.path.exists(STATIC_DIR):

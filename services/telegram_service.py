@@ -4,6 +4,7 @@ import logging
 import datetime
 from typing import Optional, Dict, Any, List
 import httpx
+import asyncio
 from sqlalchemy.orm import Session
 
 from models import User, Portfolio, Notification, MarketQuote, ExchangeRate
@@ -392,8 +393,9 @@ def handle_incoming_telegram_message(db: Session, payload: Dict[str, Any]) -> Di
             return {"status": "not_linked"}
 
     # 5. /ayuda or /help command
+    bot_name = get_bot_username()
     reply_help = (
-        "📖 <b>COMANDOS DISPONIBLES | @KixInvertAlertsBot</b>\n"
+        f"📖 <b>COMANDOS DISPONIBLES | @{bot_name}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "• /balance - Consulta saldo consolidado (VES, USD, USDT) y posiciones\n"
         "• /alertas - Consulta la brecha cambiaria actual y estado de mercado\n"
@@ -404,3 +406,42 @@ def handle_incoming_telegram_message(db: Session, payload: Dict[str, Any]) -> Di
     )
     send_telegram_message(chat_id, reply_help)
     return {"status": "ok", "command": "/ayuda"}
+
+async def telegram_polling_worker(db_session_factory):
+    """
+    Background worker that continuously polls Telegram getUpdates API.
+    Enables instant automatic pairing when users click 'Iniciar' on t.me/KixInvert_bot?start=KIX-XXXX.
+    """
+    offset = None
+    logger.info("Telegram background polling worker started.")
+    while True:
+        try:
+            token = get_bot_token()
+            if not token:
+                await asyncio.sleep(5)
+                continue
+
+            url = f"https://api.telegram.org/bot{token}/getUpdates"
+            params = {"timeout": 10}
+            if offset is not None:
+                params["offset"] = offset
+
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(url, params=params)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    updates = data.get("result", [])
+                    for update in updates:
+                        offset = update["update_id"] + 1
+                        db = db_session_factory()
+                        try:
+                            handle_incoming_telegram_message(db, update)
+                        except Exception as e:
+                            logger.error(f"Error handling Telegram update: {e}")
+                        finally:
+                            db.close()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            await asyncio.sleep(3)
+        await asyncio.sleep(1)
