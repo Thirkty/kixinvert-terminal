@@ -1,0 +1,69 @@
+# ==========================================
+# GITIGNORE - KixInvert BVC Financial Terminal
+# ==========================================
+
+# 1. Environment and Secrets (CRITICAL)
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# 2. Database files & Backups
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+*.dump
+
+# 3. Python Virtual Environments & Packages
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# 4. Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 5. Frontend & Node.js
+frontend/node_modules/
+node_modules/
+frontend/.next/
+.next/
+frontend/out/
+out/
+frontend/.env*.local
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 6. IDE, Editors & System
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 7. Temporary / Logs / Scratch
+*.log
+logs/
+scratch/
+.tempmediaStorage/
