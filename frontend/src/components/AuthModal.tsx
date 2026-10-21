@@ -41,6 +41,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
+  const formatError = (data: any, fallback: string): string => {
+    if (!data) return fallback;
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail)) {
+      return data.detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
+    }
+    if (data.message && typeof data.message === 'string') return data.message;
+    return fallback;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -48,7 +58,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (mode === 'login') {
-        const body: Record<string, string> = { username, password };
+        const body: Record<string, string> = {
+          username_or_email: username.trim(),
+          password
+        };
         if (twoFactorCode) body.two_factor_code = twoFactorCode;
 
         const res = await fetch('/api/auth/login', {
@@ -57,14 +70,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           body: JSON.stringify(body),
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        let data: any = {};
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { detail: text || 'Error del servidor (500).' };
+        }
+
         if (!res.ok) {
           if (data.requires_2fa) {
             setRequires2FA(true);
             setErrorMsg('Ingresa tu código de autenticación 2FA para continuar.');
             return;
           }
-          throw new Error(data.detail || 'Error al iniciar sesión');
+          throw new Error(formatError(data, 'Error al iniciar sesión'));
         }
 
         setAuthToken(data.access_token);
@@ -80,11 +100,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password }),
+          body: JSON.stringify({
+            username: username.trim(),
+            email: email.trim(),
+            password,
+            full_name: username.trim(),
+          }),
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Error al registrar usuario');
+        const text = await res.text();
+        let data: any = {};
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { detail: text || 'Error del servidor (500).' };
+        }
+
+        if (!res.ok) {
+          throw new Error(formatError(data, 'Error al registrar usuario'));
+        }
 
         setAuthToken(data.access_token);
         onSuccess({

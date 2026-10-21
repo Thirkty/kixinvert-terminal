@@ -140,8 +140,8 @@ def validate_password_strength(password: str) -> Tuple[bool, List[str]]:
     - At least one special symbol (!@#$%^&*-_)
     """
     errors = []
-    if len(password) < 10:
-        errors.append("La contraseña debe tener al menos 10 caracteres.")
+    if len(password) < 8:
+        errors.append("La contraseña debe tener al menos 8 caracteres.")
     if len(password) > 128:
         errors.append("La contraseña no puede exceder 128 caracteres.")
     if not re.search(r"[A-Z]", password):

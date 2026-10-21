@@ -213,8 +213,8 @@ def get_optional_current_user(request: Request, db: Session = Depends(get_db)) -
 class UserRegister(BaseModel):
     username: str = Field(..., min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9_.-]+$")
     email: str = Field(..., min_length=5, max_length=100, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    full_name: str = Field(..., min_length=2, max_length=100)
-    password: str = Field(..., min_length=10, max_length=128)
+    full_name: Optional[str] = Field(None, max_length=100)
+    password: str = Field(..., min_length=8, max_length=128)
     system_website_hp: Optional[str] = Field(None, max_length=100) # Honeypot
     broker: Optional[str] = Field("KixBroker BVC", max_length=50)
     risk_profile: Optional[str] = Field("Moderado", max_length=30)
