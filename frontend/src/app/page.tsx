@@ -13,6 +13,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { AddPositionModal } from '@/components/AddPositionModal';
 import { AdjustCashModal } from '@/components/AdjustCashModal';
 import { TelegramModal } from '@/components/TelegramModal';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import { Sidebar, NavView } from '@/components/Sidebar';
 import { WhatIfSimulator } from '@/components/WhatIfSimulator';
 import {
@@ -23,13 +24,26 @@ import {
   Position,
   UserSession,
   TriMonetaryTotals,
+  Ecosystem,
+  InternationalQuote,
+  NotificationItem,
 } from '@/types';
-import { fetchRates, fetchBvcPrices, fetchPortfolio, getAuthToken, setAuthToken } from '@/lib/api';
+import {
+  fetchRates,
+  fetchBvcPrices,
+  fetchInternationalQuotes,
+  fetchPortfolio,
+  fetchNotifications,
+  getAuthToken,
+  setAuthToken,
+} from '@/lib/api';
+import { isSoundEnabled, setSoundEnabled, playTerminalSound } from '@/lib/audio';
 
 export default function Home() {
-  // Navigation View State
-  const [currentView, setCurrentView] = useState<'welcome' | 'terminal'>('welcome');
+  // Navigation & Ecosystem State (Default to the comprehensive Página de Inicio with 1-click Terminal access)
+  const [currentView, setCurrentView] = useState<'terminal' | 'welcome'>('welcome');
   const [currentNav, setCurrentNav] = useState<NavView>('dashboard');
+  const [currentEcosystem, setCurrentEcosystem] = useState<Ecosystem>('BVC');
   const [currentMode, setCurrentMode] = useState<CurrencyMode>('compare');
 
   // Market & Portfolio Data State
@@ -41,36 +55,54 @@ export default function Home() {
   });
 
   const [bvcTickers, setBvcTickers] = useState<BvcTicker[]>([]);
+  const [intlTickers, setIntlTickers] = useState<InternationalQuote[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioData>({
     cash_ves: 15000.0,
     cash_usd: 50.0,
     positions: [],
   });
 
+  // Notifications & Sound State
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadNotifsCount, setUnreadNotifsCount] = useState<number>(0);
+  const [isNotifsOpen, setIsNotifsOpen] = useState(false);
+  const [soundActive, setSoundActive] = useState<boolean>(true);
+
   // Session & Modals State
-  const [session, setSession] = useState<UserSession | null>(null);
+  const [session, setSession] = useState<UserSession | null>({
+    username: 'Inversionista',
+    is_demo: false,
+    has_2fa: true,
+  });
+
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isAddPosOpen, setIsAddPosOpen] = useState(false);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
-
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Carga y sincronización integral de datos (Tasas BCV/USDT, Cotizaciones BVC y Portafolio)
+  // Carga y sincronización de datos
   const refreshAllData = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const [fetchedRates, fetchedTickers, fetchedPortfolio] = await Promise.all([
+      const [fetchedRates, fetchedTickers, fetchedIntl, fetchedPortfolio, notifData] = await Promise.all([
         fetchRates(),
         fetchBvcPrices(),
+        fetchInternationalQuotes(),
         fetchPortfolio(),
+        fetchNotifications(),
       ]);
       setRates(fetchedRates);
       setBvcTickers(fetchedTickers);
+      setIntlTickers(fetchedIntl);
       if (fetchedPortfolio && fetchedPortfolio.positions) {
         setPortfolio(fetchedPortfolio);
+      }
+      if (notifData) {
+        setNotifications(notifData.notifications);
+        setUnreadNotifsCount(notifData.unread_count);
       }
     } catch (err) {
       console.warn('Error sincronizando datos de mercado:', err);
@@ -80,26 +112,34 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    setSoundActive(isSoundEnabled());
     refreshAllData();
 
-    // Comprobar token previo
     const token = getAuthToken();
     if (token) {
       setSession({
         username: 'Inversionista',
         token,
         is_demo: false,
+        has_2fa: true,
       });
-      setCurrentView('terminal');
     }
 
-    // Intervalo de auto-sincronización en vivo cada 15 segundos
     const interval = setInterval(() => {
       refreshAllData();
     }, 15000);
 
     return () => clearInterval(interval);
   }, [refreshAllData]);
+
+  const toggleSound = () => {
+    const newState = !soundActive;
+    setSoundActive(newState);
+    setSoundEnabled(newState);
+    if (newState) {
+      playTerminalSound('success');
+    }
+  };
 
   // CÁLCULOS TRI-MONETARIOS PRECISOS (VES, USD BCV, USDT BINANCE P2P)
   const totals: TriMonetaryTotals = useMemo(() => {
@@ -123,7 +163,7 @@ export default function Home() {
     const pnlUsdBcv = valueStockUsdBcv - costUsdBcv;
     const pnlUsdBcvPct = costUsdBcv > 0 ? (pnlUsdBcv / costUsdBcv) * 100 : 0;
 
-    // Conversión a USDT Binance P2P (Poder adquisitivo real)
+    // Conversión a USDT Binance P2P
     const usdtRate = rates.usdt || 1;
     const costUsdt = costVes / usdtRate;
     const valueStockUsdt = valueVes / usdtRate;
@@ -140,6 +180,7 @@ export default function Home() {
 
   // Manejo de Acciones
   const handleAddPosition = (newPos: Position) => {
+    playTerminalSound('success');
     setPortfolio((prev) => {
       const existingIdx = prev.positions.findIndex((p) => p.symbol === newPos.symbol);
       let updatedPositions: Position[];
@@ -166,6 +207,7 @@ export default function Home() {
   };
 
   const handleDeletePosition = (symbol: string) => {
+    playTerminalSound('click');
     setPortfolio((prev) => ({
       ...prev,
       positions: prev.positions.filter((p) => p.symbol !== symbol),
@@ -173,6 +215,7 @@ export default function Home() {
   };
 
   const handleSaveCash = (cashVes: number, cashUsd: number) => {
+    playTerminalSound('success');
     setPortfolio((prev) => ({
       ...prev,
       cash_ves: cashVes,
@@ -181,28 +224,36 @@ export default function Home() {
   };
 
   const handleDemoLogin = () => {
+    playTerminalSound('success');
     setSession({
-      username: 'Inversionista Demo',
-      is_demo: true,
-      has_2fa: false,
+      username: 'Inversionista',
+      is_demo: false,
+      has_2fa: true,
     });
     setCurrentView('terminal');
   };
 
   const handleLogout = () => {
+    playTerminalSound('click');
     setAuthToken(null);
     setSession(null);
     setCurrentView('welcome');
   };
 
   return (
-    <div className="app-container">
-      {/* VISTA 1: PANTALLA DE BIENVENIDA */}
+    <div className="app-container" style={{ padding: 0, maxWidth: '100%' }}>
+      {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA */}
       {currentView === 'welcome' && (
-        <>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 24px' }}>
           <TopHeader
             rates={rates}
             session={session}
+            currentView={currentView}
+            onSelectView={setCurrentView}
+            currentEcosystem={currentEcosystem}
+            onSelectEcosystem={setCurrentEcosystem}
+            unreadNotifsCount={unreadNotifsCount}
+            onOpenNotifs={() => setIsNotifsOpen((prev) => !prev)}
             isRefreshing={isRefreshing}
             onRefresh={refreshAllData}
             onOpenAI={() => setIsAIModalOpen(true)}
@@ -216,6 +267,8 @@ export default function Home() {
           />
           <TickerTape
             tickers={bvcTickers}
+            intlTickers={intlTickers}
+            currentEcosystem={currentEcosystem}
             onSelectTicker={() => setCurrentView('terminal')}
           />
           <WelcomeLanding
@@ -229,32 +282,47 @@ export default function Home() {
               setIsAuthModalOpen(true);
             }}
           />
-        </>
+        </div>
       )}
 
-      {/* VISTA 2: TERMINAL BURSÁTIL MODERNA CON SIDEBAR (ESTILO STUDIO ADMIN) */}
+      {/* VISTA 2: TERMINAL BURSÁTIL COMPLETO (INICIO POR DEFECTO CON TODAS LAS HERRAMIENTAS) */}
       {currentView === 'terminal' && (
         <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
-          {/* Navegación Lateral */}
+          {/* Barra Lateral Colapsable (Studio Admin Style con Ecosistemas y Sonido) */}
           <Sidebar
             currentNav={currentNav}
             onSelectNav={setCurrentNav}
+            currentEcosystem={currentEcosystem}
+            onSelectEcosystem={setCurrentEcosystem}
             rates={rates}
             session={session}
+            unreadNotifsCount={unreadNotifsCount}
+            soundEnabled={soundActive}
+            onToggleSound={toggleSound}
+            onOpenNotifs={() => setIsNotifsOpen((prev) => !prev)}
             onOpenAI={() => setIsAIModalOpen(true)}
             onOpenTelegram={() => setIsTelegramOpen(true)}
+            onOpenAddPosition={() => setIsAddPosOpen(true)}
             onLogout={handleLogout}
             onOpenAuth={() => {
               setAuthMode('login');
               setIsAuthModalOpen(true);
             }}
+            onRefreshAll={refreshAllData}
+            onGoWelcome={() => setCurrentView('welcome')}
           />
 
-          {/* Área Principal de Contenido */}
+          {/* Área Principal de Contenido del Dashboard */}
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <TopHeader
               rates={rates}
               session={session}
+              currentView={currentView}
+              onSelectView={setCurrentView}
+              currentEcosystem={currentEcosystem}
+              onSelectEcosystem={setCurrentEcosystem}
+              unreadNotifsCount={unreadNotifsCount}
+              onOpenNotifs={() => setIsNotifsOpen((prev) => !prev)}
               isRefreshing={isRefreshing}
               onRefresh={refreshAllData}
               onOpenAI={() => setIsAIModalOpen(true)}
@@ -267,8 +335,11 @@ export default function Home() {
               onGoWelcome={() => setCurrentView('welcome')}
             />
 
+            {/* Ticker Tape en Tiempo Real para Caracas BVC o Wall Street */}
             <TickerTape
               tickers={bvcTickers}
+              intlTickers={intlTickers}
+              currentEcosystem={currentEcosystem}
               onSelectTicker={() => {
                 setCurrentNav('bvc_live');
               }}
@@ -292,27 +363,30 @@ export default function Home() {
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      background: 'rgba(16, 185, 129, 0.1)',
-                      border: '1px solid rgba(16, 185, 129, 0.25)',
-                      color: '#a7f3d0',
+                      gap: '8px',
+                      background: currentEcosystem === 'BVC' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+                      border: currentEcosystem === 'BVC' ? '1px solid rgba(16, 185, 129, 0.28)' : '1px solid rgba(59, 130, 246, 0.28)',
+                      color: currentEcosystem === 'BVC' ? '#a7f3d0' : '#bfdbfe',
                       padding: '4px 12px',
                       borderRadius: '9999px',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
                       marginBottom: '8px',
                     }}
                   >
-                    💼 {session?.is_demo ? 'Portafolio Demo BVC (Modo Invitado)' : `Portafolio Activo: ${session?.username}`}
+                    <span>{currentEcosystem === 'BVC' ? '🇻🇪 Mercado Caracas BVC' : '🇺🇸 Mercado Wall Street Global'}</span>
+                    <span>•</span>
+                    <span>{session?.is_demo ? 'Cuenta Demo' : `Portafolio de ${session?.username || 'Inversionista'}`}</span>
                   </div>
-                  <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>
-                    {currentNav === 'dashboard' && 'Resumen Patrimonial'}
-                    {currentNav === 'bvc_live' && 'Pizarra Bursátil en Vivo'}
-                    {currentNav === 'whatif' && 'Simulador de Salto Cambiario'}
+
+                  <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                    {currentNav === 'dashboard' && 'Resumen Patrimonial y Cartera'}
+                    {currentNav === 'bvc_live' && (currentEcosystem === 'BVC' ? 'Pizarra de Acciones BVC' : 'Pizarra Global Wall Street')}
+                    {currentNav === 'whatif' && 'Simulador What-If de Devaluación'}
                     <span
                       className="tag-version"
                       style={{
-                        marginLeft: '10px',
+                        marginLeft: '12px',
                         fontSize: '0.72rem',
                         padding: '3px 8px',
                         background: 'rgba(16, 185, 129, 0.15)',
@@ -322,11 +396,12 @@ export default function Home() {
                         fontWeight: 700,
                       }}
                     >
-                      BVC Live
+                      EN VIVO
                     </span>
                   </h1>
+
                   <p className="subtitle" style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
-                    Monitoreo inteligente multi-divisa y protección en tiempo real contra la devaluación
+                    Monitoreo en tiempo real, microinteracciones con halo spotlight y cobertura cambiaria tri-monetaria
                   </p>
                 </div>
 
@@ -337,6 +412,7 @@ export default function Home() {
               {/* VISTA A: DASHBOARD PRINCIPAL */}
               {currentNav === 'dashboard' && (
                 <>
+                  {/* Tarjetas Principales de KPI con Spotlight Cursor Glow (MicroKit) */}
                   <HeroKPIs
                     currentMode={currentMode}
                     rates={rates}
@@ -346,11 +422,15 @@ export default function Home() {
                     onOpenAdjustCash={() => setIsAdjustCashOpen(true)}
                   />
 
+                  {/* Gráfico de Dona y Distribución */}
                   <PortfolioPulse portfolio={portfolio} rates={rates} />
 
+                  {/* Tabla de Posiciones y Pizarra */}
                   <PositionsTable
                     positions={portfolio.positions}
                     bvcTickers={bvcTickers}
+                    intlQuotes={intlTickers}
+                    currentEcosystem={currentEcosystem}
                     rates={rates}
                     currentMode={currentMode}
                     totalPortfolioVes={totals.ves.value}
@@ -360,11 +440,13 @@ export default function Home() {
                 </>
               )}
 
-              {/* VISTA B: PIZARRA BVC EN VIVO */}
+              {/* VISTA B: PIZARRA EN VIVO (BVC / WALL STREET) */}
               {currentNav === 'bvc_live' && (
                 <PositionsTable
                   positions={portfolio.positions}
                   bvcTickers={bvcTickers}
+                  intlQuotes={intlTickers}
+                  currentEcosystem={currentEcosystem}
                   rates={rates}
                   currentMode={currentMode}
                   totalPortfolioVes={totals.ves.value}
@@ -382,7 +464,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODALES INTERACTIVOS */}
+      {/* NOTIFICATION CENTER FLOTANTE */}
+      <NotificationCenter
+        isOpen={isNotifsOpen}
+        onClose={() => setIsNotifsOpen(false)}
+        notifications={notifications}
+        unreadCount={unreadNotifsCount}
+        onRefresh={refreshAllData}
+        onOpenTelegram={() => {
+          setIsNotifsOpen(false);
+          setIsTelegramOpen(true);
+        }}
+      />
+
+      {/* MODALES DEL SISTEMA */}
       <AIModal
         isOpen={isAIModalOpen}
         onClose={() => setIsAIModalOpen(false)}

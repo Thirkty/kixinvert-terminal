@@ -1,43 +1,60 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { BvcTicker } from '@/types';
-import { formatVES } from '@/lib/formatters';
+import { BvcTicker, Ecosystem, InternationalQuote } from '@/types';
+import { formatVES, formatUSD } from '@/lib/formatters';
+import { playTerminalSound } from '@/lib/audio';
 
 interface TickerTapeProps {
   tickers: BvcTicker[];
+  intlTickers?: InternationalQuote[];
+  currentEcosystem?: Ecosystem;
   onSelectTicker?: (symbol: string) => void;
 }
 
-const TickerTapeComponent: React.FC<TickerTapeProps> = ({ tickers, onSelectTicker }) => {
-  // Ordenar tickers: instrumentos líquidos y con variación al frente
-  const sortedTickers = useMemo(() => {
+const TickerTapeComponent: React.FC<TickerTapeProps> = ({
+  tickers,
+  intlTickers = [],
+  currentEcosystem = 'BVC',
+  onSelectTicker,
+}) => {
+  const activeItems = useMemo(() => {
+    if (currentEcosystem === 'US') {
+      if (!intlTickers || intlTickers.length === 0) return [];
+      return intlTickers.map((item) => ({
+        symbol: item.symbol,
+        name: item.name,
+        price: item.price,
+        change_pct: item.change_pct,
+        currency: 'USD',
+      }));
+    }
+
     if (!tickers || tickers.length === 0) return [];
-
-    // Filtrar instrumentos sin cotización válida
     const valid = tickers.filter((t) => t.price > 0);
-
-    // Separar en activos con variación y activos sin movimiento
     const movers = valid.filter((t) => Math.abs(t.change_pct) > 0);
     const neutrals = valid.filter((t) => Math.abs(t.change_pct) === 0);
-
-    // Ordenar los que tienen variación por magnitud de variación
     movers.sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct));
-
-    return [...movers, ...neutrals];
-  }, [tickers]);
+    return [...movers, ...neutrals].map((item) => ({
+      symbol: item.symbol,
+      name: item.name,
+      price: item.price,
+      change_pct: item.change_pct,
+      currency: 'VES',
+    }));
+  }, [tickers, intlTickers, currentEcosystem]);
 
   // Duplicar elementos para que el marquee sea infinito y sin cortes
   const marqueeList = useMemo(() => {
-    if (sortedTickers.length === 0) return [];
-    return [...sortedTickers, ...sortedTickers];
-  }, [sortedTickers]);
+    if (activeItems.length === 0) return [];
+    return [...activeItems, ...activeItems];
+  }, [activeItems]);
 
   return (
-    <div className="tape-container">
-      <div className="tape-badge">
-        <span className="pulse-dot" style={{ width: '6px', height: '6px', minWidth: '6px' }}></span>
-        <span>BVC LIVE</span>
+    <div className="tape-container" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <div className="tape-badge" style={{ background: currentEcosystem === 'US' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: currentEcosystem === 'US' ? '#93c5fd' : '#a7f3d0' }}>
+        <span className="pulse-dot" style={{ width: '6px', height: '6px', minWidth: '6px', background: currentEcosystem === 'US' ? '#3b82f6' : '#10b981' }}></span>
+        <span>{currentEcosystem === 'US' ? 'WALL STREET' : 'BVC LIVE'}</span>
       </div>
       <div className="tape-viewport">
         <div className="tape-track">
@@ -46,16 +63,20 @@ const TickerTapeComponent: React.FC<TickerTapeProps> = ({ tickers, onSelectTicke
             const isZero = t.change_pct === 0;
             const sign = isPos ? '▲ +' : t.change_pct < 0 ? '▼ ' : '';
             const badgeClass = isPos ? 'tag-green' : isZero ? 'tag-neutral' : 'tag-red';
+            const priceFormatted = t.currency === 'USD' ? formatUSD(t.price) : formatVES(t.price);
 
             return (
               <div
                 key={`${t.symbol}-${idx}`}
                 className="tape-item"
-                onClick={() => onSelectTicker?.(t.symbol)}
-                title={`${t.name}: ${formatVES(t.price)} (${isPos ? '+' : ''}${t.change_pct.toFixed(2)}%)`}
+                onClick={() => {
+                  playTerminalSound('click');
+                  onSelectTicker?.(t.symbol);
+                }}
+                title={`${t.name}: ${priceFormatted} (${isPos ? '+' : ''}${t.change_pct.toFixed(2)}%)`}
               >
                 <span className="sym">{t.symbol}</span>
-                <span className="price">{formatVES(t.price)}</span>
+                <span className="price">{priceFormatted}</span>
                 <span className={`tag ${badgeClass}`}>
                   {sign}
                   {t.change_pct.toFixed(2)}%

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Layers, LayoutList, Bot, Trash2, Zap, Search } from 'lucide-react';
-import { Position, BvcTicker, CurrencyMode, MarketRates } from '@/types';
+import { Layers, LayoutList, Bot, Trash2, Zap, Search, Globe, DollarSign } from 'lucide-react';
+import { Position, BvcTicker, CurrencyMode, MarketRates, Ecosystem, InternationalQuote } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
+import { playTerminalSound } from '@/lib/audio';
 import { SpotlightCard } from './SpotlightCard';
 import { AnimatedTrend, AnimatedSparkles } from './AnimatedIcons';
 import { WhatIfSimulator } from './WhatIfSimulator';
@@ -11,6 +12,8 @@ import { WhatIfSimulator } from './WhatIfSimulator';
 interface PositionsTableProps {
   positions: Position[];
   bvcTickers: BvcTicker[];
+  intlQuotes?: InternationalQuote[];
+  currentEcosystem?: Ecosystem;
   rates: MarketRates;
   currentMode: CurrencyMode;
   totalPortfolioVes: number;
@@ -21,16 +24,18 @@ interface PositionsTableProps {
 const PositionsTableComponent: React.FC<PositionsTableProps> = ({
   positions,
   bvcTickers,
+  intlQuotes = [],
+  currentEcosystem = 'BVC',
   rates,
   currentMode,
   totalPortfolioVes,
   onDeletePosition,
   onOpenAI,
 }) => {
-  const [activeTab, setActiveTab] = useState<'positions' | 'bvc_live' | 'whatif'>('positions');
+  const [activeTab, setActiveTab] = useState<'positions' | 'market_live' | 'whatif'>('positions');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Ordenar cotizaciones de la pizarra BVC: activos con variación y de mayor movimiento primero
+  // Ordenar cotizaciones de la pizarra BVC
   const sortedBvcTickers = useMemo(() => {
     const list = [...bvcTickers].filter((t) => t.price > 0);
     const movers = list.filter((t) => Math.abs(t.change_pct) > 0);
@@ -39,7 +44,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
     return [...movers, ...neutrals];
   }, [bvcTickers]);
 
-  // Filtrado reactivo en vivo por Ticker o Nombre de Empresa
+  // Filtrado BVC
   const filteredBvcTickers = useMemo(() => {
     if (!searchTerm.trim()) return sortedBvcTickers;
     const term = searchTerm.toLowerCase();
@@ -47,6 +52,15 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
       (t) => t.symbol.toLowerCase().includes(term) || t.name.toLowerCase().includes(term)
     );
   }, [sortedBvcTickers, searchTerm]);
+
+  // Filtrado Wall Street
+  const filteredIntlQuotes = useMemo(() => {
+    if (!searchTerm.trim()) return intlQuotes;
+    const term = searchTerm.toLowerCase();
+    return intlQuotes.filter(
+      (t) => t.symbol.toLowerCase().includes(term) || t.name.toLowerCase().includes(term)
+    );
+  }, [intlQuotes, searchTerm]);
 
   return (
     <SpotlightCard
@@ -59,7 +73,10 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
       <div className="table-tabs" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <button
           className={`tab-btn ${activeTab === 'positions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('positions')}
+          onClick={() => {
+            playTerminalSound('click');
+            setActiveTab('positions');
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -75,33 +92,40 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
             transition: 'all 0.2s ease',
           }}
         >
-          <Layers size={15} /> Mis Posiciones ( {positions.length} )
+          <Layers size={15} /> Mis Posiciones ({positions.length})
         </button>
 
         <button
-          className={`tab-btn ${activeTab === 'bvc_live' ? 'active' : ''}`}
-          onClick={() => setActiveTab('bvc_live')}
+          className={`tab-btn ${activeTab === 'market_live' ? 'active' : ''}`}
+          onClick={() => {
+            playTerminalSound('click');
+            setActiveTab('market_live');
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '10px',
-            background: activeTab === 'bvc_live' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-            border: activeTab === 'bvc_live' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-            color: activeTab === 'bvc_live' ? '#10b981' : '#94a3b8',
+            background: activeTab === 'market_live' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+            border: activeTab === 'market_live' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+            color: activeTab === 'market_live' ? '#10b981' : '#94a3b8',
             fontWeight: 700,
             fontSize: '0.85rem',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
           }}
         >
-          <LayoutList size={15} /> Pizarra BVC en Vivo ({bvcTickers.length} Títulos)
+          <LayoutList size={15} />
+          {currentEcosystem === 'BVC' ? `Pizarra BVC en Vivo (${bvcTickers.length} Títulos)` : `Pizarra Wall Street (${intlQuotes.length} Acciones & ETFs)`}
         </button>
 
         <button
           className={`tab-btn ${activeTab === 'whatif' ? 'active' : ''}`}
-          onClick={() => setActiveTab('whatif')}
+          onClick={() => {
+            playTerminalSound('click');
+            setActiveTab('whatif');
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -122,7 +146,10 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
 
         <button
           className="tab-btn btn-shimmer"
-          onClick={onOpenAI}
+          onClick={() => {
+            playTerminalSound('click');
+            onOpenAI();
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -151,7 +178,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 <th>Activo / Ticker</th>
                 <th className="text-right">Títulos</th>
                 <th className="text-right">Costo Promedio</th>
-                <th className="text-right">Precio Actual (BVC)</th>
+                <th className="text-right">Precio Actual</th>
                 <th className="text-right">Valor Total</th>
                 <th className="text-right">Ganancia / Pérdida</th>
                 <th className="text-right">% Cartera</th>
@@ -220,7 +247,10 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                       <td>
                         <button
                           className="btn-delete-pos"
-                          onClick={() => onDeletePosition(pos.symbol)}
+                          onClick={() => {
+                            playTerminalSound('click');
+                            onDeletePosition(pos.symbol);
+                          }}
                           title={`Eliminar posición en ${pos.symbol}`}
                           style={{
                             background: 'transparent',
@@ -244,8 +274,8 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
         </div>
       )}
 
-      {/* TAB 2: PIZARRA BVC EN VIVO */}
-      {activeTab === 'bvc_live' && (
+      {/* TAB 2: PIZARRA DE MERCADO EN VIVO (CARACAS BVC O WALL STREET) */}
+      {activeTab === 'market_live' && (
         <div>
           {/* Quick Search Bar (Studio Admin Pattern) */}
           <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -259,13 +289,13 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 borderRadius: '10px',
                 padding: '8px 14px',
                 width: '100%',
-                maxWidth: '400px',
+                maxWidth: '420px',
               }}
             >
               <Search size={16} style={{ color: '#64748b' }} />
               <input
                 type="text"
-                placeholder="Filtrar por Ticker o Nombre (ej: BNC, CANTV, Banco)..."
+                placeholder={currentEcosystem === 'BVC' ? 'Buscar en BVC (ej: BNC, CANTV, Provincial)...' : 'Buscar en Wall Street (ej: SPY, Nvidia, Apple, Tesla)...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
@@ -279,45 +309,79 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
               />
             </div>
             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              Mostrando {filteredBvcTickers.length} títulos
+              {currentEcosystem === 'BVC' ? `Mostrando ${filteredBvcTickers.length} acciones BVC` : `Mostrando ${filteredIntlQuotes.length} activos globales`}
             </span>
           </div>
 
           <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr>
-                  <th>Ticker</th>
-                  <th>Nombre de la Empresa</th>
-                  <th className="text-right">Precio en Bolívares (VES)</th>
-                  <th className="text-right">Equivalente USD (BCV)</th>
-                  <th className="text-right">Equivalente USDT (P2P)</th>
-                  <th className="text-right">Variación Diaria</th>
-                </tr>
+                {currentEcosystem === 'BVC' ? (
+                  <tr>
+                    <th>Ticker</th>
+                    <th>Nombre de la Empresa</th>
+                    <th className="text-right">Precio en Bolívares (VES)</th>
+                    <th className="text-right">Equivalente USD (BCV)</th>
+                    <th className="text-right">Equivalente USDT (P2P)</th>
+                    <th className="text-right">Variación Diaria</th>
+                  </tr>
+                ) : (
+                  <tr>
+                    <th>Ticker</th>
+                    <th>Nombre del Activo / ETF</th>
+                    <th className="text-right">Precio Oficial (USD)</th>
+                    <th className="text-right">Equivalente en Bolívares (BCV)</th>
+                    <th className="text-right">Equivalente en USDT</th>
+                    <th className="text-right">Variación Diaria</th>
+                  </tr>
+                )}
               </thead>
               <tbody>
-                {filteredBvcTickers.map((t) => {
-                  const isPos = t.change_pct > 0;
-                  const isZero = t.change_pct === 0;
-                  const colorClass = isPos ? 'text-green' : isZero ? 'text-dim' : 'text-red';
-                  const sign = isPos ? '+' : '';
+                {currentEcosystem === 'BVC'
+                  ? filteredBvcTickers.map((t) => {
+                      const isPos = t.change_pct > 0;
+                      const isZero = t.change_pct === 0;
+                      const colorClass = isPos ? 'text-green' : isZero ? 'text-dim' : 'text-red';
+                      const sign = isPos ? '+' : '';
 
-                  return (
-                    <tr key={t.symbol}>
-                      <td><strong style={{ color: '#fff' }}>{t.symbol}</strong></td>
-                      <td style={{ color: '#94a3b8' }}>{t.name}</td>
-                      <td className="text-right font-mono font-bold">{formatVES(t.price)}</td>
-                      <td className="text-right font-mono text-dim">{formatUSD(t.price / (rates.bcv || 1))}</td>
-                      <td className="text-right font-mono text-dim">{(t.price / (rates.usdt || 1)).toFixed(2)} USDT</td>
-                      <td className={`text-right font-mono ${colorClass}`}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          {!isZero && <AnimatedTrend type={isPos ? 'up' : 'down'} size={14} />}
-                          <span>{sign}{t.change_pct.toFixed(2)}%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      return (
+                        <tr key={t.symbol}>
+                          <td><strong style={{ color: '#fff' }}>{t.symbol}</strong></td>
+                          <td style={{ color: '#94a3b8' }}>{t.name}</td>
+                          <td className="text-right font-mono font-bold">{formatVES(t.price)}</td>
+                          <td className="text-right font-mono text-dim">{formatUSD(t.price / (rates.bcv || 1))}</td>
+                          <td className="text-right font-mono text-dim">{(t.price / (rates.usdt || 1)).toFixed(2)} USDT</td>
+                          <td className={`text-right font-mono ${colorClass}`}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              {!isZero && <AnimatedTrend type={isPos ? 'up' : 'down'} size={14} />}
+                              <span>{sign}{t.change_pct.toFixed(2)}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  : filteredIntlQuotes.map((t) => {
+                      const isPos = t.change_pct > 0;
+                      const isZero = t.change_pct === 0;
+                      const colorClass = isPos ? 'text-green' : isZero ? 'text-dim' : 'text-red';
+                      const sign = isPos ? '+' : '';
+
+                      return (
+                        <tr key={t.symbol}>
+                          <td><strong style={{ color: '#fff' }}>{t.symbol}</strong></td>
+                          <td style={{ color: '#94a3b8' }}>{t.name}</td>
+                          <td className="text-right font-mono font-bold text-green">{formatUSD(t.price)}</td>
+                          <td className="text-right font-mono text-dim">{formatVES(t.price * (rates.bcv || 1))}</td>
+                          <td className="text-right font-mono text-dim">{t.price.toFixed(2)} USDT</td>
+                          <td className={`text-right font-mono ${colorClass}`}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              {!isZero && <AnimatedTrend type={isPos ? 'up' : 'down'} size={14} />}
+                              <span>{sign}{t.change_pct.toFixed(2)}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
           </div>

@@ -81,3 +81,28 @@ export interface WhatIfSimulationResult {
   advice: string;
 }
 
+export type Ecosystem = 'BVC' | 'US';
+
+export interface NotificationItem {
+  id: number;
+  category?: string;
+  type?: string;
+  title: string;
+  message?: string;
+  desc?: string;
+  is_read: boolean;
+  action_url?: string;
+  created_at?: string;
+  time?: string;
+}
+
+export interface InternationalQuote {
+  symbol: string;
+  name: string;
+  price: number;
+  change_pct: number;
+  currency?: string;
+  category?: string;
+}
+
+

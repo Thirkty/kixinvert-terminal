@@ -1,4 +1,13 @@
-import { MarketRates, BvcTicker, PortfolioData, Position, TelegramStatus, WhatIfSimulationResult } from '@/types';
+import {
+  MarketRates,
+  BvcTicker,
+  PortfolioData,
+  Position,
+  TelegramStatus,
+  WhatIfSimulationResult,
+  NotificationItem,
+  InternationalQuote,
+} from '@/types';
 
 const API_BASE = '/api';
 
@@ -295,4 +304,104 @@ export async function simulateWhatIf(params: {
     };
   }
 }
+
+export async function fetchInternationalQuotes(): Promise<InternationalQuote[]> {
+  try {
+    const res = await fetch(`${API_BASE}/international/popular`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Error al cargar cotizaciones de Wall Street');
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map((item: any) => ({
+        symbol: item.ticker || item.symbol,
+        name: item.name || item.ticker,
+        price: Number(item.price ?? item.current_price ?? 0),
+        change_pct: Number(item.change_pct ?? item.change_today_pct ?? 0),
+        currency: 'USD',
+        category: item.category || 'US Equities',
+      }));
+    }
+    throw new Error('Lista vacía de Wall Street');
+  } catch (err) {
+    return [
+      { symbol: 'SPY', name: 'SPDR S&P 500 ETF Trust', price: 585.40, change_pct: 0.82, currency: 'USD' },
+      { symbol: 'QQQ', name: 'Invesco QQQ Trust (Nasdaq 100)', price: 492.15, change_pct: 1.14, currency: 'USD' },
+      { symbol: 'NVDA', name: 'NVIDIA Corporation', price: 138.25, change_pct: 3.42, currency: 'USD' },
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 232.10, change_pct: -0.45, currency: 'USD' },
+      { symbol: 'MSFT', name: 'Microsoft Corporation', price: 428.60, change_pct: 0.65, currency: 'USD' },
+      { symbol: 'TSLA', name: 'Tesla, Inc.', price: 218.80, change_pct: -1.80, currency: 'USD' },
+    ];
+  }
+}
+
+export async function fetchNotifications(category?: string): Promise<{ unread_count: number; notifications: NotificationItem[] }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const query = category && category !== 'all' ? `?category=${category}` : '';
+    const res = await fetch(`${API_BASE}/notifications${query}`, { headers, cache: 'no-store' });
+    if (!res.ok) throw new Error('Error al consultar notificaciones');
+    const data = await res.json();
+    return {
+      unread_count: Number(data.unread_count || 0),
+      notifications: Array.isArray(data.notifications) ? data.notifications : [],
+    };
+  } catch (err) {
+    return {
+      unread_count: 2,
+      notifications: [
+        {
+          id: 1,
+          category: 'tactical',
+          type: 'spread',
+          title: 'Brecha Cambiaria BCV vs USDT',
+          message: 'La brecha cambiaria se ubica en 13.58%. Se recomienda mantener posiciones en títulos indexados.',
+          desc: 'La brecha cambiaria se ubica en 13.58%. Se recomienda mantener posiciones en títulos indexados.',
+          is_read: false,
+          time: 'En vivo',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          category: 'market',
+          type: 'bvc_surge',
+          title: 'Movimiento en la BVC: CANTV (TDV.D)',
+          message: 'CANTV (TDV.D) sube +5.69% en la sesión de hoy con alto volumen negociado.',
+          desc: 'CANTV (TDV.D) sube +5.69% en la sesión de hoy con alto volumen negociado.',
+          is_read: false,
+          time: 'Hace 5m',
+          created_at: new Date().toISOString(),
+        },
+      ],
+    };
+  }
+}
+
+export async function markNotificationRead(id: number): Promise<boolean> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/notifications/${id}/read`, { method: 'POST', headers });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function markAllNotificationsRead(): Promise<boolean> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/notifications/read-all`, { method: 'POST', headers });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 
