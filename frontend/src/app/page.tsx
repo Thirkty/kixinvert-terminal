@@ -242,37 +242,14 @@ export default function Home() {
 
   return (
     <div className="app-container" style={{ padding: 0, maxWidth: '100%' }}>
-      {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA */}
+      {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA (UNIFICADO, SIN DOBLE HEADER NI OVERLAPPING) */}
       {currentView === 'welcome' && (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 24px' }}>
-          <TopHeader
-            rates={rates}
-            session={session}
-            currentView={currentView}
-            onSelectView={setCurrentView}
-            currentEcosystem={currentEcosystem}
-            onSelectEcosystem={setCurrentEcosystem}
-            unreadNotifsCount={unreadNotifsCount}
-            onOpenNotifs={() => setIsNotifsOpen((prev) => !prev)}
-            isRefreshing={isRefreshing}
-            onRefresh={refreshAllData}
-            onOpenAI={() => setIsAIModalOpen(true)}
-            onOpenTelegram={() => setIsTelegramOpen(true)}
-            onLogout={handleLogout}
-            onOpenAuth={() => {
-              setAuthMode('login');
-              setIsAuthModalOpen(true);
-            }}
-            onGoWelcome={() => setCurrentView('welcome')}
-          />
-          <TickerTape
-            tickers={bvcTickers}
-            intlTickers={intlTickers}
-            currentEcosystem={currentEcosystem}
-            onSelectTicker={() => setCurrentView('terminal')}
-          />
+        <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <WelcomeLanding
             onEnterDemo={handleDemoLogin}
+            onGoTerminal={() => setCurrentView('terminal')}
+            session={session}
+            onLogout={handleLogout}
             onOpenRegister={() => {
               setAuthMode('register');
               setIsAuthModalOpen(true);
@@ -281,6 +258,9 @@ export default function Home() {
               setAuthMode('login');
               setIsAuthModalOpen(true);
             }}
+            bvcTickers={bvcTickers}
+            intlTickers={intlTickers}
+            currentEcosystem={currentEcosystem}
           />
         </div>
       )}

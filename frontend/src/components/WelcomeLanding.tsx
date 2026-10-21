@@ -5,6 +5,7 @@ import Image from 'next/image';
 import {
   UserPlus,
   Lock,
+  LogOut,
   Zap,
   Coins,
   TrendingUp,
@@ -29,6 +30,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
+import { TickerTape } from './TickerTape';
+import { UserSession, BvcTicker, InternationalQuote, Ecosystem } from '@/types';
 import {
   AnimatedPulseBeacon,
   AnimatedTelegram,
@@ -41,12 +44,24 @@ interface WelcomeLandingProps {
   onEnterDemo: () => void;
   onOpenRegister: () => void;
   onOpenLogin: () => void;
+  onGoTerminal?: () => void;
+  session?: UserSession | null;
+  onLogout?: () => void;
+  bvcTickers?: BvcTicker[];
+  intlTickers?: InternationalQuote[];
+  currentEcosystem?: Ecosystem;
 }
 
 export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
   onEnterDemo,
   onOpenRegister,
   onOpenLogin,
+  onGoTerminal,
+  session,
+  onLogout,
+  bvcTickers,
+  intlTickers,
+  currentEcosystem,
 }) => {
   // FAQ accordion state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -111,6 +126,18 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
         </div>
 
         <div className="welcome-nav-cta" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {onGoTerminal && (
+            <button
+              className="btn-nav-terminal"
+              onClick={() => {
+                playTerminalSound('click');
+                onGoTerminal();
+              }}
+              title="Ir directamente al Terminal Bursátil en Vivo"
+            >
+              <TrendingUp size={14} /> Abrir Terminal
+            </button>
+          )}
           <button
             className="btn-nav-demo"
             onClick={() => {
@@ -118,20 +145,55 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
               onEnterDemo();
             }}
           >
-            <PlayCircle size={15} /> Probar Demo en Vivo
+            <PlayCircle size={15} /> Probar Demo
           </button>
-          <button
-            className="btn-hero-secondary"
-            style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px' }}
-            onClick={() => {
-              playTerminalSound('click');
-              onOpenLogin();
-            }}
-          >
-            <Lock size={13} /> Entrar
-          </button>
+          {session ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="nav-user-pill">
+                <span className="user-online-dot"></span>
+                {session.username}
+              </span>
+              {onLogout && (
+                <button
+                  className="btn-nav-logout"
+                  onClick={() => {
+                    playTerminalSound('click');
+                    onLogout();
+                  }}
+                  title="Cerrar Sesión"
+                >
+                  <LogOut size={13} />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              className="btn-hero-secondary"
+              style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px' }}
+              onClick={() => {
+                playTerminalSound('click');
+                onOpenLogin();
+              }}
+            >
+              <Lock size={13} /> Entrar
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Live Financial Ticker on Landing */}
+      {bvcTickers && bvcTickers.length > 0 && (
+        <div style={{ margin: '0 auto 16px auto', maxWidth: '1240px', width: 'calc(100% - 32px)' }}>
+          <TickerTape
+            tickers={bvcTickers}
+            intlTickers={intlTickers}
+            currentEcosystem={currentEcosystem || 'BVC'}
+            onSelectTicker={() => {
+              if (onGoTerminal) onGoTerminal();
+            }}
+          />
+        </div>
+      )}
 
       {/* 2. HERO SECTION */}
       <section className="welcome-hero glass-panel">
