@@ -12,6 +12,9 @@ import { AIModal } from '@/components/AIModal';
 import { AuthModal } from '@/components/AuthModal';
 import { AddPositionModal } from '@/components/AddPositionModal';
 import { AdjustCashModal } from '@/components/AdjustCashModal';
+import { TelegramModal } from '@/components/TelegramModal';
+import { Sidebar, NavView } from '@/components/Sidebar';
+import { WhatIfSimulator } from '@/components/WhatIfSimulator';
 import {
   CurrencyMode,
   MarketRates,
@@ -26,6 +29,7 @@ import { fetchRates, fetchBvcPrices, fetchPortfolio, getAuthToken, setAuthToken 
 export default function Home() {
   // Navigation View State
   const [currentView, setCurrentView] = useState<'welcome' | 'terminal'>('welcome');
+  const [currentNav, setCurrentNav] = useState<NavView>('dashboard');
   const [currentMode, setCurrentMode] = useState<CurrencyMode>('compare');
 
   // Market & Portfolio Data State
@@ -50,6 +54,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isAddPosOpen, setIsAddPosOpen] = useState(false);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
+  const [isTelegramOpen, setIsTelegramOpen] = useState(false);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -88,8 +93,7 @@ export default function Home() {
       setCurrentView('terminal');
     }
 
-    // Intervalo de auto-sincronización en vivo cada 15 segundos:
-    // Actualiza precios BVC, libro de cotizaciones, tasas BCV/USDT y recalcula el portafolio en tiempo real
+    // Intervalo de auto-sincronización en vivo cada 15 segundos
     const interval = setInterval(() => {
       refreshAllData();
     }, 15000);
@@ -193,103 +197,189 @@ export default function Home() {
 
   return (
     <div className="app-container">
-      {/* Barra Global Superior */}
-      <TopHeader
-        rates={rates}
-        session={session}
-        isRefreshing={isRefreshing}
-        onRefresh={refreshAllData}
-        onOpenAI={() => setIsAIModalOpen(true)}
-        onLogout={handleLogout}
-        onOpenAuth={() => {
-          setAuthMode('login');
-          setIsAuthModalOpen(true);
-        }}
-        onGoWelcome={() => setCurrentView('welcome')}
-      />
-
-      {/* Barra de Ticker de Wall Street (BVC LIVE) */}
-      <TickerTape
-        tickers={bvcTickers}
-        onSelectTicker={(sym) => {
-          if (currentView === 'welcome') setCurrentView('terminal');
-        }}
-      />
-
       {/* VISTA 1: PANTALLA DE BIENVENIDA */}
       {currentView === 'welcome' && (
-        <WelcomeLanding
-          onEnterDemo={handleDemoLogin}
-          onOpenRegister={() => {
-            setAuthMode('register');
-            setIsAuthModalOpen(true);
-          }}
-          onOpenLogin={() => {
-            setAuthMode('login');
-            setIsAuthModalOpen(true);
-          }}
-        />
+        <>
+          <TopHeader
+            rates={rates}
+            session={session}
+            isRefreshing={isRefreshing}
+            onRefresh={refreshAllData}
+            onOpenAI={() => setIsAIModalOpen(true)}
+            onOpenTelegram={() => setIsTelegramOpen(true)}
+            onLogout={handleLogout}
+            onOpenAuth={() => {
+              setAuthMode('login');
+              setIsAuthModalOpen(true);
+            }}
+            onGoWelcome={() => setCurrentView('welcome')}
+          />
+          <TickerTape
+            tickers={bvcTickers}
+            onSelectTicker={() => setCurrentView('terminal')}
+          />
+          <WelcomeLanding
+            onEnterDemo={handleDemoLogin}
+            onOpenRegister={() => {
+              setAuthMode('register');
+              setIsAuthModalOpen(true);
+            }}
+            onOpenLogin={() => {
+              setAuthMode('login');
+              setIsAuthModalOpen(true);
+            }}
+          />
+        </>
       )}
 
-      {/* VISTA 2: TERMINAL BURSÁTIL */}
+      {/* VISTA 2: TERMINAL BURSÁTIL MODERNA CON SIDEBAR (ESTILO STUDIO ADMIN) */}
       {currentView === 'terminal' && (
-        <main className="terminal-main-view">
-          {/* Header de controles y selector de divisa */}
-          <div className="controls-section" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-            <div className="section-heading">
+        <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+          {/* Navegación Lateral */}
+          <Sidebar
+            currentNav={currentNav}
+            onSelectNav={setCurrentNav}
+            rates={rates}
+            session={session}
+            onOpenAI={() => setIsAIModalOpen(true)}
+            onOpenTelegram={() => setIsTelegramOpen(true)}
+            onLogout={handleLogout}
+            onOpenAuth={() => {
+              setAuthMode('login');
+              setIsAuthModalOpen(true);
+            }}
+          />
+
+          {/* Área Principal de Contenido */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <TopHeader
+              rates={rates}
+              session={session}
+              isRefreshing={isRefreshing}
+              onRefresh={refreshAllData}
+              onOpenAI={() => setIsAIModalOpen(true)}
+              onOpenTelegram={() => setIsTelegramOpen(true)}
+              onLogout={handleLogout}
+              onOpenAuth={() => {
+                setAuthMode('login');
+                setIsAuthModalOpen(true);
+              }}
+              onGoWelcome={() => setCurrentView('welcome')}
+            />
+
+            <TickerTape
+              tickers={bvcTickers}
+              onSelectTicker={() => {
+                setCurrentNav('bvc_live');
+              }}
+            />
+
+            <main className="terminal-main-view" style={{ flex: 1, padding: '24px 32px' }}>
+              {/* Header de controles y selector de divisa */}
               <div
+                className="controls-section"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.25)',
-                  color: '#a7f3d0',
-                  padding: '4px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  marginBottom: '24px',
+                  flexWrap: 'wrap',
+                  gap: '16px',
                 }}
               >
-                💼 {session?.is_demo ? 'Portafolio Demo BVC (Modo Invitado)' : `Portafolio Activo: ${session?.username}`}
+                <div className="section-heading">
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      color: '#a7f3d0',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      marginBottom: '8px',
+                    }}
+                  >
+                    💼 {session?.is_demo ? 'Portafolio Demo BVC (Modo Invitado)' : `Portafolio Activo: ${session?.username}`}
+                  </div>
+                  <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>
+                    {currentNav === 'dashboard' && 'Resumen Patrimonial'}
+                    {currentNav === 'bvc_live' && 'Pizarra Bursátil en Vivo'}
+                    {currentNav === 'whatif' && 'Simulador de Salto Cambiario'}
+                    <span
+                      className="tag-version"
+                      style={{
+                        marginLeft: '10px',
+                        fontSize: '0.72rem',
+                        padding: '3px 8px',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10b981',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                      }}
+                    >
+                      BVC Live
+                    </span>
+                  </h1>
+                  <p className="subtitle" style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
+                    Monitoreo inteligente multi-divisa y protección en tiempo real contra la devaluación
+                  </p>
+                </div>
+
+                {/* Selector de Divisa Segmentado */}
+                <CurrencySelector currentMode={currentMode} onChangeMode={setCurrentMode} />
               </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>
-                Resumen Patrimonial <span className="tag-version" style={{ fontSize: '0.72rem', padding: '3px 8px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', fontWeight: 700 }}>BVC Live</span>
-              </h1>
-              <p className="subtitle" style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
-                Monitoreo inteligente multi-divisa y protección en tiempo real contra la devaluación
-              </p>
-            </div>
 
-            {/* Selector de Divisa Segmentado */}
-            <CurrencySelector currentMode={currentMode} onChangeMode={setCurrentMode} />
+              {/* VISTA A: DASHBOARD PRINCIPAL */}
+              {currentNav === 'dashboard' && (
+                <>
+                  <HeroKPIs
+                    currentMode={currentMode}
+                    rates={rates}
+                    portfolio={portfolio}
+                    totals={totals}
+                    onOpenAddPosition={() => setIsAddPosOpen(true)}
+                    onOpenAdjustCash={() => setIsAdjustCashOpen(true)}
+                  />
+
+                  <PortfolioPulse portfolio={portfolio} rates={rates} />
+
+                  <PositionsTable
+                    positions={portfolio.positions}
+                    bvcTickers={bvcTickers}
+                    rates={rates}
+                    currentMode={currentMode}
+                    totalPortfolioVes={totals.ves.value}
+                    onDeletePosition={handleDeletePosition}
+                    onOpenAI={() => setIsAIModalOpen(true)}
+                  />
+                </>
+              )}
+
+              {/* VISTA B: PIZARRA BVC EN VIVO */}
+              {currentNav === 'bvc_live' && (
+                <PositionsTable
+                  positions={portfolio.positions}
+                  bvcTickers={bvcTickers}
+                  rates={rates}
+                  currentMode={currentMode}
+                  totalPortfolioVes={totals.ves.value}
+                  onDeletePosition={handleDeletePosition}
+                  onOpenAI={() => setIsAIModalOpen(true)}
+                />
+              )}
+
+              {/* VISTA C: SIMULADOR WHAT-IF */}
+              {currentNav === 'whatif' && (
+                <WhatIfSimulator rates={rates} portfolio={portfolio} />
+              )}
+            </main>
           </div>
-
-          {/* Tarjetas Principales de KPI (Hero) */}
-          <HeroKPIs
-            currentMode={currentMode}
-            rates={rates}
-            portfolio={portfolio}
-            totals={totals}
-            onOpenAddPosition={() => setIsAddPosOpen(true)}
-            onOpenAdjustCash={() => setIsAdjustCashOpen(true)}
-          />
-
-          {/* Pulso del Portafolio & Gráfico de Dona */}
-          <PortfolioPulse portfolio={portfolio} rates={rates} />
-
-          {/* Tabla de Posiciones & Pizarra BVC */}
-          <PositionsTable
-            positions={portfolio.positions}
-            bvcTickers={bvcTickers}
-            rates={rates}
-            currentMode={currentMode}
-            totalPortfolioVes={totals.ves.value}
-            onDeletePosition={handleDeletePosition}
-            onOpenAI={() => setIsAIModalOpen(true)}
-          />
-        </main>
+        </div>
       )}
 
       {/* MODALES INTERACTIVOS */}
@@ -326,6 +416,11 @@ export default function Home() {
         currentCashUsd={portfolio.cash_usd}
         onClose={() => setIsAdjustCashOpen(false)}
         onSave={handleSaveCash}
+      />
+
+      <TelegramModal
+        isOpen={isTelegramOpen}
+        onClose={() => setIsTelegramOpen(false)}
       />
     </div>
   );

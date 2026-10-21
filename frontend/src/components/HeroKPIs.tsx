@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { CurrencyMode, MarketRates, PortfolioData, TriMonetaryTotals } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
+import { SpotlightCard } from './SpotlightCard';
+import { AnimatedTrend } from './AnimatedIcons';
 
 interface HeroKPIsProps {
   currentMode: CurrencyMode;
@@ -73,9 +75,13 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
   return (
     <div className="hero-kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '28px' }}>
       {/* ==============================================================
-          CARD 1: MI PATRIMONIO TOTAL
+          CARD 1: MI PATRIMONIO TOTAL (MICROKIT SPOTLIGHT)
          ============================================================== */}
-      <div className="kpi-card glass-panel kpi-card-hero">
+      <SpotlightCard
+        spotlightColor="rgba(16, 185, 129, 0.16)"
+        borderColor="rgba(16, 185, 129, 0.45)"
+        className="kpi-card glass-panel kpi-card-hero"
+      >
         <div className="kpi-header">
           <span className="kpi-title">
             <Briefcase size={16} /> Mi Patrimonio Total
@@ -143,12 +149,16 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             💎 USDT Real: <strong>{formatUSDT(totalPortfolioUsdt)}</strong>
           </span>
         </div>
-      </div>
+      </SpotlightCard>
 
       {/* ==============================================================
-          CARD 2: RENDIMIENTO Y COBERTURA (TRI-MONETARY PODIUM)
+          CARD 2: RENDIMIENTO Y COBERTURA (MICROKIT SPOTLIGHT)
          ============================================================== */}
-      <div className="kpi-card glass-panel kpi-card-pnl">
+      <SpotlightCard
+        spotlightColor={isUsdtPos ? 'rgba(16, 185, 129, 0.16)' : 'rgba(244, 63, 94, 0.16)'}
+        borderColor={isUsdtPos ? 'rgba(16, 185, 129, 0.45)' : 'rgba(244, 63, 94, 0.45)'}
+        className="kpi-card glass-panel kpi-card-pnl"
+      >
         <div className="kpi-header">
           <span className="kpi-title">
             <ShieldCheck size={16} /> Rendimiento y Cobertura
@@ -318,12 +328,16 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             </div>
           </>
         )}
-      </div>
+      </SpotlightCard>
 
       {/* ==============================================================
-          CARD 3: BILLETERA Y LIQUIDEZ DISPONIBLE
+          CARD 3: BILLETERA Y LIQUIDEZ DISPONIBLE (MICROKIT SPOTLIGHT)
          ============================================================== */}
-      <div className="kpi-card glass-panel kpi-card-wallet">
+      <SpotlightCard
+        spotlightColor="rgba(59, 130, 246, 0.16)"
+        borderColor="rgba(59, 130, 246, 0.45)"
+        className="kpi-card glass-panel kpi-card-wallet"
+      >
         <div className="kpi-header">
           <span className="kpi-title">
             <Wallet size={16} /> Billetera y Liquidez
@@ -400,7 +414,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         >
           <PlusCircle size={16} /> Operar / Agregar Acción
         </button>
-      </div>
+      </SpotlightCard>
     </div>
   );
 };

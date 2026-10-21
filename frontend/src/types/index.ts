@@ -52,3 +52,32 @@ export interface TriMonetaryTotals {
   usd_bcv: PnLCalculation;
   usdt: PnLCalculation;
 }
+
+export interface TelegramStatus {
+  linked: boolean;
+  chat_id: string;
+  raw_chat_id?: number | null;
+  telegram_username?: string | null;
+  alerts_enabled: boolean;
+  link_code?: string | null;
+  bot_username?: string;
+  bot_configured: boolean;
+}
+
+export interface WhatIfSimulationResult {
+  current_portfolio_ves: number;
+  projected_portfolio_ves: number;
+  current_portfolio_usd_bcv: number;
+  projected_portfolio_usd_bcv: number;
+  current_portfolio_usdt: number;
+  projected_portfolio_usdt: number;
+  net_ves_impact: number;
+  net_usd_bcv_impact: number;
+  net_usdt_impact: number;
+  bcv_target: number;
+  usdt_target: number;
+  wall_street_shock_pct: number;
+  protection_rating: string;
+  advice: string;
+}
+

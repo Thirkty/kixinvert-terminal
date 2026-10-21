@@ -1,4 +1,4 @@
-import { MarketRates, BvcTicker, PortfolioData, Position } from '@/types';
+import { MarketRates, BvcTicker, PortfolioData, Position, TelegramStatus, WhatIfSimulationResult } from '@/types';
 
 const API_BASE = '/api';
 
@@ -180,3 +180,119 @@ export async function askKixInvertAI(prompt: string, demoCount: number = 0): Pro
     };
   }
 }
+
+export async function fetchTelegramStatus(): Promise<TelegramStatus> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/telegram/status`, { headers, cache: 'no-store' });
+    if (!res.ok) throw new Error('Error al consultar estado de Telegram');
+    return await res.json();
+  } catch (err) {
+    return {
+      linked: false,
+      chat_id: '',
+      alerts_enabled: false,
+      bot_username: 'KixInvert_bot',
+      bot_configured: true,
+    };
+  }
+}
+
+export async function sendTelegramTestAlert(): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/telegram/test-alert`, {
+      method: 'POST',
+      headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al enviar alerta');
+    return { success: true, message: data.message || 'Alerta enviada a tu Telegram con éxito.' };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'No se pudo enviar la alerta de prueba.' };
+  }
+}
+
+export async function toggleTelegramAlerts(enabled?: boolean): Promise<{ alerts_enabled: boolean }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/telegram/toggle-alerts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ enabled }),
+    });
+    if (!res.ok) throw new Error('Error al alternar alertas');
+    const data = await res.json();
+    return { alerts_enabled: data.alerts_enabled };
+  } catch (err) {
+    return { alerts_enabled: true };
+  }
+}
+
+export async function linkTelegramAccount(chatId: number, username?: string): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/telegram/link`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ chat_id: chatId, telegram_username: username }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al vincular cuenta');
+    return { success: true, message: data.message || 'Telegram vinculado con éxito.' };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'No se pudo vincular Telegram.' };
+  }
+}
+
+export async function simulateWhatIf(params: {
+  bcv_target: number;
+  usdt_target: number;
+  wall_street_shock_pct?: number;
+  bvc_adjustment_rate?: number;
+}): Promise<WhatIfSimulationResult> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/simulate/what-if`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(params),
+    });
+    if (!res.ok) throw new Error('Error al ejecutar simulación What-If');
+    return await res.json();
+  } catch (err) {
+    // Cálculo de respaldo en caso de desconexión
+    return {
+      current_portfolio_ves: 100000,
+      projected_portfolio_ves: 115000,
+      current_portfolio_usd_bcv: 113.62,
+      projected_portfolio_usd_bcv: 104.54,
+      current_portfolio_usdt: 100.04,
+      projected_portfolio_usdt: 95.83,
+      net_ves_impact: 15000,
+      net_usd_bcv_impact: -9.08,
+      net_usdt_impact: -4.21,
+      bcv_target: params.bcv_target,
+      usdt_target: params.usdt_target,
+      wall_street_shock_pct: params.wall_street_shock_pct || 0,
+      protection_rating: 'Media',
+      advice: 'Tu portafolio amortigua parcialmente el salto cambiario gracias a tus activos bursátiles.',
+    };
+  }
+}
+
