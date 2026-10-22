@@ -9,7 +9,7 @@ interface AuthModalProps {
   isOpen: boolean;
   initialMode?: 'login' | 'register';
   onClose: () => void;
-  onSuccess: (session: UserSession) => void;
+  onSuccess: (session: UserSession, isNewRegistration?: boolean) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -87,13 +87,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           throw new Error(formatError(data, 'Error al iniciar sesión'));
         }
 
-        setAuthToken(data.access_token);
+        const validToken = data.token || data.access_token;
+        setAuthToken(validToken);
         onSuccess({
           username: data.user?.username || username,
-          token: data.access_token,
+          token: validToken,
           is_demo: false,
           has_2fa: data.user?.has_2fa,
-        });
+        }, false);
         onClose();
       } else {
         // Registro
@@ -120,12 +121,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           throw new Error(formatError(data, 'Error al registrar usuario'));
         }
 
-        setAuthToken(data.access_token);
+        const validToken = data.token || data.access_token;
+        setAuthToken(validToken);
         onSuccess({
           username: data.user?.username || username,
-          token: data.access_token,
+          token: validToken,
           is_demo: false,
-        });
+        }, true);
         onClose();
       }
     } catch (err: any) {

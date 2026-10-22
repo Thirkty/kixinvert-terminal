@@ -235,7 +235,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           <AnimatedTrend type={isPos ? 'up' : 'down'} size={14} />
                           <span>
-                            {sign}
+                            {currentMode !== 'compare' && sign}
                             {currentMode === 'ves' && formatVES(pnlVes)}
                             {currentMode === 'usd_bcv' && formatUSD(pnlVes / (rates.bcv || 1))}
                             {currentMode === 'usdt' && formatUSDT(pnlVes / (rates.usdt || 1))}

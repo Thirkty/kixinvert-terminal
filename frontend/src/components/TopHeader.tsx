@@ -94,8 +94,8 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
           </div>
         </div>
 
-        {/* View Switcher: Inicio / Landing vs Terminal */}
-        {onSelectView && (
+        {/* View Switcher: ONLY for guest users exploring Inicio vs Demo Terminal */}
+        {onSelectView && !session && (
           <div
             style={{
               display: 'flex',
@@ -156,6 +156,27 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
               <span>📊</span>
               <span>Terminal</span>
             </button>
+          </div>
+        )}
+
+        {/* Private Workspace Badge for Logged In Users */}
+        {session && (
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '8px',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              color: '#34d399',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+            }}
+          >
+            <AnimatedPulseBeacon color="#10b981" />
+            <span>Terminal Privada</span>
           </div>
         )}
 

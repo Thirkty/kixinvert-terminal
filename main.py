@@ -418,6 +418,8 @@ async def register_user(request: Request, response: Response, item: UserRegister
         "success": True,
         "message": "¡Cuenta creada exitosamente!",
         "token": token,
+        "access_token": token,
+        "token_type": "bearer",
         "user": {
             "id": user.id,
             "uuid": user.uuid,
@@ -560,6 +562,8 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
         "two_factor_required": False,
         "message": f"¡Bienvenido de vuelta, {user.full_name}!",
         "token": token,
+        "access_token": token,
+        "token_type": "bearer",
         "user": {
             "id": user.id,
             "uuid": user.uuid,
@@ -619,6 +623,8 @@ async def verify_2fa_login(request: Request, response: Response, item: TwoFactor
         "success": True,
         "message": f"¡Autenticación en dos pasos exitosa! Bienvenido, {user.full_name}",
         "token": token,
+        "access_token": token,
+        "token_type": "bearer",
         "user": {
             "id": user.id,
             "uuid": user.uuid,

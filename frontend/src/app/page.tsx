@@ -114,7 +114,6 @@ export default function Home() {
 
   useEffect(() => {
     setSoundActive(isSoundEnabled());
-    refreshAllData();
 
     const token = getAuthToken();
     const savedUser = typeof window !== 'undefined' ? localStorage.getItem('kix_username') : null;
@@ -127,9 +126,41 @@ export default function Home() {
       });
       // Usuario autenticado entra directo al Terminal en un ecosistema separado
       setCurrentView('terminal');
+
+      // Validar sesión con el backend
+      fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            setAuthToken(null);
+            setSession(null);
+            setCurrentView('welcome');
+            return null;
+          }
+          return res.json();
+        })
+        .then((userData) => {
+          if (userData && userData.username) {
+            setSession({
+              username: userData.username,
+              token,
+              is_demo: false,
+              has_2fa: userData.two_factor_enabled,
+            });
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('kix_username', userData.username);
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          refreshAllData();
+        });
     } else {
       setSession(null);
       setCurrentView('welcome');
+      refreshAllData();
     }
 
     const interval = setInterval(() => {
@@ -474,14 +505,14 @@ export default function Home() {
         isOpen={isAuthModalOpen}
         initialMode={authMode}
         onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(sess) => {
+        onSuccess={(sess, isNewRegistration) => {
           setSession(sess);
           if (typeof window !== 'undefined') {
             localStorage.setItem('kix_username', sess.username);
           }
           setCurrentView('terminal');
           // Si el usuario se acaba de registrar, lanzar Onboarding guiado
-          if (authMode === 'register') {
+          if (isNewRegistration || authMode === 'register') {
             setIsOnboardingOpen(true);
           }
           refreshAllData();

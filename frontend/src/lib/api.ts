@@ -13,15 +13,17 @@ const API_BASE = '/api';
 
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('kix_auth_token');
+  return localStorage.getItem('kix_auth_token') || localStorage.getItem('kix_token') || null;
 }
 
-export function setAuthToken(token: string | null) {
+export function setAuthToken(token: string | null | undefined) {
   if (typeof window === 'undefined') return;
-  if (token) {
-    localStorage.setItem('kix_auth_token', token);
+  if (token && typeof token === 'string' && token.trim().length > 0) {
+    localStorage.setItem('kix_auth_token', token.trim());
+    localStorage.setItem('kix_token', token.trim());
   } else {
     localStorage.removeItem('kix_auth_token');
+    localStorage.removeItem('kix_token');
   }
 }
 
