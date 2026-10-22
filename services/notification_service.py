@@ -75,13 +75,6 @@ def get_or_create_notification(
     db.add(new_notif)
     db.commit()
     db.refresh(new_notif)
-
-    try:
-        from services.telegram_service import send_notification_to_telegram
-        send_notification_to_telegram(db, new_notif)
-    except Exception:
-        pass
-
     return new_notif
 
 def generate_smart_notifications(db: Session, user_id: Optional[int] = None) -> List[Notification]:
@@ -219,6 +212,13 @@ def generate_smart_notifications(db: Session, user_id: Optional[int] = None) -> 
             )
             if notif:
                 notifications_generated.append(notif)
+
+    if notifications_generated:
+        try:
+            from services.telegram_service import dispatch_consolidated_digest
+            dispatch_consolidated_digest(db, notifications_generated, user_id=user_id)
+        except Exception:
+            pass
 
     return notifications_generated
 

@@ -16,6 +16,7 @@ import { TelegramModal } from '@/components/TelegramModal';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { Sidebar, NavView } from '@/components/Sidebar';
 import { WhatIfSimulator } from '@/components/WhatIfSimulator';
+import { OnboardingModal } from '@/components/OnboardingModal';
 import {
   CurrencyMode,
   MarketRates,
@@ -36,11 +37,14 @@ import {
   fetchNotifications,
   getAuthToken,
   setAuthToken,
+  addPositionApi,
+  deletePositionApi,
+  updateCashApi,
 } from '@/lib/api';
 import { isSoundEnabled, setSoundEnabled, playTerminalSound } from '@/lib/audio';
 
 export default function Home() {
-  // Navigation & Ecosystem State (Default to the comprehensive Página de Inicio with 1-click Terminal access)
+  // Navigation & Ecosystem State (Default to Landing for guests, Terminal for logged-in users)
   const [currentView, setCurrentView] = useState<'terminal' | 'welcome'>('welcome');
   const [currentNav, setCurrentNav] = useState<NavView>('dashboard');
   const [currentEcosystem, setCurrentEcosystem] = useState<Ecosystem>('BVC');
@@ -57,8 +61,8 @@ export default function Home() {
   const [bvcTickers, setBvcTickers] = useState<BvcTicker[]>([]);
   const [intlTickers, setIntlTickers] = useState<InternationalQuote[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioData>({
-    cash_ves: 15000.0,
-    cash_usd: 50.0,
+    cash_ves: 0.0,
+    cash_usd: 0.0,
     positions: [],
   });
 
@@ -68,12 +72,8 @@ export default function Home() {
   const [isNotifsOpen, setIsNotifsOpen] = useState(false);
   const [soundActive, setSoundActive] = useState<boolean>(true);
 
-  // Session & Modals State
-  const [session, setSession] = useState<UserSession | null>({
-    username: 'Inversionista',
-    is_demo: false,
-    has_2fa: true,
-  });
+  // Session & Modals State (Starts cleanly as null for guests)
+  const [session, setSession] = useState<UserSession | null>(null);
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -81,6 +81,7 @@ export default function Home() {
   const [isAddPosOpen, setIsAddPosOpen] = useState(false);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Carga y sincronización de datos
@@ -97,7 +98,7 @@ export default function Home() {
       setRates(fetchedRates);
       setBvcTickers(fetchedTickers);
       setIntlTickers(fetchedIntl);
-      if (fetchedPortfolio && fetchedPortfolio.positions) {
+      if (fetchedPortfolio) {
         setPortfolio(fetchedPortfolio);
       }
       if (notifData) {
@@ -116,13 +117,19 @@ export default function Home() {
     refreshAllData();
 
     const token = getAuthToken();
+    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('kix_username') : null;
     if (token) {
       setSession({
-        username: 'Inversionista',
+        username: savedUser || 'Inversionista',
         token,
         is_demo: false,
         has_2fa: true,
       });
+      // Usuario autenticado entra directo al Terminal en un ecosistema separado
+      setCurrentView('terminal');
+    } else {
+      setSession(null);
+      setCurrentView('welcome');
     }
 
     const interval = setInterval(() => {
@@ -178,57 +185,49 @@ export default function Home() {
     };
   }, [portfolio, rates]);
 
-  // Manejo de Acciones
-  const handleAddPosition = (newPos: Position) => {
+  // Manejo de Acciones persistente con liquidación de efectivo
+  const handleAddPosition = async (newPos: Position, deductFromCash: boolean = true, execDate?: string) => {
     playTerminalSound('success');
-    setPortfolio((prev) => {
-      const existingIdx = prev.positions.findIndex((p) => p.symbol === newPos.symbol);
-      let updatedPositions: Position[];
-
-      if (existingIdx >= 0) {
-        const existing = prev.positions[existingIdx];
-        const totalShares = existing.shares + newPos.shares;
-        const totalCost = (existing.shares * existing.avg_cost) + (newPos.shares * newPos.avg_cost);
-        const avgCost = totalCost / totalShares;
-
-        updatedPositions = [...prev.positions];
-        updatedPositions[existingIdx] = {
-          ...existing,
-          shares: totalShares,
-          avg_cost: avgCost,
-          current_price: newPos.current_price,
-        };
-      } else {
-        updatedPositions = [...prev.positions, newPos];
-      }
-
-      return { ...prev, positions: updatedPositions };
+    const res = await addPositionApi({
+      ticker: newPos.symbol,
+      shares: newPos.shares,
+      buy_price: newPos.avg_cost,
+      currency: 'VES',
+      deduct_from_cash: deductFromCash,
+      execution_date: execDate,
     });
+    if (res.cash_ves !== undefined) {
+      setPortfolio((prev) => ({ ...prev, cash_ves: res.cash_ves! }));
+    }
+    await refreshAllData();
   };
 
-  const handleDeletePosition = (symbol: string) => {
+  const handleDeletePosition = async (symbol: string) => {
     playTerminalSound('click');
-    setPortfolio((prev) => ({
-      ...prev,
-      positions: prev.positions.filter((p) => p.symbol !== symbol),
-    }));
+    const existing = portfolio.positions.find((p) => p.symbol === symbol);
+    if (existing && existing.id) {
+      await deletePositionApi(existing.id);
+    }
+    await refreshAllData();
   };
 
-  const handleSaveCash = (cashVes: number, cashUsd: number) => {
+  const handleSaveCash = async (cashVes: number, cashUsd: number) => {
     playTerminalSound('success');
+    await updateCashApi(cashVes, cashUsd);
     setPortfolio((prev) => ({
       ...prev,
       cash_ves: cashVes,
       cash_usd: cashUsd,
     }));
+    await refreshAllData();
   };
 
   const handleDemoLogin = () => {
     playTerminalSound('success');
     setSession({
-      username: 'Inversionista',
-      is_demo: false,
-      has_2fa: true,
+      username: 'Inversionista Demo',
+      is_demo: true,
+      has_2fa: false,
     });
     setCurrentView('terminal');
   };
@@ -236,6 +235,9 @@ export default function Home() {
   const handleLogout = () => {
     playTerminalSound('click');
     setAuthToken(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kix_username');
+    }
     setSession(null);
     setCurrentView('welcome');
   };
@@ -474,13 +476,22 @@ export default function Home() {
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={(sess) => {
           setSession(sess);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('kix_username', sess.username);
+          }
           setCurrentView('terminal');
+          // Si el usuario se acaba de registrar, lanzar Onboarding guiado
+          if (authMode === 'register') {
+            setIsOnboardingOpen(true);
+          }
+          refreshAllData();
         }}
       />
 
       <AddPositionModal
         isOpen={isAddPosOpen}
         bvcTickers={bvcTickers}
+        currentCashVes={portfolio.cash_ves}
         onClose={() => setIsAddPosOpen(false)}
         onAdd={handleAddPosition}
       />
@@ -496,6 +507,16 @@ export default function Home() {
       <TelegramModal
         isOpen={isTelegramOpen}
         onClose={() => setIsTelegramOpen(false)}
+      />
+
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        session={session}
+        bvcTickers={bvcTickers}
+        onComplete={() => {
+          setIsOnboardingOpen(false);
+          refreshAllData();
+        }}
       />
     </div>
   );

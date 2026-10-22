@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Send, Bell, CheckCircle2, AlertCircle, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
 import { TelegramStatus } from '@/types';
-import { fetchTelegramStatus, sendTelegramTestAlert, toggleTelegramAlerts } from '@/lib/api';
+import { fetchTelegramStatus, sendTelegramTestAlert, toggleTelegramAlerts, fetchTelegramPairingUrl } from '@/lib/api';
 import { AnimatedBell, AnimatedPulseBeacon, AnimatedTelegram } from './AnimatedIcons';
 import { SpotlightCard } from './SpotlightCard';
+import { playTerminalSound } from '@/lib/audio';
 
 interface TelegramModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface TelegramModalProps {
 
 export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose }) => {
   const [status, setStatus] = useState<TelegramStatus | null>(null);
+  const [pairingUrl, setPairingUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isSendingTest, setIsSendingTest] = useState(false);
@@ -23,6 +25,8 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
     try {
       const data = await fetchTelegramStatus();
       setStatus(data);
+      const pair = await fetchTelegramPairingUrl();
+      if (pair.direct_url) setPairingUrl(pair.direct_url);
     } finally {
       setLoading(false);
     }
@@ -34,6 +38,23 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
       setTestResult(null);
     }
   }, [isOpen]);
+
+  // Polling automático mientras el modal está abierto para detectar cuando el usuario pulsa "Iniciar" en Telegram
+  useEffect(() => {
+    let timer: any = null;
+    if (isOpen && !status?.linked) {
+      timer = setInterval(async () => {
+        const data = await fetchTelegramStatus();
+        if (data.linked) {
+          setStatus(data);
+          playTerminalSound('success');
+        }
+      }, 2500);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isOpen, status?.linked]);
 
   if (!isOpen) return null;
 
@@ -59,7 +80,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
   };
 
   const botUsername = status?.bot_username || 'KixInvert_bot';
-  const telegramDirectUrl = `https://t.me/${botUsername}`;
+  const telegramDirectUrl = pairingUrl || `https://t.me/${botUsername}`;
 
   return (
     <div
@@ -200,6 +221,43 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
               </button>
             </div>
           </div>
+
+          {/* Botón de 1-Clic cuando no está vinculado */}
+          {!status?.linked && (
+            <div style={{ marginBottom: '16px' }}>
+              <a
+                href={telegramDirectUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => playTerminalSound('success')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '13px',
+                  background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+                  color: '#fff',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '0.94rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 14px rgba(6, 182, 212, 0.4)',
+                  marginBottom: '8px',
+                }}
+              >
+                <AnimatedTelegram size={18} />
+                <span>📱 Conectar Telegram en 1 Clic</span>
+                <ExternalLink size={15} />
+              </a>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <AnimatedPulseBeacon color="#f59e0b" size={6} />
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                  Solo dale a &quot;Iniciar&quot; en el chat y se vinculará automáticamente sin buscar ningún ID.
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Test Alert Button */}
           <button

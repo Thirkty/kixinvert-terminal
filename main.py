@@ -24,7 +24,7 @@ from slowapi.errors import RateLimitExceeded
 sys.stdout.reconfigure(encoding='utf-8')
 
 from db import get_db, engine, Base
-from models import User, Portfolio, Position, Asset, MarketQuote, AuditLog, Transaction, PaymentOrder, Notification
+from models import User, Portfolio, Position, Asset, MarketQuote, AuditLog, Transaction, PaymentOrder, Notification, CashMovement
 from services.rates_service import fetch_current_rates
 from services.bvc_service import fetch_bvc_market_data
 from services.portfolio_service import get_portfolio_summary
@@ -218,9 +218,9 @@ class UserRegister(BaseModel):
     system_website_hp: Optional[str] = Field(None, max_length=100) # Honeypot
     broker: Optional[str] = Field("KixBroker BVC", max_length=50)
     risk_profile: Optional[str] = Field("Moderado", max_length=30)
-    initial_cash_ves: Optional[float] = Field(10000.0, ge=0, le=1_000_000_000_000)
-    initial_cash_usd: Optional[float] = Field(20.0, ge=0, le=1_000_000_000)
-    include_sample_positions: Optional[bool] = True
+    initial_cash_ves: Optional[float] = Field(0.0, ge=0, le=1_000_000_000_000)
+    initial_cash_usd: Optional[float] = Field(0.0, ge=0, le=1_000_000_000)
+    include_sample_positions: Optional[bool] = False
 
 class UserLogin(BaseModel):
     username_or_email: str = Field(..., min_length=3, max_length=100)
@@ -244,6 +244,16 @@ class PositionCreate(BaseModel):
     shares: float = Field(..., gt=0, le=100_000_000)
     buy_price: float = Field(..., gt=0, le=100_000_000_000)
     currency: str = Field("VES", pattern=r"^(VES|USD)$")
+    deduct_from_cash: Optional[bool] = Field(True, description="Liquidar automáticamente del saldo disponible en efectivo")
+    execution_date: Optional[str] = Field(None, max_length=30)
+    notes: Optional[str] = Field(None, max_length=200)
+
+class CashDepositRequest(BaseModel):
+    amount: float = Field(..., gt=0, le=1_000_000_000_000)
+    currency: str = Field("VES", pattern=r"^(VES|USD)$")
+    date: Optional[str] = Field(None, max_length=30)
+    concept: Optional[str] = Field("Aporte de capital para inversión", max_length=150)
+    reference: Optional[str] = Field(None, max_length=100)
 
 class CashUpdate(BaseModel):
     cash_ves: float = Field(..., ge=0, le=1_000_000_000_000)
@@ -752,8 +762,8 @@ async def get_portfolio(
             portfolio = Portfolio(
                 user_id=current_user.id,
                 name=f"Portafolio BVC de {current_user.full_name}",
-                cash_ves=10000.0,
-                cash_usd=20.0
+                cash_ves=0.0,
+                cash_usd=0.0
             )
             db.add(portfolio)
             db.commit()
@@ -800,8 +810,8 @@ async def add_position(
         portfolio = Portfolio(
             user_id=current_user.id,
             name=f"Portafolio BVC de {current_user.full_name}",
-            cash_ves=10000.0,
-            cash_usd=20.0
+            cash_ves=0.0,
+            cash_usd=0.0
         )
         db.add(portfolio)
         db.commit()
@@ -835,6 +845,17 @@ async def add_position(
         except Exception as e:
             logger.warning(f"Could not pre-sync international quote for {ticker}: {e}")
 
+    # Parse execution date if provided
+    exec_date = datetime.datetime.utcnow()
+    if item.execution_date:
+        try:
+            exec_date = datetime.datetime.fromisoformat(item.execution_date.replace("Z", "+00:00"))
+        except Exception:
+            try:
+                exec_date = datetime.datetime.strptime(item.execution_date, "%Y-%m-%d")
+            except Exception:
+                pass
+
     # Atomicity: add or average down existing position
     existing_pos = db.query(Position).filter(
         Position.portfolio_id == portfolio.id,
@@ -856,9 +877,55 @@ async def add_position(
             shares=item.shares,
             avg_buy_price_ves=buy_price_ves,
             historic_rate_bcv=bcv,
-            historic_rate_usdt=usdt
+            historic_rate_usdt=usdt,
+            created_at=exec_date
         )
         db.add(new_pos)
+
+    # Automatic Cash Liquidation & Cash Ledger Recording
+    if item.deduct_from_cash:
+        if is_intl or item.currency.upper() == "USD":
+            cost_usd = item.shares * item.buy_price
+            new_cash_usd = max(0.0, float(portfolio.cash_usd) - cost_usd)
+            portfolio.cash_usd = new_cash_usd
+            cm = CashMovement(
+                portfolio_id=portfolio.id,
+                movement_type="BUY_STOCK",
+                currency="USD",
+                amount=cost_usd,
+                balance_after=new_cash_usd,
+                concept=f"Liquidación compra {item.shares:,.0f} acc {ticker}",
+                movement_date=exec_date
+            )
+            db.add(cm)
+        else:
+            cost_ves = item.shares * buy_price_ves
+            new_cash_ves = max(0.0, float(portfolio.cash_ves) - cost_ves)
+            portfolio.cash_ves = new_cash_ves
+            cm = CashMovement(
+                portfolio_id=portfolio.id,
+                movement_type="BUY_STOCK",
+                currency="VES",
+                amount=cost_ves,
+                balance_after=new_cash_ves,
+                concept=f"Liquidación compra {item.shares:,.0f} acc {ticker}",
+                movement_date=exec_date
+            )
+            db.add(cm)
+
+    # Record trade in transactions ledger
+    tx = Transaction(
+        portfolio_id=portfolio.id,
+        ticker=ticker,
+        tx_type="BUY",
+        shares=item.shares,
+        price_ves=buy_price_ves,
+        rate_bcv=bcv,
+        rate_usdt=usdt,
+        notes=item.notes or f"Compra de {item.shares:,.0f} acc {ticker}",
+        executed_at=exec_date
+    )
+    db.add(tx)
 
     db.commit()
 
@@ -870,7 +937,12 @@ async def add_position(
         details=f"Added {item.shares} shares of {ticker} @ {buy_price_ves:.2f} VES"
     )
 
-    return {"success": True, "message": f"Posición {ticker} agregada/actualizada con éxito en tu portafolio"}
+    return {
+        "success": True,
+        "message": f"Posición {ticker} registrada con éxito. Saldo en efectivo liquidado: Bs {float(portfolio.cash_ves):,.2f}",
+        "cash_ves": float(portfolio.cash_ves),
+        "cash_usd": float(portfolio.cash_usd)
+    }
 
 @app.delete("/api/positions/{position_id}")
 @limiter.limit("30/minute")
@@ -933,6 +1005,115 @@ def update_cash(
     )
 
     return {"success": True, "message": "Saldos de efectivo actualizados con éxito"}
+
+@app.post("/api/portfolio/deposit")
+@limiter.limit("30/minute")
+async def deposit_cash(
+    item: CashDepositRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
+    if not portfolio:
+        portfolio = Portfolio(
+            user_id=current_user.id,
+            name=f"Portafolio BVC de {current_user.full_name}",
+            cash_ves=0.0,
+            cash_usd=0.0
+        )
+        db.add(portfolio)
+        db.commit()
+        db.refresh(portfolio)
+
+    dep_date = datetime.datetime.utcnow()
+    if item.date:
+        try:
+            dep_date = datetime.datetime.fromisoformat(item.date.replace("Z", "+00:00"))
+        except Exception:
+            try:
+                dep_date = datetime.datetime.strptime(item.date, "%Y-%m-%d")
+            except Exception:
+                pass
+
+    if item.currency.upper() == "USD":
+        portfolio.cash_usd = float(portfolio.cash_usd) + item.amount
+        bal_after = float(portfolio.cash_usd)
+    else:
+        portfolio.cash_ves = float(portfolio.cash_ves) + item.amount
+        bal_after = float(portfolio.cash_ves)
+
+    cm = CashMovement(
+        portfolio_id=portfolio.id,
+        movement_type="DEPOSIT",
+        currency=item.currency.upper(),
+        amount=item.amount,
+        balance_after=bal_after,
+        concept=item.concept or "Depósito de liquidez para inversión",
+        reference=item.reference,
+        movement_date=dep_date
+    )
+    db.add(cm)
+    db.commit()
+
+    log_audit(
+        db,
+        "CASH_DEPOSIT",
+        user_id=current_user.id,
+        request=request,
+        details=f"Deposit of {item.amount:,.2f} {item.currency.upper()}"
+    )
+
+    return {
+        "success": True,
+        "message": f"Depósito de {item.amount:,.2f} {item.currency.upper()} registrado con éxito.",
+        "cash_ves": float(portfolio.cash_ves),
+        "cash_usd": float(portfolio.cash_usd),
+        "movement": {
+            "id": cm.id,
+            "movement_type": cm.movement_type,
+            "currency": cm.currency,
+            "amount": float(cm.amount),
+            "balance_after": float(cm.balance_after),
+            "concept": cm.concept,
+            "date": cm.movement_date.isoformat()
+        }
+    }
+
+@app.get("/api/portfolio/cash-movements")
+def get_cash_movements(
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user:
+        return {"movements": [], "cash_ves": 0.0, "cash_usd": 0.0}
+
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
+    if not portfolio:
+        return {"movements": [], "cash_ves": 0.0, "cash_usd": 0.0}
+
+    movements = db.query(CashMovement).filter(
+        CashMovement.portfolio_id == portfolio.id
+    ).order_by(CashMovement.movement_date.desc(), CashMovement.id.desc()).limit(100).all()
+
+    return {
+        "cash_ves": float(portfolio.cash_ves),
+        "cash_usd": float(portfolio.cash_usd),
+        "movements": [
+            {
+                "id": m.id,
+                "movement_type": m.movement_type,
+                "currency": m.currency,
+                "amount": float(m.amount),
+                "balance_after": float(m.balance_after),
+                "concept": m.concept,
+                "reference": m.reference,
+                "movement_date": m.movement_date.isoformat(),
+                "created_at": m.created_at.isoformat()
+            }
+            for m in movements
+        ]
+    }
 
 # ==========================================================
 # PHASE 3: WALL STREET & INTERNATIONAL ASSETS
@@ -1330,6 +1511,30 @@ async def api_generate_telegram_code(
         "link_code": code,
         "bot_username": telegram_service.TELEGRAM_BOT_USERNAME,
         "instruction": f"Envía /start {code} a @{telegram_service.TELEGRAM_BOT_USERNAME} en Telegram."
+    }
+
+@app.get("/api/telegram/pairing-url")
+def get_telegram_pairing_url(
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: Session = Depends(get_db)
+):
+    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+
+    if not user.telegram_link_code:
+        user.telegram_link_code = telegram_service.generate_pairing_code(db, user)
+
+    bot_username = telegram_service.TELEGRAM_BOT_USERNAME
+    direct_url = f"https://t.me/{bot_username}?start={user.telegram_link_code}"
+
+    return {
+        "bot_username": bot_username,
+        "link_code": user.telegram_link_code,
+        "direct_url": direct_url,
+        "linked": bool(user.telegram_chat_id),
+        "telegram_username": user.telegram_username,
+        "chat_id": user.telegram_chat_id
     }
 
 @app.post("/api/telegram/link")

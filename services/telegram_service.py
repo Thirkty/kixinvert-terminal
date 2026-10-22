@@ -247,38 +247,124 @@ def get_user_portfolio_summary_text(db: Session, user: User) -> str:
     lines.append("<i>💡 Consulta completa en https://kixinvertapp.com</i>")
     return "\n".join(lines)
 
-def send_notification_to_telegram(db: Session, notif: Notification) -> int:
-    """
-    Dispatches a created Notification object to relevant users via Telegram.
-    Returns the number of messages successfully dispatched.
-    """
+def format_consolidated_digest_html(
+    user: Optional[User],
+    notifications: List[Notification],
+    bcv_rate: float,
+    usdt_rate: float,
+    gap_pct: float,
+    cash_ves: float = 0.0,
+    cash_usd: float = 0.0,
+    total_usdt: float = 0.0
+) -> str:
+    """Formats all alerts, market rates, and portfolio into a single, cohesive executive Telegram message."""
+    now_str = datetime.datetime.now().strftime("%d %b %Y · %I:%M %p")
+    gap_status = "🔴 Crítica" if gap_pct >= 18.0 else ("🟡 Elevada" if gap_pct >= 12.0 else "🟢 Controlada")
+    user_name = user.full_name if user else "Inversionista"
+
+    lines = [
+        "📊 <b>REPORTE INTEGRAL DE MERCADO & CARTERA</b>",
+        f"<i>KixInvertAPP Terminal · {now_str}</i>",
+        "━━━━━━━━━━━━━━━━━━━━━━",
+        f"👤 Inversionista: <b>{user_name}</b>",
+        "",
+        "🏛️ <b>MERCADO CAMBIARIO:</b>",
+        f"• Dólar Oficial BCV: <b>Bs {bcv_rate:,.2f}</b>",
+        f"• Dólar USDT (Binance): <b>Bs {usdt_rate:,.2f}</b>",
+        f"• Brecha Cambiaria: <b>{gap_pct:+.2f}%</b> ({gap_status})",
+    ]
+
+    if user and (cash_ves > 0 or cash_usd > 0 or total_usdt > 0):
+        lines.extend([
+            "",
+            "💼 <b>ESTADO DE CARTERA:</b>",
+            f"• Efectivo Disponible: <b>Bs {cash_ves:,.2f}</b> | <b>${cash_usd:,.2f} USD</b>",
+            f"• Valor Total Portafolio: <b>${total_usdt:,.2f} USDT</b>"
+        ])
+
+    if notifications:
+        lines.extend([
+            "",
+            f"🎯 <b>ALERTAS Y SEÑALES CLAVE ({len(notifications)}):</b>"
+        ])
+        for n in notifications[:6]:
+            icon = "🚨" if n.severity == "critical" else ("🎯" if n.severity == "success" else "⚡")
+            tck_part = f" [<code>{n.ticker}</code>]" if n.ticker else ""
+            lines.append(f"{icon} <b>{n.title}</b>{tck_part}")
+            if len(n.message) <= 120:
+                lines.append(f"   <i>{n.message}</i>")
+            else:
+                lines.append(f"   <i>{n.message[:117]}...</i>")
+
+    lines.extend([
+        "",
+        "━━━━━━━━━━━━━━━━━━━━━━",
+        "<i>💡 Consulta en tiempo real en https://kixinvertapp.com</i>"
+    ])
+    return "\n".join(lines)
+
+def dispatch_consolidated_digest(
+    db: Session,
+    notifications: List[Notification],
+    user_id: Optional[int] = None
+) -> int:
+    """Dispatches a single consolidated digest message to users via Telegram instead of multiple alerts."""
+    if not notifications:
+        return 0
+
+    rates_bcv = db.query(ExchangeRate).filter(ExchangeRate.rate_type == "BCV").order_by(ExchangeRate.recorded_at.desc()).first()
+    rates_usdt = db.query(ExchangeRate).filter(ExchangeRate.rate_type == "USDT_BINANCE").order_by(ExchangeRate.recorded_at.desc()).first()
+    bcv = float(rates_bcv.rate_value) if rates_bcv else 881.87
+    usdt = float(rates_usdt.rate_value) if rates_usdt else 1007.60
+    gap = ((usdt - bcv) / bcv) * 100.0 if bcv > 0 else 0.0
+
     recipients = []
-    if notif.user_id:
-        user = db.query(User).filter(User.id == notif.user_id).first()
+    if user_id:
+        user = db.query(User).filter(User.id == user_id).first()
         if user and user.telegram_chat_id and user.telegram_alerts_enabled:
             recipients.append(user)
     else:
-        # Broadcast notification (e.g. Critical FX Gap)
         recipients = db.query(User).filter(
             User.telegram_chat_id.isnot(None),
             User.telegram_alerts_enabled == True
         ).all()
 
     dispatched = 0
-    formatted_text = format_alert_html(
-        title=notif.title,
-        message=notif.message,
-        severity=notif.severity,
-        ticker=notif.ticker,
-        action_url=notif.action_url
-    )
+    for u in recipients:
+        port = db.query(Portfolio).filter(Portfolio.user_id == u.id).first()
+        c_ves = float(port.cash_ves) if port else 0.0
+        c_usd = float(port.cash_usd) if port else 0.0
+        tot_usdt = 0.0
+        if port:
+            try:
+                summary = get_portfolio_summary(db, bcv, usdt, portfolio_id=port.id)
+                tot_usdt = summary.get("total_portfolio_usdt", 0.0)
+            except Exception:
+                pass
 
-    for recipient in recipients:
-        res = send_telegram_message(recipient.telegram_chat_id, formatted_text)
+        user_notifs = [n for n in notifications if n.user_id in (u.id, None)]
+        if not user_notifs:
+            continue
+
+        text = format_consolidated_digest_html(
+            user=u,
+            notifications=user_notifs,
+            bcv_rate=bcv,
+            usdt_rate=usdt,
+            gap_pct=gap,
+            cash_ves=c_ves,
+            cash_usd=c_usd,
+            total_usdt=tot_usdt
+        )
+        res = send_telegram_message(u.telegram_chat_id, text)
         if res.get("success"):
             dispatched += 1
 
     return dispatched
+
+def send_notification_to_telegram(db: Session, notif: Notification) -> int:
+    """Dispatches a single notification as a clean unified message."""
+    return dispatch_consolidated_digest(db, [notif], user_id=notif.user_id)
 
 def handle_incoming_telegram_message(db: Session, payload: Dict[str, Any]) -> Dict[str, Any]:
     """

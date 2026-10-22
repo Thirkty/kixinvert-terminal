@@ -51,6 +51,7 @@ class Portfolio(Base):
     user = relationship("User", back_populates="portfolios")
     positions = relationship("Position", back_populates="portfolio", cascade="all, delete-orphan")
     transactions = relationship("Transaction", back_populates="portfolio", cascade="all, delete-orphan")
+    cash_movements = relationship("CashMovement", back_populates="portfolio", cascade="all, delete-orphan")
 
 class Asset(Base):
     __tablename__ = "assets"
@@ -171,4 +172,21 @@ class Notification(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False, index=True)
 
     user = relationship("User", back_populates="notifications")
+
+
+class CashMovement(Base):
+    __tablename__ = "cash_movements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    portfolio_id = Column(Integer, ForeignKey("portfolios.id"), nullable=False, index=True)
+    movement_type = Column(String(20), nullable=False) # 'DEPOSIT', 'WITHDRAWAL', 'BUY_STOCK', 'SELL_STOCK'
+    currency = Column(String(10), default="VES", nullable=False) # 'VES' or 'USD'
+    amount = Column(Numeric(18, 4), nullable=False)
+    balance_after = Column(Numeric(18, 4), nullable=False)
+    concept = Column(String(255), nullable=True)
+    reference = Column(String(100), nullable=True)
+    movement_date = Column(DateTime, default=datetime.datetime.utcnow, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    portfolio = relationship("Portfolio", back_populates="cash_movements")
 

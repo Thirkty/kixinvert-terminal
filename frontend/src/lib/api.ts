@@ -108,11 +108,18 @@ export async function fetchPortfolio(): Promise<PortfolioData> {
     });
 
     return {
-      cash_ves: Number(data.cash_ves ?? 15000.0),
-      cash_usd: Number(data.cash_usd ?? 50.0),
-      positions: normalizedPositions.length > 0 ? normalizedPositions : getDefaultPositions(),
+      cash_ves: Number(data.cash_ves ?? 0.0),
+      cash_usd: Number(data.cash_usd ?? 0.0),
+      positions: token ? normalizedPositions : (normalizedPositions.length > 0 ? normalizedPositions : getDefaultPositions()),
     };
   } catch (err) {
+    if (token) {
+      return {
+        cash_ves: 0.0,
+        cash_usd: 0.0,
+        positions: [],
+      };
+    }
     console.warn('Usando portafolio demo por defecto:', err);
     return {
       cash_ves: 15000.0,
@@ -401,6 +408,159 @@ export async function markAllNotificationsRead(): Promise<boolean> {
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+export async function addPositionApi(pos: {
+  ticker: string;
+  shares: number;
+  buy_price: number;
+  currency?: string;
+  deduct_from_cash?: boolean;
+  execution_date?: string;
+  notes?: string;
+}): Promise<{ success: boolean; message: string; cash_ves?: number; cash_usd?: number }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/positions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        ticker: pos.ticker,
+        shares: pos.shares,
+        buy_price: pos.buy_price,
+        currency: pos.currency || 'VES',
+        deduct_from_cash: pos.deduct_from_cash !== false,
+        execution_date: pos.execution_date,
+        notes: pos.notes,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al agregar posición');
+    return data;
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Error al registrar posición' };
+  }
+}
+
+export async function deletePositionApi(positionId: string | number): Promise<boolean> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/positions/${positionId}`, {
+      method: 'DELETE',
+      headers,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function updateCashApi(cashVes: number, cashUsd: number): Promise<boolean> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/portfolio/cash`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ cash_ves: cashVes, cash_usd: cashUsd }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function depositCashApi(deposit: {
+  amount: number;
+  currency?: string;
+  date?: string;
+  concept?: string;
+  reference?: string;
+}): Promise<{ success: boolean; message: string; cash_ves?: number; cash_usd?: number }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/portfolio/deposit`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        amount: deposit.amount,
+        currency: deposit.currency || 'VES',
+        date: deposit.date,
+        concept: deposit.concept || 'Aporte de capital para inversión',
+        reference: deposit.reference,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al registrar depósito');
+    return data;
+  } catch (err: any) {
+    return { success: false, message: err.message || 'No se pudo registrar el depósito' };
+  }
+}
+
+export async function fetchCashMovementsApi(): Promise<{
+  cash_ves: number;
+  cash_usd: number;
+  movements: Array<{
+    id: number;
+    movement_type: string;
+    currency: string;
+    amount: number;
+    balance_after: number;
+    concept: string;
+    reference?: string;
+    movement_date: string;
+    created_at: string;
+  }>;
+}> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/portfolio/cash-movements`, { headers, cache: 'no-store' });
+    if (!res.ok) throw new Error('Error al obtener movimientos');
+    return await res.json();
+  } catch {
+    return { cash_ves: 0, cash_usd: 0, movements: [] };
+  }
+}
+
+export async function fetchTelegramPairingUrl(): Promise<{
+  bot_username: string;
+  link_code: string;
+  direct_url: string;
+  linked: boolean;
+  telegram_username?: string;
+  chat_id?: string;
+}> {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/telegram/pairing-url`, { headers, cache: 'no-store' });
+    if (!res.ok) throw new Error('Error al obtener enlace de Telegram');
+    return await res.json();
+  } catch {
+    return {
+      bot_username: 'KixInvert_bot',
+      link_code: 'KIX-DEMO',
+      direct_url: 'https://t.me/KixInvert_bot?start=KIX-DEMO',
+      linked: false,
+    };
   }
 }
 
