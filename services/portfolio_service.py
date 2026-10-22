@@ -2,34 +2,105 @@ from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 from models import Portfolio, Position, Asset, MarketQuote
 
+def compute_tactical_shares_to_sell(shares: float, pnl_pct_usdt: float, weight_pct: float = 0.0) -> tuple[int, int]:
+    """
+    Calculates exact integer number of shares to sell and keep for a position,
+    avoiding vague percentages so the investor gets an actionable share count.
+    """
+    sh = int(round(float(shares or 0)))
+    if sh <= 0:
+        return 0, 0
+    if sh == 1:
+        return 1, 0
+    if sh == 2:
+        return 1, 1
+    if sh == 3:
+        return 1, 2
+    if sh in (4, 5):
+        to_sell = 2 if pnl_pct_usdt >= 60.0 else 1
+        return to_sell, sh - to_sell
+
+    # For larger positions (sh > 5)
+    if pnl_pct_usdt >= 60.0:
+        pct = 0.35
+    elif pnl_pct_usdt >= 40.0:
+        pct = 0.30
+    elif weight_pct >= 35.0 and pnl_pct_usdt < 20.0:
+        pct = 0.20
+    else:
+        pct = 0.25
+
+    raw_sell = sh * pct
+    if sh >= 25:
+        # Round to a clean multiple of 5 for large share counts (e.g. 95 -> 25 shares)
+        to_sell = max(5, int(round(raw_sell / 5.0) * 5))
+        if to_sell >= sh:
+            to_sell = max(1, int(round(raw_sell)))
+    else:
+        to_sell = max(1, int(round(raw_sell)))
+
+    return to_sell, max(0, sh - to_sell)
+
+
 def compute_tactical_signal(
     pnl_pct_usdt: float,
     pnl_pct_ves: float,
     weight_pct: float,
     change_today_pct: float,
     brecha_pct: float,
-    cash_weight_pct: float = 0.0
+    cash_weight_pct: float = 0.0,
+    shares: float = 0.0,
+    current_price_ves: float = 0.0
 ) -> Dict[str, Any]:
     """
-    Computes actionable tactical signals (Cuándo Vender / Cuándo Comprar Más / Mantener / Rotar).
+    Computes actionable tactical signals (Cuándo Vender / Cuándo Comprar Más / Mantener / Rotar)
+    with exact share counts to sell and keep.
     """
+    sh_int = int(round(float(shares or 0)))
+    to_sell, to_keep = compute_tactical_shares_to_sell(shares, pnl_pct_usdt, weight_pct)
+    sell_word = "acción" if to_sell == 1 else "acciones"
+    keep_word = "acción" if to_keep == 1 else "acciones"
+    cash_collect = to_sell * float(current_price_ves or 0.0)
+
     # 1. Take Profit Strong (P&L in real USDT >= +40%)
     if pnl_pct_usdt >= 40.0:
+        if sh_int > 0:
+            act_text = f"Vender {to_sell} {sell_word} y conservar {to_keep}"
+            rat_text = (
+                f"Vas ganando +{pnl_pct_usdt}% real en USDT. Te sugiero vender {to_sell} de tus {sh_int} acciones "
+                f"(recibes Bs. {cash_collect:,.2f}) y dejar {to_keep} {keep_word} trabajando."
+            )
+        else:
+            act_text = "Vender una parte para asegurar ganancia"
+            rat_text = f"Rendimiento sobresaliente (+{pnl_pct_usdt}% en USDT). Asegura parte de la ganancia."
+
         return {
             "signal": "SELL_STRONG",
             "action": "VENDER",
             "type": "profit_strong",
-            "label": f"Venta Fuerte (+{pnl_pct_usdt}% USDT)",
+            "label": f"Toma de Ganancia (+{pnl_pct_usdt}% USDT)",
             "badge_color": "green",
             "badge_class": "badge-signal-sell-strong",
             "icon": "arrow-up-right",
             "recommendation": "Toma de Ganancias Fuerte",
-            "action_text": "Vender 40% a 50% de la posición",
-            "rationale": f"Rendimiento real sobresaliente (+{pnl_pct_usdt}% en USDT). Recomendado asegurar entre 40% y 60% de la ganancia vendiendo títulos para fondear liquidez o USDT."
+            "shares_to_sell": to_sell,
+            "shares_to_keep": to_keep,
+            "action_text": act_text,
+            "rationale": rat_text
         }
 
     # 2. Take Profit Moderate (P&L in real USDT >= +20%)
     if pnl_pct_usdt >= 20.0:
+        if sh_int > 0:
+            act_text = f"Vender {to_sell} {sell_word} y conservar {to_keep}"
+            rat_text = (
+                f"Llevas +{pnl_pct_usdt}% de ganancia real en dólares. Conviene vender {to_sell} {sell_word} "
+                f"(cobras Bs. {cash_collect:,.2f}) y mantener tus otras {to_keep} {keep_word}."
+            )
+        else:
+            act_text = "Vender una parte para asegurar ganancia"
+            rat_text = f"Ganancia real neta de +{pnl_pct_usdt}% en dólares. Sugerido tomar beneficio parcial."
+
         return {
             "signal": "SELL_PARTIAL",
             "action": "VENDER",
@@ -39,23 +110,37 @@ def compute_tactical_signal(
             "badge_class": "badge-signal-sell",
             "icon": "dollar-sign",
             "recommendation": "Toma de Ganancias Parcial",
-            "action_text": "Vender 25% a 35% de la posición",
-            "rationale": f"Ganancia real neta de +{pnl_pct_usdt}% en dólares. Sugerido tomar beneficio parcial para rebalancear cartera o asegurar dólares."
+            "shares_to_sell": to_sell,
+            "shares_to_keep": to_keep,
+            "action_text": act_text,
+            "rationale": rat_text
         }
 
     # 3. High Concentration Alert (Asset represents >= 35% of total portfolio)
     if weight_pct >= 35.0:
+        if sh_int > 0:
+            act_text = f"Vender {to_sell} {sell_word} para diversificar"
+            rat_text = (
+                f"Esta acción representa el {weight_pct}% de tu cartera. Vender {to_sell} {sell_word} "
+                f"y quedarte con {to_keep} te ayuda a reducir riesgo y tener liquidez."
+            )
+        else:
+            act_text = "Podar posición para diversificar"
+            rat_text = f"Este activo abarca el {weight_pct}% de tu capital total. Conviene diversificar."
+
         return {
             "signal": "REDUCE_CONCENTRATION",
             "action": "REDUCIR",
             "type": "warning",
-            "label": f"Reducir por Concentración ({weight_pct}%)",
+            "label": f"Reducir Concentración ({weight_pct}%)",
             "badge_color": "amber",
             "badge_class": "badge-signal-rebalance",
             "icon": "pie-chart",
             "recommendation": "Reducir Exposición",
-            "action_text": "Podar posición para diversificar",
-            "rationale": f"Este activo abarca el {weight_pct}% de tu capital total. Sobrepasa el límite sugerido de concentración prudencial (30%). Conviene diversificar."
+            "shares_to_sell": to_sell,
+            "shares_to_keep": to_keep,
+            "action_text": act_text,
+            "rationale": rat_text
         }
 
     # 4. Buy More / Currency Lag (Exchange rate gap >= 10% and Stock lag behind in Bs)
@@ -280,7 +365,9 @@ def get_portfolio_summary(db: Session, bcv_rate: float, usdt_rate: float, portfo
             weight_pct=item["weight_pct"],
             change_today_pct=item.get("change_today_pct", 0.0),
             brecha_pct=brecha_pct,
-            cash_weight_pct=cash_weight_pct
+            cash_weight_pct=cash_weight_pct,
+            shares=item["shares"],
+            current_price_ves=item["current_price_ves"]
         )
         item["tactical_signal"] = signal
         

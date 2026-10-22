@@ -11,6 +11,8 @@ import { WelcomeLanding } from '@/components/WelcomeLanding';
 import { AIModal } from '@/components/AIModal';
 import { AuthModal } from '@/components/AuthModal';
 import { AddPositionModal } from '@/components/AddPositionModal';
+import { EditPositionModal } from '@/components/EditPositionModal';
+import { SellPositionModal } from '@/components/SellPositionModal';
 import { AdjustCashModal } from '@/components/AdjustCashModal';
 import { TelegramModal } from '@/components/TelegramModal';
 import { NotificationCenter } from '@/components/NotificationCenter';
@@ -38,6 +40,8 @@ import {
   getAuthToken,
   setAuthToken,
   addPositionApi,
+  updatePositionApi,
+  sellPositionApi,
   deletePositionApi,
   updateCashApi,
 } from '@/lib/api';
@@ -79,6 +83,10 @@ export default function Home() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isAddPosOpen, setIsAddPosOpen] = useState(false);
+  const [isEditPosOpen, setIsEditPosOpen] = useState(false);
+  const [isSellPosOpen, setIsSellPosOpen] = useState(false);
+  const [selectedPosForEdit, setSelectedPosForEdit] = useState<Position | null>(null);
+  const [selectedPosForSell, setSelectedPosForSell] = useState<Position | null>(null);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -216,8 +224,18 @@ export default function Home() {
     };
   }, [portfolio, rates]);
 
-  // Manejo de Acciones persistente con liquidación de efectivo
-  const handleAddPosition = async (newPos: Position, deductFromCash: boolean = true, execDate?: string) => {
+  // Manejo de Acciones persistente con liquidación de efectivo y comisiones Mercosur
+  const handleAddPosition = async (
+    newPos: Position,
+    deductFromCash: boolean = true,
+    execDate?: string,
+    fees?: {
+      broker_commission?: number;
+      broker_iva?: number;
+      broker_registry_fee?: number;
+      net_total_amount?: number;
+    }
+  ) => {
     playTerminalSound('success');
     const res = await addPositionApi({
       ticker: newPos.symbol,
@@ -226,7 +244,49 @@ export default function Home() {
       currency: 'VES',
       deduct_from_cash: deductFromCash,
       execution_date: execDate,
+      broker_commission: fees?.broker_commission,
+      broker_iva: fees?.broker_iva,
+      broker_registry_fee: fees?.broker_registry_fee,
+      net_total_amount: fees?.net_total_amount,
     });
+    if (res.cash_ves !== undefined) {
+      setPortfolio((prev) => ({ ...prev, cash_ves: res.cash_ves! }));
+    }
+    await refreshAllData();
+  };
+
+  const handleEditPosition = async (
+    positionId: string,
+    updatedShares: number,
+    updatedBuyPrice: number,
+    adjustCash: boolean
+  ) => {
+    playTerminalSound('success');
+    const res = await updatePositionApi(positionId, {
+      shares: updatedShares,
+      buy_price: updatedBuyPrice,
+      adjust_cash: adjustCash,
+    });
+    if (res.cash_ves !== undefined) {
+      setPortfolio((prev) => ({ ...prev, cash_ves: res.cash_ves! }));
+    }
+    await refreshAllData();
+  };
+
+  const handleSellPosition = async (payload: {
+    ticker: string;
+    shares_to_sell: number;
+    sell_price: number;
+    credit_to_cash: boolean;
+    broker_commission?: number;
+    broker_iva?: number;
+    broker_registry_fee?: number;
+    net_total_amount?: number;
+    execution_date?: string;
+    notes?: string;
+  }) => {
+    playTerminalSound('success');
+    const res = await sellPositionApi(payload);
     if (res.cash_ves !== undefined) {
       setPortfolio((prev) => ({ ...prev, cash_ves: res.cash_ves! }));
     }
@@ -433,6 +493,10 @@ export default function Home() {
                     totals={totals}
                     onOpenAddPosition={() => setIsAddPosOpen(true)}
                     onOpenAdjustCash={() => setIsAdjustCashOpen(true)}
+                    onOpenSellPosition={() => {
+                      setSelectedPosForSell(null);
+                      setIsSellPosOpen(true);
+                    }}
                   />
 
                   {/* Gráfico de Dona y Distribución */}
@@ -449,6 +513,19 @@ export default function Home() {
                     totalPortfolioVes={totals.ves.value}
                     onDeletePosition={handleDeletePosition}
                     onOpenAI={() => setIsAIModalOpen(true)}
+                    onEditPosition={(pos) => {
+                      setSelectedPosForEdit(pos);
+                      setIsEditPosOpen(true);
+                    }}
+                    onSellPosition={(pos) => {
+                      setSelectedPosForSell(pos);
+                      setIsSellPosOpen(true);
+                    }}
+                    onOpenAddPosition={() => setIsAddPosOpen(true)}
+                    onOpenSellModal={() => {
+                      setSelectedPosForSell(null);
+                      setIsSellPosOpen(true);
+                    }}
                   />
                 </>
               )}
@@ -465,6 +542,19 @@ export default function Home() {
                   totalPortfolioVes={totals.ves.value}
                   onDeletePosition={handleDeletePosition}
                   onOpenAI={() => setIsAIModalOpen(true)}
+                  onEditPosition={(pos) => {
+                    setSelectedPosForEdit(pos);
+                    setIsEditPosOpen(true);
+                  }}
+                  onSellPosition={(pos) => {
+                    setSelectedPosForSell(pos);
+                    setIsSellPosOpen(true);
+                  }}
+                  onOpenAddPosition={() => setIsAddPosOpen(true)}
+                  onOpenSellModal={() => {
+                    setSelectedPosForSell(null);
+                    setIsSellPosOpen(true);
+                  }}
                 />
               )}
 
@@ -525,6 +615,30 @@ export default function Home() {
         currentCashVes={portfolio.cash_ves}
         onClose={() => setIsAddPosOpen(false)}
         onAdd={handleAddPosition}
+      />
+
+      <EditPositionModal
+        isOpen={isEditPosOpen}
+        position={selectedPosForEdit}
+        currentCashVes={portfolio.cash_ves}
+        onClose={() => {
+          setIsEditPosOpen(false);
+          setSelectedPosForEdit(null);
+        }}
+        onSave={handleEditPosition}
+      />
+
+      <SellPositionModal
+        isOpen={isSellPosOpen}
+        positions={portfolio.positions}
+        selectedInitialPosition={selectedPosForSell}
+        bvcTickers={bvcTickers}
+        currentCashVes={portfolio.cash_ves}
+        onClose={() => {
+          setIsSellPosOpen(false);
+          setSelectedPosForSell(null);
+        }}
+        onSell={handleSellPosition}
       />
 
       <AdjustCashModal

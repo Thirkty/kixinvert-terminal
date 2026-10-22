@@ -419,6 +419,10 @@ export async function addPositionApi(pos: {
   buy_price: number;
   currency?: string;
   deduct_from_cash?: boolean;
+  broker_commission?: number;
+  broker_iva?: number;
+  broker_registry_fee?: number;
+  net_total_amount?: number;
   execution_date?: string;
   notes?: string;
 }): Promise<{ success: boolean; message: string; cash_ves?: number; cash_usd?: number }> {
@@ -436,6 +440,10 @@ export async function addPositionApi(pos: {
         buy_price: pos.buy_price,
         currency: pos.currency || 'VES',
         deduct_from_cash: pos.deduct_from_cash !== false,
+        broker_commission: pos.broker_commission || 0,
+        broker_iva: pos.broker_iva || 0,
+        broker_registry_fee: pos.broker_registry_fee || 0,
+        net_total_amount: pos.net_total_amount,
         execution_date: pos.execution_date,
         notes: pos.notes,
       }),
@@ -445,6 +453,72 @@ export async function addPositionApi(pos: {
     return data;
   } catch (err: any) {
     return { success: false, message: err.message || 'Error al registrar posición' };
+  }
+}
+
+export async function updatePositionApi(
+  positionId: string | number,
+  payload: {
+    shares: number;
+    buy_price: number;
+    adjust_cash?: boolean;
+    notes?: string;
+  }
+): Promise<{ success: boolean; message: string; cash_ves?: number; cash_usd?: number }> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/positions/${positionId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al actualizar posición');
+    return data;
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Error al actualizar posición' };
+  }
+}
+
+export async function sellPositionApi(payload: {
+  ticker: string;
+  shares_to_sell: number;
+  sell_price: number;
+  currency?: string;
+  credit_to_cash?: boolean;
+  broker_commission?: number;
+  broker_iva?: number;
+  broker_registry_fee?: number;
+  net_total_amount?: number;
+  execution_date?: string;
+  notes?: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  remaining_shares?: number;
+  realized_pnl_ves?: number;
+  net_ves?: number;
+  cash_ves?: number;
+  cash_usd?: number;
+}> {
+  const token = getAuthToken();
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/positions/sell`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al registrar venta');
+    return data;
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Error al registrar venta' };
   }
 }
 
@@ -461,6 +535,23 @@ export async function deletePositionApi(positionId: string | number): Promise<bo
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+export async function fetchTransactionsApi(limit: number = 50) {
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/portfolio/transactions?limit=${limit}`, {
+      headers,
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
   }
 }
 

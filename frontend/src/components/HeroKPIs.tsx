@@ -14,6 +14,7 @@ import {
   Calculator,
   LineChart,
   ArrowUpRight,
+  TrendingDown,
 } from 'lucide-react';
 import { CurrencyMode, MarketRates, PortfolioData, TriMonetaryTotals } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
@@ -27,6 +28,7 @@ interface HeroKPIsProps {
   totals: TriMonetaryTotals;
   onOpenAddPosition: () => void;
   onOpenAdjustCash: () => void;
+  onOpenSellPosition?: () => void;
 }
 
 const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
@@ -36,6 +38,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
   totals,
   onOpenAddPosition,
   onOpenAdjustCash,
+  onOpenSellPosition,
 }) => {
   // Cálculos de liquidez y totales
   const totalStockVes = totals.ves.value - portfolio.cash_ves;
@@ -390,30 +393,54 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
           </div>
         </div>
 
-        {/* Botón principal de acción: Operar */}
-        <button
-          className="btn-action-primary"
-          onClick={onOpenAddPosition}
-          style={{
-            marginTop: '16px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '11px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            color: '#fff',
-            borderRadius: '10px',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            border: 'none',
-            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-          }}
-        >
-          <PlusCircle size={16} /> Operar / Agregar Acción
-        </button>
+        {/* Botones principales de acción: Comprar y Vender */}
+        <div style={{ display: 'grid', gridTemplateColumns: onOpenSellPosition && portfolio.positions.length > 0 ? '1fr 1fr' : '1fr', gap: '8px', marginTop: '16px' }}>
+          <button
+            className="btn-action-primary"
+            onClick={onOpenAddPosition}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '11px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#fff',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              border: 'none',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+            }}
+          >
+            <PlusCircle size={15} /> Comprar Acción
+          </button>
+
+          {onOpenSellPosition && portfolio.positions.length > 0 && (
+            <button
+              type="button"
+              onClick={onOpenSellPosition}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '11px',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.2))',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                color: '#fca5a5',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <TrendingDown size={15} /> Vender Acción
+            </button>
+          )}
+        </div>
       </SpotlightCard>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Layers, LayoutList, Bot, Trash2, Zap, Search, Globe, DollarSign } from 'lucide-react';
+import { Layers, LayoutList, Bot, Trash2, Zap, Search, Globe, DollarSign, Pencil, TrendingDown, PlusCircle } from 'lucide-react';
 import { Position, BvcTicker, CurrencyMode, MarketRates, Ecosystem, InternationalQuote } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
@@ -19,6 +19,10 @@ interface PositionsTableProps {
   totalPortfolioVes: number;
   onDeletePosition: (symbol: string) => void;
   onOpenAI: () => void;
+  onEditPosition?: (position: Position) => void;
+  onSellPosition?: (position: Position) => void;
+  onOpenAddPosition?: () => void;
+  onOpenSellModal?: () => void;
 }
 
 const PositionsTableComponent: React.FC<PositionsTableProps> = ({
@@ -31,6 +35,10 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
   totalPortfolioVes,
   onDeletePosition,
   onOpenAI,
+  onEditPosition,
+  onSellPosition,
+  onOpenAddPosition,
+  onOpenSellModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'positions' | 'market_live' | 'whatif'>('positions');
   const [searchTerm, setSearchTerm] = useState('');
@@ -144,29 +152,80 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
           <Zap size={15} /> Simulador What-If (Salto Cambiario)
         </button>
 
-        <button
-          className="tab-btn btn-shimmer"
-          onClick={() => {
-            playTerminalSound('click');
-            onOpenAI();
-          }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 16px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2))',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-            color: '#c084fc',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            marginLeft: 'auto',
-          }}
-        >
-          <AnimatedSparkles size={16} /> KixInvert AI Analista
-        </button>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: 'auto', flexWrap: 'wrap' }}>
+          {onOpenAddPosition && (
+            <button
+              type="button"
+              onClick={() => {
+                playTerminalSound('click');
+                onOpenAddPosition();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '9px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                color: '#10b981',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+            >
+              <PlusCircle size={14} /> Comprar
+            </button>
+          )}
+
+          {onOpenSellModal && positions.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                playTerminalSound('click');
+                onOpenSellModal();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '9px',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#fca5a5',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+            >
+              <TrendingDown size={14} /> Vender
+            </button>
+          )}
+
+          <button
+            className="tab-btn btn-shimmer"
+            onClick={() => {
+              playTerminalSound('click');
+              onOpenAI();
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2))',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#c084fc',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+            }}
+          >
+            <AnimatedSparkles size={16} /> KixInvert AI Analista
+          </button>
+        </div>
       </div>
 
       {/* TAB 1: POSICIONES DEL USUARIO */}
@@ -182,7 +241,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 <th className="text-right">Valor Total</th>
                 <th className="text-right">Ganancia / Pérdida</th>
                 <th className="text-right">% Cartera</th>
-                <th style={{ width: '40px' }}></th>
+                <th style={{ width: '140px', textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -244,26 +303,77 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                         </div>
                       </td>
                       <td className="text-right font-mono font-bold text-dim">{weightPct.toFixed(1)}%</td>
-                      <td>
-                        <button
-                          className="btn-delete-pos"
-                          onClick={() => {
-                            playTerminalSound('click');
-                            onDeletePosition(pos.symbol);
-                          }}
-                          title={`Eliminar posición en ${pos.symbol}`}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#64748b',
-                            cursor: 'pointer',
-                            padding: '4px',
-                            borderRadius: '4px',
-                            transition: 'color 0.2s ease',
-                          }}
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                          <button
+                            onClick={() => {
+                              playTerminalSound('click');
+                              onSellPosition && onSellPosition(pos);
+                            }}
+                            title={`Vender acciones de ${pos.symbol}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 8px',
+                              borderRadius: '7px',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#fca5a5',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            <TrendingDown size={12} /> Vender
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              playTerminalSound('click');
+                              onEditPosition && onEditPosition(pos);
+                            }}
+                            title={`Editar / Corregir títulos o precio en ${pos.symbol}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '5px 7px',
+                              borderRadius: '7px',
+                              background: 'rgba(56, 189, 248, 0.12)',
+                              border: '1px solid rgba(56, 189, 248, 0.3)',
+                              color: '#38bdf8',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            <Pencil size={13} />
+                          </button>
+
+                          <button
+                            className="btn-delete-pos"
+                            onClick={() => {
+                              playTerminalSound('click');
+                              if (confirm(`¿Estás seguro de que deseas eliminar permanentemente la posición en ${pos.symbol}?`)) {
+                                onDeletePosition(pos.symbol);
+                              }
+                            }}
+                            title={`Eliminar posición en ${pos.symbol}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '5px',
+                              borderRadius: '7px',
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#64748b',
+                              cursor: 'pointer',
+                              transition: 'color 0.2s ease',
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
