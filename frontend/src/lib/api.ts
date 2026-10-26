@@ -285,33 +285,35 @@ export async function simulateWhatIf(params: {
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  try {
-    const res = await fetch(`${API_BASE}/simulate/what-if`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(params),
-    });
-    if (!res.ok) throw new Error('Error al ejecutar simulación What-If');
-    return await res.json();
-  } catch (err) {
-    // Cálculo de respaldo en caso de desconexión
-    return {
-      current_portfolio_ves: 100000,
-      projected_portfolio_ves: 115000,
-      current_portfolio_usd_bcv: 113.62,
-      projected_portfolio_usd_bcv: 104.54,
-      current_portfolio_usdt: 100.04,
-      projected_portfolio_usdt: 95.83,
-      net_ves_impact: 15000,
-      net_usd_bcv_impact: -9.08,
-      net_usdt_impact: -4.21,
-      bcv_target: params.bcv_target,
-      usdt_target: params.usdt_target,
-      wall_street_shock_pct: params.wall_street_shock_pct || 0,
-      protection_rating: 'Media',
-      advice: 'Tu portafolio amortigua parcialmente el salto cambiario gracias a tus activos bursátiles.',
-    };
-  }
+  // Sin datos de respaldo inventados: si el backend falla, el simulador muestra el error
+  const res = await fetch(`${API_BASE}/portfolio/simulate-what-if`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(params),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.detail || 'No se pudo ejecutar la simulación What-If.');
+
+  // El backend responde agrupado (current_wealth / projected_wealth / impact / verdict)
+  const current = data.current_wealth || {};
+  const projected = data.projected_wealth || {};
+  const ratingByBadge: Record<string, string> = { success: 'Alta', warning: 'Media', critical: 'Baja' };
+  return {
+    current_portfolio_ves: current.ves ?? 0,
+    projected_portfolio_ves: projected.ves ?? 0,
+    current_portfolio_usd_bcv: current.usd_bcv ?? 0,
+    projected_portfolio_usd_bcv: projected.usd_bcv ?? 0,
+    current_portfolio_usdt: current.usdt ?? 0,
+    projected_portfolio_usdt: projected.usdt ?? 0,
+    net_ves_impact: data.impact?.delta_ves ?? 0,
+    net_usd_bcv_impact: (projected.usd_bcv ?? 0) - (current.usd_bcv ?? 0),
+    net_usdt_impact: data.impact?.delta_usdt ?? 0,
+    bcv_target: data.inputs?.bcv_target ?? params.bcv_target,
+    usdt_target: data.inputs?.usdt_target ?? params.usdt_target,
+    wall_street_shock_pct: data.inputs?.wall_street_shock_pct ?? params.wall_street_shock_pct ?? 0,
+    protection_rating: ratingByBadge[data.verdict?.badge] || 'Media',
+    advice: data.verdict?.summary || '',
+  };
 }
 
 export async function fetchInternationalQuotes(): Promise<InternationalQuote[]> {
