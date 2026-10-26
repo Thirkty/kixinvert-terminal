@@ -437,9 +437,9 @@ export default function Home() {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '8px',
-                      background: currentEcosystem === 'BVC' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                      border: currentEcosystem === 'BVC' ? '1px solid rgba(16, 185, 129, 0.28)' : '1px solid rgba(59, 130, 246, 0.28)',
-                      color: currentEcosystem === 'BVC' ? '#a7f3d0' : '#bfdbfe',
+                      background: currentEcosystem === 'BVC' ? 'rgba(124, 140, 255, 0.12)' : 'rgba(124, 140, 255, 0.12)',
+                      border: currentEcosystem === 'BVC' ? '1px solid rgba(124, 140, 255, 0.28)' : '1px solid rgba(124, 140, 255, 0.28)',
+                      color: currentEcosystem === 'BVC' ? '#c9cfff' : '#c9cfff',
                       padding: '4px 12px',
                       borderRadius: '9999px',
                       fontSize: '0.76rem',
@@ -447,7 +447,7 @@ export default function Home() {
                       marginBottom: '8px',
                     }}
                   >
-                    <span>{currentEcosystem === 'BVC' ? '🇻🇪 Mercado Caracas BVC' : '🇺🇸 Mercado Wall Street Global'}</span>
+                    <span>{currentEcosystem === 'BVC' ? 'Mercado Caracas BVC' : 'Mercado Wall Street Global'}</span>
                     <span>•</span>
                     <span>{session?.is_demo ? 'Cuenta Demo' : `Portafolio de ${session?.username || 'Inversionista'}`}</span>
                   </div>
@@ -462,9 +462,9 @@ export default function Home() {
                         marginLeft: '12px',
                         fontSize: '0.72rem',
                         padding: '3px 8px',
-                        background: 'rgba(16, 185, 129, 0.15)',
-                        color: '#10b981',
-                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        background: 'rgba(124, 140, 255, 0.15)',
+                        color: '#7c8cff',
+                        border: '1px solid rgba(124, 140, 255, 0.3)',
                         borderRadius: '6px',
                         fontWeight: 700,
                       }}
@@ -473,7 +473,7 @@ export default function Home() {
                     </span>
                   </h1>
 
-                  <p className="subtitle" style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
+                  <p className="subtitle" style={{ color: '#9aa3b2', fontSize: '0.9rem', marginTop: '2px' }}>
                     Monitoreo en tiempo real, microinteracciones con halo spotlight y cobertura cambiaria tri-monetaria
                   </p>
                 </div>
