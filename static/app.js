@@ -30,14 +30,14 @@ let systemNotifications = [
     id: 2,
     type: 'ai',
     title: 'Analista KixInvert AI Disponible',
-    desc: 'DiagnÃ³stico autÃ³nomo de 9 acciones con evaluaciÃ³n de cobertura.',
+    desc: 'Diagnóstico autónomo de 9 acciones con evaluación de cobertura.',
     time: 'En vivo'
   },
   {
     id: 3,
     type: 'sync',
     title: 'BVC Conectada en Vivo',
-    desc: '46 tÃ­tulos bursÃ¡tiles sincronizados con la Bolsa de Valores de Caracas.',
+    desc: '46 títulos bursátiles sincronizados con la Bolsa de Valores de Caracas.',
     time: 'En vivo'
   }
 ];
@@ -62,8 +62,8 @@ async function fetchWithAuth(url, options = {}) {
     console.warn('Session expired or unauthorized. Performing secure auto-logout.');
     performLogout();
     showToast({
-      title: 'ðŸ”’ SesiÃ³n Expirada',
-      message: 'Tu sesiÃ³n ha expirado. Por favor inicia sesiÃ³n nuevamente.',
+      title: '🔒 Sesión Expirada',
+      message: 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.',
       type: 'warning',
       duration: 5000
     });
@@ -340,10 +340,10 @@ function renderMarqueeTape(quotes) {
     if (chgVal > 0) {
       chgClass = 'up';
       sign = '+';
-      arrow = 'â–² ';
+      arrow = '▲ ';
     } else if (chgVal < 0) {
       chgClass = 'down';
-      arrow = 'â–¼ ';
+      arrow = '▼ ';
     }
 
     return `
@@ -415,8 +415,8 @@ window.openProModal = async function() {
 
   if (!isAuth || !token) {
     showToast({
-      title: 'Inicia SesiÃ³n',
-      message: 'RegÃ­strate o inicia sesiÃ³n para activar tu membresÃ­a PRO.',
+      title: 'Inicia Sesión',
+      message: 'Regístrate o inicia sesión para activar tu membresía PRO.',
       type: 'warning',
       duration: 4000
     });
@@ -472,7 +472,7 @@ window.openProModal = async function() {
         qrImg.style.display = 'block';
       };
     }
-    if (statusText) statusText.textContent = 'Esperando confirmaciÃ³n de Binance...';
+    if (statusText) statusText.textContent = 'Esperando confirmación de Binance...';
 
     if (deeplinkBtn && order.checkout_url) {
       deeplinkBtn.href = order.checkout_url;
@@ -502,7 +502,7 @@ window.openProModal = async function() {
 
   } catch (err) {
     console.error('Error creating Binance Pay order:', err);
-    showToast({ title: 'Error de ConexiÃ³n', message: 'No se pudo conectar con Binance.', type: 'error' });
+    showToast({ title: 'Error de Conexión', message: 'No se pudo conectar con Binance.', type: 'error' });
   }
 };
 
@@ -531,14 +531,14 @@ window.simulateProPayment = async function() {
       clearInterval(activeProPollInterval);
       handleProActivationSuccess(data.expires_at);
     } else {
-      showToast({ title: 'Error', message: 'No se pudo simular la activaciÃ³n.', type: 'error' });
+      showToast({ title: 'Error', message: 'No se pudo simular la activación.', type: 'error' });
     }
   } catch (err) {
     showToast({ title: 'Error', message: String(err), type: 'error' });
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="zap"></i> Probar Pago Exitoso (SimulaciÃ³n Binance)`;
+      btn.innerHTML = `<i data-lucide="zap"></i> Probar Pago Exitoso (Simulación Binance)`;
       lucide.createIcons();
     }
   }
@@ -565,15 +565,15 @@ function handleProActivationSuccess(expiresAt) {
 
   if (expiryEl && expiresAt) {
     const expDate = new Date(expiresAt);
-    expiryEl.textContent = `MembresÃ­a activa hasta: ${expDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+    expiryEl.textContent = `Membresía activa hasta: ${expDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })}`;
   }
 
   updateUserTierUI();
   lucide.createIcons();
 
   showToast({
-    title: 'ðŸ‘‘ Â¡Plan PRO Activado!',
-    message: 'Disfruta de consultas ilimitadas con tu Analista AI y seÃ±ales tÃ¡cticas en vivo.',
+    title: '👑 ¡Plan PRO Activado!',
+    message: 'Disfruta de consultas ilimitadas con tu Analista AI y señales tácticas en vivo.',
     type: 'success',
     duration: 5000
   });
@@ -753,8 +753,8 @@ function setupEcosystemAuth() {
         if (modalInact) modalInact.classList.remove('show');
         performLogout();
         showToast({
-          title: 'ðŸ”’ SesiÃ³n Cerrada',
-          message: 'Tu sesiÃ³n se cerrÃ³ automÃ¡ticamente tras 25 minutos de inactividad.',
+          title: '🔒 Sesión Cerrada',
+          message: 'Tu sesión se cerró automáticamente tras 25 minutos de inactividad.',
           type: 'warning',
           duration: 5000
         });
@@ -768,7 +768,7 @@ function setupEcosystemAuth() {
     if (modalInact) modalInact.classList.remove('show');
     resetInactivityTimer();
     showToast({
-      title: 'SesiÃ³n Renovada',
+      title: 'Sesión Renovada',
       message: 'Continuando en tu terminal financiero seguro.',
       type: 'success',
       duration: 2500
@@ -951,13 +951,13 @@ function setupEcosystemAuth() {
       const btnSubmit = document.getElementById('btn-submit-login');
 
       if (!identifier || !pwd) {
-        showAuthAlert('Por favor ingresa tu usuario y contraseÃ±a.');
+        showAuthAlert('Por favor ingresa tu usuario y contraseña.');
         return;
       }
 
       if (btnSubmit) {
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = `<i data-lucide="loader-2" class="spin-anim"></i> Iniciando sesiÃ³n...`;
+        btnSubmit.innerHTML = `<i data-lucide="loader-2" class="spin-anim"></i> Iniciando sesión...`;
         lucide.createIcons();
       }
 
@@ -984,7 +984,7 @@ function setupEcosystemAuth() {
           pending2FAUserUuid = data.user_uuid;
           switchAuthTab('2fa');
           showToast({
-            title: 'ðŸ”‘ CÃ³digo 2FA Requerido',
+            title: '🔑 Código 2FA Requerido',
             message: data.message,
             type: 'warning',
             duration: 4000
@@ -995,7 +995,7 @@ function setupEcosystemAuth() {
         applyUserSession(data.user, data.token);
 
         showToast({
-          title: 'Â¡SesiÃ³n Iniciada con Ã‰xito!',
+          title: '¡Sesión Iniciada con Éxito!',
           message: `Bienvenido de vuelta, ${data.user.full_name}.`,
           type: 'success',
           duration: 3500
@@ -1003,11 +1003,11 @@ function setupEcosystemAuth() {
 
         addNotification({
           type: 'sync',
-          title: 'SesiÃ³n Iniciada',
+          title: 'Sesión Iniciada',
           desc: `Acceso protegido al terminal como ${data.user.full_name}.`
         });
       } catch (err) {
-        showAuthAlert('Error de conexiÃ³n con el servidor. Revisa tu red.');
+        showAuthAlert('Error de conexión con el servidor. Revisa tu red.');
       } finally {
         if (btnSubmit) {
           btnSubmit.disabled = false;
@@ -1027,7 +1027,7 @@ function setupEcosystemAuth() {
       const btnSubmit = document.getElementById('btn-submit-2fa-login');
 
       if (!code || code.length !== 6) {
-        showAuthAlert('Ingresa los 6 dÃ­gitos de Google Authenticator.');
+        showAuthAlert('Ingresa los 6 dígitos de Google Authenticator.');
         return;
       }
 
@@ -1049,7 +1049,7 @@ function setupEcosystemAuth() {
         const data = await res.json();
 
         if (!res.ok) {
-          showAuthAlert(data.detail || 'CÃ³digo 2FA incorrecto o expirado.');
+          showAuthAlert(data.detail || 'Código 2FA incorrecto o expirado.');
           playSound('click');
           return;
         }
@@ -1057,13 +1057,13 @@ function setupEcosystemAuth() {
         applyUserSession(data.user, data.token);
 
         showToast({
-          title: 'ðŸ›¡ï¸ AutenticaciÃ³n 2FA Verificada',
+          title: '🛡️ Autenticación 2FA Verificada',
           message: `Bienvenido, ${data.user.full_name}. Acceso protegido completado.`,
           type: 'success',
           duration: 3500
         });
       } catch (err) {
-        showAuthAlert('Error validando el cÃ³digo 2FA. Revisa tu conexiÃ³n.');
+        showAuthAlert('Error validando el código 2FA. Revisa tu conexión.');
       } finally {
         if (btnSubmit) {
           btnSubmit.disabled = false;
@@ -1099,11 +1099,11 @@ function setupEcosystemAuth() {
         return;
       }
       if (!email.includes('@') || !email.includes('.')) {
-        showAuthAlert('Por favor ingresa un correo electrÃ³nico vÃ¡lido.');
+        showAuthAlert('Por favor ingresa un correo electrónico válido.');
         return;
       }
       if (password.length < 10) {
-        showAuthAlert('La contraseÃ±a debe tener al menos 10 caracteres.');
+        showAuthAlert('La contraseña debe tener al menos 10 caracteres.');
         return;
       }
 
@@ -1141,7 +1141,7 @@ function setupEcosystemAuth() {
         applyUserSession(data.user, data.token);
 
         showToast({
-          title: 'ðŸŽ‰ Â¡Registro Exitoso!',
+          title: '🎉 ¡Registro Exitoso!',
           message: `Bienvenido a KixInvertAPP, ${data.user.full_name}. Activa tu Doble Factor (2FA) para blindar tu patrimonio.`,
           type: 'success',
           duration: 4500
@@ -1183,7 +1183,7 @@ function setupEcosystemAuth() {
     applyUserSession(demoUser);
     showToast({
       title: 'Modo Demo Activo',
-      message: 'Explorando terminal privado con datos bursÃ¡tiles en vivo.',
+      message: 'Explorando terminal privado con datos bursátiles en vivo.',
       type: 'ai',
       duration: 3000
     });
@@ -1224,8 +1224,8 @@ function setupEcosystemAuth() {
     switchView('welcome');
     updateUserTierUI();
     showToast({
-      title: 'SesiÃ³n Finalizada',
-      message: 'Has salido de tu terminal privado. Â¡Hasta pronto!',
+      title: 'Sesión Finalizada',
+      message: 'Has salido de tu terminal privado. ¡Hasta pronto!',
       type: 'ai',
       duration: 3000
     });
@@ -1240,7 +1240,7 @@ function setupEcosystemAuth() {
     if (!token) {
       showToast({
         title: 'Modo Demo',
-        message: 'Para configurar la autenticaciÃ³n en dos pasos (2FA), crea tu cuenta de inversionista.',
+        message: 'Para configurar la autenticación en dos pasos (2FA), crea tu cuenta de inversionista.',
         type: 'warning',
         duration: 3800
       });
@@ -1318,7 +1318,7 @@ function setupEcosystemAuth() {
     if (!token) {
       showToast({
         title: 'Modo Demo (Solo Lectura)',
-        message: 'Para configurar Google Authenticator real, regÃ­strate o inicia sesiÃ³n con tu cuenta.',
+        message: 'Para configurar Google Authenticator real, regístrate o inicia sesión con tu cuenta.',
         type: 'warning',
         duration: 4500
       });
@@ -1364,7 +1364,7 @@ function setupEcosystemAuth() {
   async function confirmEnable2FA() {
     const code = document.getElementById('sec-confirm-totp-code').value.trim();
     if (!code || code.length !== 6) {
-      alert('Ingresa el cÃ³digo de 6 dÃ­gitos que muestra Google Authenticator.');
+      alert('Ingresa el código de 6 dígitos que muestra Google Authenticator.');
       return;
     }
 
@@ -1380,7 +1380,7 @@ function setupEcosystemAuth() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.detail || 'CÃ³digo 2FA incorrecto.');
+        alert(data.detail || 'Código 2FA incorrecto.');
         return;
       }
 
@@ -1389,8 +1389,8 @@ function setupEcosystemAuth() {
       loadAuditLogs();
 
       showToast({
-        title: 'ðŸ›¡ï¸ Â¡2FA Activado con Ã‰xito!',
-        message: 'El doble factor de autenticaciÃ³n ha sido habilitado.',
+        title: '🛡️ ¡2FA Activado con Éxito!',
+        message: 'El doble factor de autenticación ha sido habilitado.',
         type: 'success',
         duration: 4000
       });
@@ -1401,9 +1401,9 @@ function setupEcosystemAuth() {
   }
 
   async function promptDisable2FA() {
-    const pwd = prompt('Para desactivar el doble factor, ingresa tu contraseÃ±a:');
+    const pwd = prompt('Para desactivar el doble factor, ingresa tu contraseña:');
     if (!pwd) return;
-    const code = prompt('Ingresa tu cÃ³digo actual de 6 dÃ­gitos de Google Authenticator:');
+    const code = prompt('Ingresa tu código actual de 6 dígitos de Google Authenticator:');
     if (!code) return;
 
     try {
@@ -1425,7 +1425,7 @@ function setupEcosystemAuth() {
 
       showToast({
         title: '2FA Desactivado',
-        message: 'La verificaciÃ³n en dos pasos fue deshabilitada.',
+        message: 'La verificación en dos pasos fue deshabilitada.',
         type: 'warning',
         duration: 3500
       });
@@ -1440,14 +1440,14 @@ function setupEcosystemAuth() {
 
     const token = localStorage.getItem('kix_token');
     if (!token) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-dim">EstÃ¡s en Modo Demo. Inicia sesiÃ³n con tu cuenta para ver tu pista de auditorÃ­a en tiempo real.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-dim">Estás en Modo Demo. Inicia sesión con tu cuenta para ver tu pista de auditoría en tiempo real.</td></tr>`;
       return;
     }
 
     try {
       const res = await fetchWithAuth('/api/audit-logs');
       if (!res.ok) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-dim">No hay registros de auditorÃ­a aÃºn.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-dim">No hay registros de auditoría aún.</td></tr>`;
         return;
       }
       const logs = await res.json();
@@ -1469,7 +1469,7 @@ function setupEcosystemAuth() {
         tbody.appendChild(tr);
       });
     } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-red">Error cargando auditorÃ­a.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-red">Error cargando auditoría.</td></tr>`;
     }
   }
 
@@ -1516,8 +1516,8 @@ function setupEcosystemAuth() {
     }, 120);
 
     showToast({
-      title: 'ðŸ¤– KixInvert AI Analista',
-      message: 'Consultando diagnÃ³stico bursÃ¡til y recomendaciones para tu cartera.',
+      title: '🤖 KixInvert AI Analista',
+      message: 'Consultando diagnóstico bursátil y recomendaciones para tu cartera.',
       type: 'ai',
       duration: 3200
     });
@@ -1618,7 +1618,7 @@ async function triggerManualSync() {
   try {
     await fetch('/api/rates/sync', { method: 'POST' });
     showToast({
-      title: 'âš¡ SincronizaciÃ³n Manual',
+      title: '⚡ Sincronización Manual',
       message: 'Tasas BCV/USDT y cotizaciones BVC actualizadas al segundo.',
       type: 'success',
       duration: 3000
@@ -1628,7 +1628,7 @@ async function triggerManualSync() {
     console.error('Error in manual sync:', err);
     showToast({
       title: 'Error de Red',
-      message: 'No se pudo conectar con el servidor bursÃ¡til.',
+      message: 'No se pudo conectar con el servidor bursátil.',
       type: 'error',
       duration: 4000
     });
@@ -1653,8 +1653,8 @@ function setupEventListeners() {
       }
       btnSound.title = soundEnabled ? 'Sonido activado (clic para silenciar)' : 'Sonido silenciado (clic para activar)';
       showToast({
-        title: soundEnabled ? 'ðŸ”Š Sonidos Activados' : 'ðŸ”‡ Modo Silencioso',
-        message: soundEnabled ? 'Efectos sonoros y pings bursÃ¡tiles habilitados.' : 'Efectos de audio desactivados.',
+        title: soundEnabled ? '🔊 Sonidos Activados' : '🔇 Modo Silencioso',
+        message: soundEnabled ? 'Efectos sonoros y pings bursátiles habilitados.' : 'Efectos de audio desactivados.',
         type: 'ai',
         duration: 2500
       });
@@ -1708,7 +1708,7 @@ function setupEventListeners() {
 
       // Update pill
       if (notifUnreadPill) {
-        notifUnreadPill.textContent = `${unreadCount} no leÃ­da${unreadCount === 1 ? '' : 's'}`;
+        notifUnreadPill.textContent = `${unreadCount} no leída${unreadCount === 1 ? '' : 's'}`;
       }
 
       renderNotificationList(cachedNotifications);
@@ -1724,7 +1724,7 @@ function setupEventListeners() {
       notifListEl.innerHTML = `
         <div class="notif-empty-state">
           <i data-lucide="shield-check"></i>
-          <p><strong>Todo en orden</strong><br>No hay alertas activas en esta categorÃ­a.</p>
+          <p><strong>Todo en orden</strong><br>No hay alertas activas en esta categoría.</p>
         </div>
       `;
       if (window.lucide) lucide.createIcons();
@@ -1760,7 +1760,7 @@ function setupEventListeners() {
               <span class="notif-action-tag">
                 <i data-lucide="arrow-right-circle"></i> ${actionText}
               </span>
-              ${!n.is_read ? '<span class="notif-unread-dot" title="No leÃ­da"></span>' : ''}
+              ${!n.is_read ? '<span class="notif-unread-dot" title="No leída"></span>' : ''}
             </div>
           </div>
         </div>
@@ -1848,8 +1848,8 @@ function setupEventListeners() {
           await fetchWithAuth('/api/notifications/read-all', { method: 'POST' });
           await loadNotifications(true);
           showToast({
-            title: 'âœ… Alertas al DÃ­a',
-            message: 'Todas las notificaciones han sido marcadas como leÃ­das.',
+            title: '✅ Alertas al Día',
+            message: 'Todas las notificaciones han sido marcadas como leídas.',
             type: 'ai',
             duration: 2000
           });
@@ -2012,8 +2012,8 @@ function setupPositionAndCashModals() {
       priceInputMode = 'unit';
       btnModeUnit.classList.add('active');
       btnModeTotal.classList.remove('active');
-      if (lblPosPrice) lblPosPrice.textContent = 'Precio de Compra por AcciÃ³n';
-      if (lblOpSummary) lblOpSummary.textContent = 'InversiÃ³n Estimada:';
+      if (lblPosPrice) lblPosPrice.textContent = 'Precio de Compra por Acción';
+      if (lblOpSummary) lblOpSummary.textContent = 'Inversión Estimada:';
       posPriceInput.placeholder = 'Ej: 219,19 o 1.898,00';
       updateModalCalc();
     });
@@ -2024,7 +2024,7 @@ function setupPositionAndCashModals() {
       btnModeTotal.classList.add('active');
       btnModeUnit.classList.remove('active');
       if (lblPosPrice) lblPosPrice.textContent = 'Costo Total de Compra (Monto Global)';
-      if (lblOpSummary) lblOpSummary.textContent = 'Precio Calculado por AcciÃ³n:';
+      if (lblOpSummary) lblOpSummary.textContent = 'Precio Calculado por Acción:';
       posPriceInput.placeholder = 'Ej: 2.411,13 o 1.814,95';
       updateModalCalc();
     });
@@ -2041,10 +2041,10 @@ function setupPositionAndCashModals() {
     const rates = portfolioData && portfolioData.rates ? portfolioData.rates : { bcv: 879.12 };
 
     if (shares > 0) {
-      sharesPreview.innerHTML = `<i data-lucide="check"></i> <span>${formatNumber(shares, 0)} tÃ­tulos</span>`;
+      sharesPreview.innerHTML = `<i data-lucide="check"></i> <span>${formatNumber(shares, 0)} títulos</span>`;
       sharesPreview.className = 'input-helper active';
     } else {
-      sharesPreview.innerHTML = `<i data-lucide="hash"></i> <span>Ej: 5.000 tÃ­tulos</span>`;
+      sharesPreview.innerHTML = `<i data-lucide="hash"></i> <span>Ej: 5.000 títulos</span>`;
       sharesPreview.className = 'input-helper';
     }
 
@@ -2094,10 +2094,10 @@ function setupPositionAndCashModals() {
         const unitPrice = totalAmount / shares;
         if (curr === 'VES') {
           const unitUsd = rates.bcv > 0 ? unitPrice / rates.bcv : 0;
-          totalCalc.innerHTML = `${formatVES(unitPrice)} / acciÃ³n <small style="color:var(--text-dim);">(${formatUSD(unitUsd)})</small>`;
+          totalCalc.innerHTML = `${formatVES(unitPrice)} / acción <small style="color:var(--text-dim);">(${formatUSD(unitUsd)})</small>`;
         } else {
           const unitVes = unitPrice * (rates.bcv || 0);
-          totalCalc.innerHTML = `${formatUSD(unitPrice)} / acciÃ³n <small style="color:var(--text-dim);">(${formatVES(unitVes)})</small>`;
+          totalCalc.innerHTML = `${formatUSD(unitPrice)} / acción <small style="color:var(--text-dim);">(${formatVES(unitVes)})</small>`;
         }
       } else {
         totalCalc.textContent = '---';
@@ -2188,7 +2188,7 @@ function setupPositionAndCashModals() {
       const currency = posCurrSelect.value;
 
       if (shares <= 0 || price <= 0) {
-        showToast({ title: 'Datos Incompletos', message: 'Por favor ingresa tÃ­tulos y precio vÃ¡lidos.', type: 'warning' });
+        showToast({ title: 'Datos Incompletos', message: 'Por favor ingresa títulos y precio válidos.', type: 'warning' });
         return;
       }
 
@@ -2211,19 +2211,19 @@ function setupPositionAndCashModals() {
           priceInputMode = 'unit';
           if (btnModeUnit) btnModeUnit.classList.add('active');
           if (btnModeTotal) btnModeTotal.classList.remove('active');
-          if (lblPosPrice) lblPosPrice.textContent = 'Precio de Compra por AcciÃ³n';
+          if (lblPosPrice) lblPosPrice.textContent = 'Precio de Compra por Acción';
           
           showToast({
-            title: 'âœ… PosiciÃ³n Guardada',
-            message: `Se aÃ±adieron ${formatNumber(shares, 0)} tÃ­tulos de ${ticker} a tu portafolio.`,
+            title: '✅ Posición Guardada',
+            message: `Se añadieron ${formatNumber(shares, 0)} títulos de ${ticker} a tu portafolio.`,
             type: 'success',
             duration: 3500
           });
 
           addNotification({
             type: 'sync',
-            title: `OperaciÃ³n Registrada: ${ticker}`,
-            desc: `Comprados ${formatNumber(shares, 0)} tÃ­tulos a ${formatVES(buy_price)}.`
+            title: `Operación Registrada: ${ticker}`,
+            desc: `Comprados ${formatNumber(shares, 0)} títulos a ${formatVES(buy_price)}.`
           });
 
           await loadAllData();
@@ -2309,7 +2309,7 @@ function setupPositionAndCashModals() {
         if (res.ok) {
           cashModal.classList.remove('show');
           showToast({
-            title: 'ðŸ’µ Saldo Actualizado',
+            title: '💵 Saldo Actualizado',
             message: `Efectivo ajustado: ${formatVES(cashVes)} / ${formatUSD(cashUsd)}.`,
             type: 'success',
             duration: 3500
@@ -2378,7 +2378,7 @@ async function loadAllData(silent = false) {
     if (silent && currentView === 'terminal') {
       playSound('success');
       showToast({
-        title: activeEcosystem === 'US' ? 'âš¡ Auto-Sync Wall Street' : 'âš¡ Auto-Sync BVC',
+        title: activeEcosystem === 'US' ? '⚡ Auto-Sync Wall Street' : '⚡ Auto-Sync BVC',
         message: 'Precios de pizarra, cotizaciones oficiales y P&L actualizados en vivo.',
         type: 'success',
         duration: 3000
@@ -2461,7 +2461,7 @@ function switchEcosystem(ecosystem, triggerUpdate = true) {
   const headingTitle = document.getElementById('terminal-heading-title');
   const headingSub = document.getElementById('terminal-heading-subtitle');
   if (ownerBadge) {
-    ownerBadge.textContent = ecosystem === 'BVC' ? 'Portafolio BursÃ¡til BVC' : 'Portafolio Wall Street Global';
+    ownerBadge.textContent = ecosystem === 'BVC' ? 'Portafolio Bursátil BVC' : 'Portafolio Wall Street Global';
   }
   if (headingTitle) {
     headingTitle.innerHTML = ecosystem === 'BVC' 
@@ -2470,8 +2470,8 @@ function switchEcosystem(ecosystem, triggerUpdate = true) {
   }
   if (headingSub) {
     headingSub.textContent = ecosystem === 'BVC'
-      ? 'Monitoreo inteligente multi-divisa y protecciÃ³n en tiempo real contra la devaluaciÃ³n'
-      : 'InversiÃ³n directa en DÃ³lares (USD) en NYSE y NASDAQ con cotizaciones en tiempo real vÃ­a yfinance';
+      ? 'Monitoreo inteligente multi-divisa y protección en tiempo real contra la devaluación'
+      : 'Inversión directa en Dólares (USD) en NYSE y NASDAQ con cotizaciones en tiempo real vía yfinance';
   }
 
   // 5. Navigation Tab & Sidebar Labels
@@ -2490,20 +2490,20 @@ function switchEcosystem(ecosystem, triggerUpdate = true) {
     sidePosLabel.textContent = ecosystem === 'BVC' ? 'Mi Portafolio (BVC)' : 'Mi Portafolio (Wall St)';
   }
   if (tabMarketLabel) {
-    tabMarketLabel.textContent = ecosystem === 'BVC' ? 'Pizarra BVC en Vivo (46 TÃ­tulos)' : 'Pizarra Wall Street en Vivo (NYSE / NASDAQ)';
+    tabMarketLabel.textContent = ecosystem === 'BVC' ? 'Pizarra BVC en Vivo (46 Títulos)' : 'Pizarra Wall Street en Vivo (NYSE / NASDAQ)';
   }
   if (sideMarketLabel) {
     sideMarketLabel.textContent = ecosystem === 'BVC' ? 'Pizarra en Vivo' : 'Wall Street en Vivo';
   }
   if (posTableTitle) {
     posTableTitle.innerHTML = ecosystem === 'BVC'
-      ? `<span id="positions-title-flag">ðŸ‡»ðŸ‡ª</span> Libro de Posiciones: Bolsa de Valores de Caracas`
-      : `<span id="positions-title-flag">ðŸ‡ºðŸ‡¸</span> Libro de Posiciones: Wall Street (NYSE / NASDAQ)`;
+      ? `<span id="positions-title-flag">🇻🇪</span> Libro de Posiciones: Bolsa de Valores de Caracas`
+      : `<span id="positions-title-flag">🇺🇸</span> Libro de Posiciones: Wall Street (NYSE / NASDAQ)`;
   }
   if (posTableSub) {
     posTableSub.textContent = ecosystem === 'BVC'
-      ? 'Rendimiento nominal y cobertura real frente a la devaluaciÃ³n'
-      : 'Rendimiento nativo en DÃ³lares (USD) y retorno porcentual de tus activos internacionales';
+      ? 'Rendimiento nominal y cobertura real frente a la devaluación'
+      : 'Rendimiento nativo en Dólares (USD) y retorno porcentual de tus activos internacionales';
   }
   if (btnTabAddLabel) {
     btnTabAddLabel.textContent = ecosystem === 'BVC' ? '+ Operar en Caracas' : '+ Operar en Wall Street';
@@ -2566,10 +2566,10 @@ function renderConsolidatedWealthBanner() {
   if (totalVesEl) totalVesEl.textContent = `(${formatVES(totalVes)})`;
 
   if (bvcValEl) bvcValEl.textContent = formatUSD(bvc.totals.usd_bcv.value);
-  if (bvcSubEl) bvcSubEl.textContent = `${formatVES(bvc.totals.ves.value)} â€¢ ${mb.bvc_pct}% de Cartera`;
+  if (bvcSubEl) bvcSubEl.textContent = `${formatVES(bvc.totals.ves.value)} • ${mb.bvc_pct}% de Cartera`;
 
   if (usValEl) usValEl.textContent = formatUSD(intl.totals.usd.value);
-  if (usSubEl) usSubEl.textContent = `${intl.count} TÃ­tulos â€¢ ${mb.intl_pct}% de Cartera`;
+  if (usSubEl) usSubEl.textContent = `${intl.count} Títulos • ${mb.intl_pct}% de Cartera`;
 
   if (ecoBvcCount) ecoBvcCount.textContent = bvc.count;
   if (ecoUsCount) ecoUsCount.textContent = intl.count;
@@ -2612,16 +2612,16 @@ function renderMarqueeTapeUS(quotes) {
 }
 
 const POPULAR_INTERNATIONAL_ASSETS = [
-  { ticker: 'AAPL', name: 'Apple Inc.', market: 'NASDAQ', sector: 'TecnologÃ­a', price_usd: 235.00 },
+  { ticker: 'AAPL', name: 'Apple Inc.', market: 'NASDAQ', sector: 'Tecnología', price_usd: 235.00 },
   { ticker: 'NVDA', name: 'NVIDIA Corporation', market: 'NASDAQ', sector: 'Semiconductores & IA', price_usd: 138.00 },
-  { ticker: 'TSLA', name: 'Tesla Inc.', market: 'NASDAQ', sector: 'Automotriz & EnergÃ­a', price_usd: 220.00 },
+  { ticker: 'TSLA', name: 'Tesla Inc.', market: 'NASDAQ', sector: 'Automotriz & Energía', price_usd: 220.00 },
   { ticker: 'MSFT', name: 'Microsoft Corporation', market: 'NASDAQ', sector: 'Software & Nube', price_usd: 425.00 },
   { ticker: 'AMZN', name: 'Amazon.com Inc.', market: 'NASDAQ', sector: 'Comercio & Cloud', price_usd: 188.00 },
   { ticker: 'GOOGL', name: 'Alphabet Inc. (Google)', market: 'NASDAQ', sector: 'Servicios Digitales', price_usd: 165.00 },
   { ticker: 'META', name: 'Meta Platforms Inc.', market: 'NASDAQ', sector: 'Redes Sociales & IA', price_usd: 580.00 },
-  { ticker: 'SPY', name: 'SPDR S&P 500 ETF Trust', market: 'NYSE', sector: 'Ãndice S&P 500', price_usd: 585.00 },
-  { ticker: 'QQQ', name: 'Invesco QQQ Trust (Nasdaq 100)', market: 'NASDAQ', sector: 'Ãndice Nasdaq 100', price_usd: 490.00 },
-  { ticker: 'BRK.B', name: 'Berkshire Hathaway Inc.', market: 'NYSE', sector: 'Finanzas & InversiÃ³n', price_usd: 460.00 },
+  { ticker: 'SPY', name: 'SPDR S&P 500 ETF Trust', market: 'NYSE', sector: 'Índice S&P 500', price_usd: 585.00 },
+  { ticker: 'QQQ', name: 'Invesco QQQ Trust (Nasdaq 100)', market: 'NASDAQ', sector: 'Índice Nasdaq 100', price_usd: 490.00 },
+  { ticker: 'BRK.B', name: 'Berkshire Hathaway Inc.', market: 'NYSE', sector: 'Finanzas & Inversión', price_usd: 460.00 },
   { ticker: 'V', name: 'Visa Inc.', market: 'NYSE', sector: 'Servicios Financieros', price_usd: 280.00 },
   { ticker: 'JNJ', name: 'Johnson & Johnson', market: 'NYSE', sector: 'Salud & Farmacia', price_usd: 162.00 },
   { ticker: 'WMT', name: 'Walmart Inc.', market: 'NYSE', sector: 'Consumo Masivo', price_usd: 80.00 },
@@ -2634,12 +2634,12 @@ function populateTickerDropdown() {
   if (!select) return;
 
   const currentVal = select.value;
-  select.innerHTML = '<option value="">Selecciona una acciÃ³n (BVC o Wall Street)...</option>';
+  select.innerHTML = '<option value="">Selecciona una acción (BVC o Wall Street)...</option>';
 
   // Optgroup 1: Bolsa de Caracas (BVC)
   if (marketQuotes && marketQuotes.length > 0) {
     const groupBVC = document.createElement('optgroup');
-    groupBVC.label = 'ðŸ‡»ðŸ‡ª Bolsa de Valores de Caracas (46 Acciones)';
+    groupBVC.label = '🇻🇪 Bolsa de Valores de Caracas (46 Acciones)';
     const sorted = [...marketQuotes].sort((a, b) => a.ticker.localeCompare(b.ticker));
     sorted.forEach(q => {
       const opt = document.createElement('option');
@@ -2655,7 +2655,7 @@ function populateTickerDropdown() {
 
   // Optgroup 2: Wall Street & ETFs
   const groupIntl = document.createElement('optgroup');
-  groupIntl.label = 'ðŸ‡ºðŸ‡¸ Wall Street & ETFs (NYSE / NASDAQ en USD)';
+  groupIntl.label = '🇺🇸 Wall Street & ETFs (NYSE / NASDAQ en USD)';
   POPULAR_INTERNATIONAL_ASSETS.forEach(item => {
     const opt = document.createElement('option');
     opt.value = item.ticker;
@@ -2728,7 +2728,7 @@ function renderHeroKPIs() {
     if (labelMarketLive) labelMarketLive.textContent = 'Wall Street Live';
     if (badgeMarketStatus) badgeMarketStatus.className = 'badge badge-pulse';
 
-    // 3. Card 2: Rendimiento en DÃ³lares (USD)
+    // 3. Card 2: Rendimiento en Dólares (USD)
     const triHeroGrid = document.getElementById('pnl-tri-hero-grid');
     const singleHeroContainer = document.getElementById('pnl-single-hero-container');
     const pnlHeroVal = document.getElementById('pnl-hero-val');
@@ -2762,7 +2762,7 @@ function renderHeroKPIs() {
     }
     if (pnlVerdictPill && pnlVerdictText) {
       pnlVerdictPill.className = isIntlPos ? 'pnl-verdict-pill badge-success' : 'pnl-verdict-pill badge-danger';
-      pnlVerdictText.textContent = `ðŸ‡ºðŸ‡¸ Rendimiento en DÃ³lares: ${sign}${intlPnlPct}% Retorno Real`;
+      pnlVerdictText.textContent = `🇺🇸 Rendimiento en Dólares: ${sign}${intlPnlPct}% Retorno Real`;
     }
     if (singleCostLbl) singleCostLbl.textContent = 'Capital Invertido en Wall Street:';
     if (singleCostVal) singleCostVal.textContent = formatUSD(intlCostUsd);
@@ -2822,22 +2822,22 @@ function renderHeroKPIs() {
   // Switch primary large display and descriptive sublabel based on selected currency
   if (currentCurrency === 'ves') {
     primaryValEl.textContent = formatVES(t.ves.value);
-    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total en BolÃ­vares (VES)';
+    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total en Bolívares (VES)';
     if (valStocksSub) valStocksSub.textContent = formatVES(stocksValVes);
     if (valCashSub) valCashSub.textContent = formatVES(portfolioData.cash_ves);
   } else if (currentCurrency === 'usd_bcv') {
     primaryValEl.textContent = formatUSD(t.usd_bcv.value);
-    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total al DÃ³lar Oficial BCV';
+    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total al Dólar Oficial BCV';
     if (valStocksSub) valStocksSub.textContent = formatUSD(stocksValUsdBcv);
     if (valCashSub) valCashSub.textContent = formatUSD(portfolioData.cash_usd || 0);
   } else if (currentCurrency === 'usdt') {
     primaryValEl.textContent = formatUSDT(t.usdt.value);
-    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total en DÃ³lar Real (USDT Binance P2P)';
+    if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total en Dólar Real (USDT Binance P2P)';
     if (valStocksSub) valStocksSub.textContent = formatUSDT(stocksValUsdt);
     const usdtCash = ((portfolioData.cash_ves || 0) / (rates.usdt || 1)) + (portfolioData.cash_usd || 0);
     if (valCashSub) valCashSub.textContent = formatUSDT(usdtCash);
   } else {
-    // Compare view: Total consolidated net worth in BolÃ­vares
+    // Compare view: Total consolidated net worth in Bolívares
     primaryValEl.textContent = formatVES(t.ves.value);
     if (totalValLabel) totalValLabel.textContent = 'Patrimonio Total Consolidado (Acciones + Efectivo)';
     if (valStocksSub) valStocksSub.textContent = formatVES(stocksValVes);
@@ -2890,10 +2890,10 @@ function renderHeroKPIs() {
   if (meterNetSpread) {
     if (parseFloat(netCoverage) >= 0) {
       meterNetSpread.className = 'text-green';
-      meterNetSpread.textContent = `+${netCoverage}% neto por encima del dÃ³lar`;
+      meterNetSpread.textContent = `+${netCoverage}% neto por encima del dólar`;
     } else {
       meterNetSpread.className = 'text-amber';
-      meterNetSpread.textContent = `${netCoverage}% neto frente al dÃ³lar`;
+      meterNetSpread.textContent = `${netCoverage}% neto frente al dólar`;
     }
   }
 
@@ -2907,7 +2907,7 @@ function renderHeroKPIs() {
 
   // Dynamic Card 2 State according to active currency
   if (currentCurrency === 'compare') {
-    // Comparativa Tri-Monetaria: Mostrar mÃ©trica principal calmada y permitir despliegue opcional
+    // Comparativa Tri-Monetaria: Mostrar métrica principal calmada y permitir despliegue opcional
     if (pnlHeroVal) {
       pnlHeroVal.className = `pnl-hero-val ${pnlColorClass}`;
       pnlHeroVal.textContent = `${pnlSign}${t.usdt.pnl_pct}% Real en USDT`;
@@ -2920,7 +2920,7 @@ function renderHeroKPIs() {
     if (singleStack) singleStack.style.display = 'none';
     if (meterBox) meterBox.style.display = 'block';
 
-    // 1. BolÃ­vares (VES)
+    // 1. Bolívares (VES)
     const isVesPos = t.ves.pnl >= 0;
     const vesSign = isVesPos ? '+' : '';
     const vesColor = isVesPos ? 'text-green' : 'text-red';
@@ -2933,7 +2933,7 @@ function renderHeroKPIs() {
       triHeroVesPct.textContent = `${vesSign}${t.ves.pnl_pct}% Nominal`;
     }
 
-    // 2. DÃ³lar Oficial (BCV)
+    // 2. Dólar Oficial (BCV)
     const isBcvPos = t.usd_bcv.pnl >= 0;
     const bcvSign = isBcvPos ? '+' : '';
     const bcvColor = isBcvPos ? 'text-green' : 'text-red';
@@ -2960,8 +2960,8 @@ function renderHeroKPIs() {
     if (triVerdictPill && triVerdictText) {
       triVerdictPill.className = isPositiveReal ? 'pnl-verdict-pill badge-success' : 'pnl-verdict-pill badge-danger';
       triVerdictText.textContent = isPositiveReal 
-        ? `Ganancia Real: +${t.usdt.pnl_pct}% USDT (Superas la devaluaciÃ³n)`
-        : `Riesgo Cambiario: ${t.usdt.pnl_pct}% USDT (La devaluaciÃ³n absorbe ganancia)`;
+        ? `Ganancia Real: +${t.usdt.pnl_pct}% USDT (Superas la devaluación)`
+        : `Riesgo Cambiario: ${t.usdt.pnl_pct}% USDT (La devaluación absorbe ganancia)`;
     }
 
     // Also populate legacy fields in case they are referenced
@@ -2970,7 +2970,7 @@ function renderHeroKPIs() {
     renderPnlLine('pnl-usdt-val', t.usdt.pnl, t.usdt.pnl_pct, 'USDT');
 
   } else if (currentCurrency === 'ves') {
-    // Modo BolÃ­vares (VES): Enfocar exclusivamente en el rendimiento nominal en Bs
+    // Modo Bolívares (VES): Enfocar exclusivamente en el rendimiento nominal en Bs
     if (triHeroGrid) triHeroGrid.style.display = 'none';
     if (singleHeroContainer) singleHeroContainer.style.display = 'flex';
     if (triVerdictRow) triVerdictRow.style.display = 'none';
@@ -2988,9 +2988,9 @@ function renderHeroKPIs() {
     }
     if (pnlVerdictPill && pnlVerdictText) {
       pnlVerdictPill.className = isVesPos ? 'pnl-verdict-pill badge-success' : 'pnl-verdict-pill badge-danger';
-      pnlVerdictText.textContent = `ðŸ‡»ðŸ‡ª Rendimiento en BolÃ­vares: ${vesSign}${t.ves.pnl_pct}% Nominal`;
+      pnlVerdictText.textContent = `🇻🇪 Rendimiento en Bolívares: ${vesSign}${t.ves.pnl_pct}% Nominal`;
     }
-    if (singleCostLbl) singleCostLbl.textContent = 'InversiÃ³n Base en TÃ­tulos:';
+    if (singleCostLbl) singleCostLbl.textContent = 'Inversión Base en Títulos:';
     if (singleCostVal) singleCostVal.textContent = formatVES(stocksValVes - t.ves.pnl);
     if (singleMarketLbl) singleMarketLbl.textContent = 'Valor Actual en la BVC:';
     if (singleMarketVal) singleMarketVal.textContent = formatVES(stocksValVes);
@@ -3000,7 +3000,7 @@ function renderHeroKPIs() {
       singleNetVal.textContent = `${vesSign}${formatVES(t.ves.pnl)} (${vesSign}${t.ves.pnl_pct}%)`;
     }
   } else if (currentCurrency === 'usd_bcv') {
-    // Modo USD (Tasa BCV): Enfocar en el rendimiento oficial en dÃ³lares
+    // Modo USD (Tasa BCV): Enfocar en el rendimiento oficial en dólares
     if (triHeroGrid) triHeroGrid.style.display = 'none';
     if (singleHeroContainer) singleHeroContainer.style.display = 'flex';
     if (triVerdictRow) triVerdictRow.style.display = 'none';
@@ -3018,13 +3018,13 @@ function renderHeroKPIs() {
     }
     if (pnlVerdictPill && pnlVerdictText) {
       pnlVerdictPill.className = isBcvPos ? 'pnl-verdict-pill badge-success' : 'pnl-verdict-pill badge-danger';
-      pnlVerdictText.textContent = `ðŸ›ï¸ Rendimiento Oficial USD: ${bcvSign}${t.usd_bcv.pnl_pct}% BCV`;
+      pnlVerdictText.textContent = `🏛️ Rendimiento Oficial USD: ${bcvSign}${t.usd_bcv.pnl_pct}% BCV`;
     }
     if (singleCostLbl) singleCostLbl.textContent = 'Costo de Compra (Tasa BCV):';
     if (singleCostVal) singleCostVal.textContent = formatUSD(stocksValUsdBcv - t.usd_bcv.pnl);
     if (singleMarketLbl) singleMarketLbl.textContent = 'Valor Oficial de Cartera:';
     if (singleMarketVal) singleMarketVal.textContent = formatUSD(stocksValUsdBcv);
-    if (singleNetLbl) singleNetLbl.textContent = 'Retorno Oficial en DÃ³lares:';
+    if (singleNetLbl) singleNetLbl.textContent = 'Retorno Oficial en Dólares:';
     if (singleNetVal) {
       singleNetVal.className = `single-val ${bcvColor}`;
       singleNetVal.textContent = `${bcvSign}${formatUSD(t.usd_bcv.pnl)} (${bcvSign}${t.usd_bcv.pnl_pct}%)`;
@@ -3044,9 +3044,9 @@ function renderHeroKPIs() {
     }
     if (pnlVerdictPill && pnlVerdictText) {
       pnlVerdictPill.className = isPositiveReal ? 'pnl-verdict-pill badge-success' : 'pnl-verdict-pill badge-danger';
-      pnlVerdictText.textContent = `ðŸ’Ž Rendimiento Real: ${pnlSign}${t.usdt.pnl_pct}% USDT P2P`;
+      pnlVerdictText.textContent = `💎 Rendimiento Real: ${pnlSign}${t.usdt.pnl_pct}% USDT P2P`;
     }
-    if (singleCostLbl) singleCostLbl.textContent = 'InversiÃ³n Real P2P:';
+    if (singleCostLbl) singleCostLbl.textContent = 'Inversión Real P2P:';
     if (singleCostVal) singleCostVal.textContent = formatUSDT(stocksValUsdt - t.usdt.pnl);
     if (singleMarketLbl) singleMarketLbl.textContent = 'Valor Real en USDT:';
     if (singleMarketVal) singleMarketVal.textContent = formatUSDT(stocksValUsdt);
@@ -3063,14 +3063,14 @@ function renderHeroKPIs() {
   if (badgePnl) {
     if (currentCurrency === 'ves') {
       const isPos = t.ves.pnl >= 0;
-      badgePnl.textContent = isPos ? 'Ganancia Nominal' : 'PÃ©rdida Nominal';
+      badgePnl.textContent = isPos ? 'Ganancia Nominal' : 'Pérdida Nominal';
       badgePnl.className = isPos ? 'badge badge-success' : 'badge badge-danger';
     } else if (currentCurrency === 'usd_bcv') {
       const isPos = t.usd_bcv.pnl >= 0;
       badgePnl.textContent = isPos ? 'Retorno Oficial BCV' : 'Retorno Negativo';
       badgePnl.className = isPos ? 'badge badge-success' : 'badge badge-danger';
     } else {
-      badgePnl.textContent = isPositiveReal ? 'Ganancia Real' : 'PÃ©rdida en USDT';
+      badgePnl.textContent = isPositiveReal ? 'Ganancia Real' : 'Pérdida en USDT';
       badgePnl.className = isPositiveReal ? 'badge badge-success' : 'badge badge-danger';
     }
   }
@@ -3100,11 +3100,11 @@ function renderHeroKPIs() {
   if (liquidityHint) {
     const liqPct = parseFloat(portfolioData.cash_weight_pct) || 0;
     if (liqPct < 3.0) {
-      liquidityHint.textContent = 'âš ï¸ Liquidez baja (conviene tener 5-10% en efectivo)';
+      liquidityHint.textContent = '⚠️ Liquidez baja (conviene tener 5-10% en efectivo)';
     } else if (liqPct <= 15.0) {
-      liquidityHint.textContent = 'âœ… Nivel Ã³ptimo de liquidez operativa';
+      liquidityHint.textContent = '✅ Nivel óptimo de liquidez operativa';
     } else {
-      liquidityHint.textContent = 'ðŸ’¡ Alta liquidez (capital disponible para nuevas acciones)';
+      liquidityHint.textContent = '💡 Alta liquidez (capital disponible para nuevas acciones)';
     }
   }
 
@@ -3214,7 +3214,7 @@ function renderPositionsTable() {
             <div class="tactical-subtext">${sig.action_text || sig.recommendation || ''}</div>
           </td>
           <td class="text-center">
-            <button class="btn-delete-pos" onclick="deletePosition(${pos.id})" title="Eliminar posiciÃ³n">
+            <button class="btn-delete-pos" onclick="deletePosition(${pos.id})" title="Eliminar posición">
               <i data-lucide="trash-2"></i>
             </button>
           </td>
@@ -3263,7 +3263,7 @@ function renderPositionsTable() {
             <div class="tactical-subtext">${sig.action_text || sig.recommendation || ''}</div>
           </td>
           <td class="text-center">
-            <button class="btn-delete-pos" onclick="deletePosition(${pos.id})" title="Vender / Cerrar posiciÃ³n">
+            <button class="btn-delete-pos" onclick="deletePosition(${pos.id})" title="Vender / Cerrar posición">
               <i data-lucide="trash-2"></i>
             </button>
           </td>
@@ -3404,7 +3404,7 @@ function renderPerformersAndSpread() {
   if (rates && alertBrechaPct && alertBrechaText) {
     alertBrechaPct.textContent = `+${rates.brecha_pct}%`;
     if (rates.brecha_pct > 10) {
-      alertBrechaText.textContent = `La brecha entre el dÃ³lar BCV (${formatNumber(rates.bcv, 2)} Bs) y USDT (${formatNumber(rates.usdt, 2)} Bs) es de +${rates.brecha_pct}%. Tus tÃ­tulos deben rendir mÃ¡s de ${rates.brecha_pct}% para superar la devaluaciÃ³n real.`;
+      alertBrechaText.textContent = `La brecha entre el dólar BCV (${formatNumber(rates.bcv, 2)} Bs) y USDT (${formatNumber(rates.usdt, 2)} Bs) es de +${rates.brecha_pct}%. Tus títulos deben rendir más de ${rates.brecha_pct}% para superar la devaluación real.`;
     } else {
       alertBrechaText.textContent = `La brecha cambiaria se encuentra en niveles normales (${rates.brecha_pct}%).`;
     }
@@ -3423,7 +3423,7 @@ function renderMarketTable(query = '') {
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-dim">No se encontraron tÃ­tulos que coincidan con la bÃºsqueda.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-dim">No se encontraron títulos que coincidan con la búsqueda.</td></tr>`;
     return;
   }
 
@@ -3475,7 +3475,7 @@ function renderMarketUsTable(query = '') {
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-dim">No se encontraron activos de Wall Street para esa bÃºsqueda.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-dim">No se encontraron activos de Wall Street para esa búsqueda.</td></tr>`;
     return;
   }
 
@@ -3559,12 +3559,12 @@ window.quickAddTicker = function(ticker, currentPrice) {
 // Global delete position handler
 window.deletePosition = async function(posId) {
   playSound('alert');
-  if (!confirm('Â¿EstÃ¡s seguro de eliminar esta posiciÃ³n de tu portafolio?')) return;
+  if (!confirm('¿Estás seguro de eliminar esta posición de tu portafolio?')) return;
   try {
     const res = await fetchWithAuth(`/api/positions/${posId}`, { method: 'DELETE' });
     if (res.ok) {
       showToast({
-        title: 'PosiciÃ³n Eliminada',
+        title: 'Posición Eliminada',
         message: 'El activo fue removido del portafolio.',
         type: 'warning',
         duration: 3000
@@ -3621,7 +3621,7 @@ async function loadAIDiagnosis(forceRefresh = false) {
 
     if (forceRefresh) {
       showToast({
-        title: 'ðŸ¤– DiagnÃ³stico IA Actualizado',
+        title: '🤖 Diagnóstico IA Actualizado',
         message: `Salud de portafolio evaluada en ${diag.health_score}/100 puntos.`,
         type: 'ai',
         duration: 3500
@@ -3700,7 +3700,7 @@ function renderTacticalRecommendationsTable(diag, filter = 'all') {
   if (!tbody) return;
 
   if (!diag || !diag.asset_recommendations || diag.asset_recommendations.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-dim">No hay posiciones registradas para evaluar seÃ±ales tÃ¡cticas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-dim">No hay posiciones registradas para evaluar señales tácticas.</td></tr>`;
     return;
   }
 
@@ -3714,7 +3714,7 @@ function renderTacticalRecommendationsTable(diag, filter = 'all') {
   }
 
   if (items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-dim">No hay activos con la seÃ±al "${filter}" en este momento.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-dim">No hay activos con la señal "${filter}" en este momento.</td></tr>`;
     return;
   }
 
@@ -3800,19 +3800,19 @@ function updateAiDemoCounterBadge() {
         if (badgeText) badgeText.textContent = remaining === 2 ? '2 consultas demo disponibles' : '1 consulta demo disponible';
       } else {
         badge.classList.add('limit-exhausted');
-        if (badgeText) badgeText.textContent = 'Consultas demo agotadas (RegÃ­strate)';
+        if (badgeText) badgeText.textContent = 'Consultas demo agotadas (Regístrate)';
       }
     }
 
     if (welcomeMsg) {
-      welcomeMsg.innerHTML = `Â¡Hola! Soy tu <strong>Analista Financiero KixInvert AI</strong>. En este Modo Demo cuentas con <strong>2 consultas de prÃ¡ctica gratuitas</strong> para comprobar mi anÃ¡lisis en tiempo real de la Bolsa de Caracas y cobertura cambiaria. Â¡Hazme una pregunta o pulsa una sugerencia arriba!`;
+      welcomeMsg.innerHTML = `¡Hola! Soy tu <strong>Analista Financiero KixInvert AI</strong>. En este Modo Demo cuentas con <strong>2 consultas de práctica gratuitas</strong> para comprobar mi análisis en tiempo real de la Bolsa de Caracas y cobertura cambiaria. ¡Hazme una pregunta o pulsa una sugerencia arriba!`;
     }
 
     if (remaining === 0) {
       if (formAiChat) formAiChat.classList.add('input-locked');
       if (chatInput) {
         chatInput.disabled = true;
-        chatInput.placeholder = 'Consultas demo agotadas. RegÃ­strate gratis para continuar.';
+        chatInput.placeholder = 'Consultas demo agotadas. Regístrate gratis para continuar.';
       }
       if (btnSend) btnSend.disabled = true;
     } else {
@@ -3820,8 +3820,8 @@ function updateAiDemoCounterBadge() {
       if (chatInput) {
         chatInput.disabled = false;
         chatInput.placeholder = remaining === 2 
-          ? 'PregÃºntale a KixInvert AI (Modo Demo - 2 consultas)...' 
-          : 'Ãšltima consulta de prÃ¡ctica disponible...';
+          ? 'Pregúntale a KixInvert AI (Modo Demo - 2 consultas)...' 
+          : 'Última consulta de práctica disponible...';
       }
       if (btnSend) btnSend.disabled = false;
     }
@@ -3839,21 +3839,21 @@ function updateAiDemoCounterBadge() {
     if (badge) {
       badge.style.display = 'inline-flex';
       badge.classList.remove('limit-exhausted');
-      if (badgeText) badgeText.innerHTML = `ðŸ‘‘ <strong>Plan PRO</strong> â€¢ Consultas Ilimitadas`;
+      if (badgeText) badgeText.innerHTML = `👑 <strong>Plan PRO</strong> • Consultas Ilimitadas`;
     }
     if (btnPillUpgrade) btnPillUpgrade.style.display = 'none';
 
     if (formAiChat) formAiChat.classList.remove('input-locked');
     if (chatInput) {
       chatInput.disabled = false;
-      chatInput.placeholder = 'PregÃºntale a KixInvert AI (Modo PRO ilimitado)...';
+      chatInput.placeholder = 'Pregúntale a KixInvert AI (Modo PRO ilimitado)...';
     }
     if (btnSend) btnSend.disabled = false;
 
     if (welcomeMsg) {
       const posCount = (portfolioData && portfolioData.positions) ? portfolioData.positions.length : 0;
-      const posText = posCount > 0 ? `tu portafolio de ${posCount} tÃ­tulos` : 'tus inversiones';
-      welcomeMsg.innerHTML = `Â¡Hola, <strong>${escapeHtml(userName || 'Inversionista')}</strong>! Cuentas con membresÃ­a <strong>KixInvert PRO ðŸ‘‘</strong> con consultas ilimitadas. Conozco a detalle ${posText} en la Bolsa de Caracas y las tasas en vivo. Â¿En quÃ© puedo orientarte hoy?`;
+      const posText = posCount > 0 ? `tu portafolio de ${posCount} títulos` : 'tus inversiones';
+      welcomeMsg.innerHTML = `¡Hola, <strong>${escapeHtml(userName || 'Inversionista')}</strong>! Cuentas con membresía <strong>KixInvert PRO 👑</strong> con consultas ilimitadas. Conozco a detalle ${posText} en la Bolsa de Caracas y las tasas en vivo. ¿En qué puedo orientarte hoy?`;
     }
 
   } else {
@@ -3865,15 +3865,15 @@ function updateAiDemoCounterBadge() {
         if (badgeText) badgeText.textContent = `Consultas este mes: ${used} / ${limit} (Plan Free)`;
       } else {
         badge.classList.add('limit-exhausted');
-        if (badgeText) badgeText.textContent = `LÃ­mite mensual alcanzado (10/10)`;
+        if (badgeText) badgeText.textContent = `Límite mensual alcanzado (10/10)`;
       }
     }
     if (btnPillUpgrade) btnPillUpgrade.style.display = 'inline-flex';
 
     if (welcomeMsg) {
       const posCount = (portfolioData && portfolioData.positions) ? portfolioData.positions.length : 0;
-      const posText = posCount > 0 ? `tu portafolio de ${posCount} tÃ­tulos` : 'tus inversiones';
-      welcomeMsg.innerHTML = `Â¡Hola, <strong>${escapeHtml(userName || 'Inversionista')}</strong>! En el Plan Free dispones de <strong>10 consultas mensuales</strong> (${remaining} disponibles este mes). Conozco ${posText} y las cotizaciones en tiempo real.`;
+      const posText = posCount > 0 ? `tu portafolio de ${posCount} títulos` : 'tus inversiones';
+      welcomeMsg.innerHTML = `¡Hola, <strong>${escapeHtml(userName || 'Inversionista')}</strong>! En el Plan Free dispones de <strong>10 consultas mensuales</strong> (${remaining} disponibles este mes). Conozco ${posText} y las cotizaciones en tiempo real.`;
     }
 
     if (remaining === 0) {
@@ -3887,7 +3887,7 @@ function updateAiDemoCounterBadge() {
       if (formAiChat) formAiChat.classList.remove('input-locked');
       if (chatInput) {
         chatInput.disabled = false;
-        chatInput.placeholder = `PregÃºntale a KixInvert AI (${remaining} consultas restantes este mes)...`;
+        chatInput.placeholder = `Pregúntale a KixInvert AI (${remaining} consultas restantes este mes)...`;
       }
       if (btnSend) btnSend.disabled = false;
     }
@@ -3919,9 +3919,9 @@ async function submitAIChat(question) {
     limitMsgDiv.innerHTML = `
       <div class="msg-avatar"><i data-lucide="shield-alert"></i></div>
       <div class="msg-body">
-        ðŸ”’ <strong>Has alcanzado el lÃ­mite de 2 consultas de prÃ¡ctica gratuitas en el Modo Demo.</strong>
+        🔒 <strong>Has alcanzado el límite de 2 consultas de práctica gratuitas en el Modo Demo.</strong>
         <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-          Para continuar disfrutando de <strong>consultas ilimitadas</strong> con tu portafolio personalizado en la Bolsa de Caracas, anÃ¡lisis en tiempo real y alertas de brecha cambiaria, <strong>crea tu cuenta gratuita de inversionista</strong>.
+          Para continuar disfrutando de <strong>consultas ilimitadas</strong> con tu portafolio personalizado en la Bolsa de Caracas, análisis en tiempo real y alertas de brecha cambiaria, <strong>crea tu cuenta gratuita de inversionista</strong>.
         </p>
         <div class="ai-register-cta-card">
           <div class="cta-title"><i data-lucide="sparkles" style="color:#c4b5fd;"></i> Desbloquea KixInvert AI Ilimitado</div>
@@ -3939,7 +3939,7 @@ async function submitAIChat(question) {
 
     showToast({
       title: 'Consultas Demo Agotadas',
-      message: 'RegÃ­strate gratis para disfrutar de consultas con la IA.',
+      message: 'Regístrate gratis para disfrutar de consultas con la IA.',
       type: 'warning',
       duration: 4000
     });
@@ -3963,13 +3963,13 @@ async function submitAIChat(question) {
     limitMsgDiv.innerHTML = `
       <div class="msg-avatar"><i data-lucide="crown" style="color: #f59e0b;"></i></div>
       <div class="msg-body">
-        ðŸ”’ <strong>Has alcanzado tu lÃ­mite mensual de 10 consultas en el Plan Free.</strong>
+        🔒 <strong>Has alcanzado tu límite mensual de 10 consultas en el Plan Free.</strong>
         <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-          Desbloquea <strong>consultas y diagnÃ³sticos ilimitados</strong>, seÃ±ales tÃ¡cticas de compra/venta y alertas de brecha cambiaria por solo <strong>$5.00 USDT/mes</strong> con Binance Pay.
+          Desbloquea <strong>consultas y diagnósticos ilimitados</strong>, señales tácticas de compra/venta y alertas de brecha cambiaria por solo <strong>$5.00 USDT/mes</strong> con Binance Pay.
         </p>
         <div class="ai-register-cta-card" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08);">
           <div class="cta-title" style="color: #fbbf24;"><i data-lucide="crown"></i> KixInvert PRO con Binance Pay</div>
-          <div class="cta-desc">ActivaciÃ³n inmediata en 2 minutos escaneando el cÃ³digo QR oficial de Binance Pay. Cancela cuando quieras.</div>
+          <div class="cta-desc">Activación inmediata en 2 minutos escaneando el código QR oficial de Binance Pay. Cancela cuando quieras.</div>
           <button class="btn-cta-register" onclick="openProModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #0b0f19; font-weight: 800;">
             <i data-lucide="crown"></i> Activar Plan PRO ($5 USDT)
           </button>
@@ -3982,8 +3982,8 @@ async function submitAIChat(question) {
     playSound('alert');
 
     showToast({
-      title: 'LÃ­mite Mensual Alcanzado',
-      message: 'PÃ¡sate a KixInvert PRO para disfrutar de consultas ilimitadas.',
+      title: 'Límite Mensual Alcanzado',
+      message: 'Pásate a KixInvert PRO para disfrutar de consultas ilimitadas.',
       type: 'warning',
       duration: 4500
     });
@@ -4004,7 +4004,7 @@ async function submitAIChat(question) {
   loadingDiv.className = 'chat-msg ai-msg loading-msg';
   loadingDiv.innerHTML = `
     <div class="msg-avatar"><i data-lucide="bot"></i></div>
-    <div class="msg-body"><em class="text-dim"><i data-lucide="loader-2" class="spin-anim" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> KixInvert AI estÃ¡ analizando tus posiciones y la pizarra BVC...</em></div>
+    <div class="msg-body"><em class="text-dim"><i data-lucide="loader-2" class="spin-anim" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> KixInvert AI está analizando tus posiciones y la pizarra BVC...</em></div>
   `;
   history.appendChild(loadingDiv);
   history.scrollTop = history.scrollHeight;
@@ -4036,7 +4036,7 @@ async function submitAIChat(question) {
       contentHtml += `
         <div class="ai-register-cta-card">
           <div class="cta-title"><i data-lucide="sparkles" style="color:#c4b5fd;"></i> Has completado tus 2 consultas demo</div>
-          <div class="cta-desc">Â¿Te gustÃ³ el anÃ¡lisis? Crea tu cuenta gratuita para conectar tus acciones reales, guardar tu historial y recibir asesorÃ­a bursÃ¡til continua sin lÃ­mites.</div>
+          <div class="cta-desc">¿Te gustó el análisis? Crea tu cuenta gratuita para conectar tus acciones reales, guardar tu historial y recibir asesoría bursátil continua sin límites.</div>
           <button class="btn-cta-register" onclick="openAuthModal('register')">
             <i data-lucide="user-plus"></i> Registrarme Gratis en KixInvert
           </button>
@@ -4051,8 +4051,8 @@ async function submitAIChat(question) {
 
       contentHtml += `
         <div class="ai-register-cta-card" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.08); margin-top: 14px;">
-          <div class="cta-title" style="color: #fbbf24;"><i data-lucide="crown"></i> LÃ­mite Mensual de 10 Consultas Alcanzado</div>
-          <div class="cta-desc">Desbloquea consultas ilimitadas con tu Analista AI, seÃ±ales tÃ¡cticas de compra/venta y alertas de brecha cambiaria por solo <strong>$5.00 USDT/mes</strong> con Binance Pay.</div>
+          <div class="cta-title" style="color: #fbbf24;"><i data-lucide="crown"></i> Límite Mensual de 10 Consultas Alcanzado</div>
+          <div class="cta-desc">Desbloquea consultas ilimitadas con tu Analista AI, señales tácticas de compra/venta y alertas de brecha cambiaria por solo <strong>$5.00 USDT/mes</strong> con Binance Pay.</div>
           <button class="btn-cta-register" onclick="openProModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #0b0f19; font-weight: 800;">
             <i data-lucide="crown"></i> Activar KixInvert PRO ($5 USDT)
           </button>
@@ -4083,7 +4083,7 @@ async function submitAIChat(question) {
     errorDiv.className = 'chat-msg ai-msg';
     errorDiv.innerHTML = `
       <div class="msg-avatar"><i data-lucide="alert-circle"></i></div>
-      <div class="msg-body text-red">OcurriÃ³ un error al contactar el servicio de IA: ${err.message}</div>
+      <div class="msg-body text-red">Ocurrió un error al contactar el servicio de IA: ${err.message}</div>
     `;
     history.appendChild(errorDiv);
   } finally {
@@ -4247,7 +4247,7 @@ async function runWhatIfSimulation() {
   if (usdtCalc) usdtCalc.textContent = `USDT: ~${formatNumber(usdtTarget, 2)} Bs.`;
   if (usDisplay) usDisplay.textContent = `${usShockPct > 0 ? '+' : ''}${usShockPct.toFixed(1)}%`;
   if (elastDisplay) {
-    elastDisplay.textContent = elastRate >= 0.95 ? 'Pleno (100%)' : (elastRate >= 0.7 ? 'TÃ­pico (85%)' : 'Rezago (50%)');
+    elastDisplay.textContent = elastRate >= 0.95 ? 'Pleno (100%)' : (elastRate >= 0.7 ? 'Típico (85%)' : 'Rezago (50%)');
   }
 
   // Clear debounce
@@ -4284,7 +4284,7 @@ function renderWhatIfResults(data) {
 
   if (verdictBanner && data.verdict) {
     verdictBanner.className = `whatif-verdict-banner badge-${data.verdict.badge || 'success'}`;
-    if (verdictTitle) verdictTitle.textContent = data.verdict.title || 'ProyecciÃ³n de Cobertura';
+    if (verdictTitle) verdictTitle.textContent = data.verdict.title || 'Proyección de Cobertura';
     if (verdictSummary) verdictSummary.textContent = data.verdict.summary || '';
     if (verdictIcon) {
       const iconName = data.verdict.badge === 'critical' ? 'alert-triangle' : (data.verdict.badge === 'warning' ? 'clock' : 'shield-check');
@@ -4417,8 +4417,8 @@ function renderExecutiveReport(data) {
   const allocUs = document.getElementById('rep-alloc-us');
   const cashAvail = document.getElementById('rep-cash-available');
 
-  if (allocBvc) allocBvc.textContent = `${bd.bvc_pct || 0}% (${bd.bvc_count || 0} tÃ­tulos)`;
-  if (allocUs) allocUs.textContent = `${bd.intl_pct || 0}% (${bd.intl_count || 0} tÃ­tulos)`;
+  if (allocBvc) allocBvc.textContent = `${bd.bvc_pct || 0}% (${bd.bvc_count || 0} títulos)`;
+  if (allocUs) allocUs.textContent = `${bd.intl_pct || 0}% (${bd.intl_count || 0} títulos)`;
   if (cashAvail) cashAvail.textContent = `${formatVES(s.cash_ves || 0)} / ${formatUSD(s.cash_usd || 0)}`;
 
   // Positions Table
@@ -4457,8 +4457,8 @@ function renderExecutiveReport(data) {
     aiVerdictEl.innerHTML = `
       Tu portafolio cuenta con un valor total de <strong>${formatNumber(t.usdt ? t.usdt.value : 0, 2)} USDT</strong> 
       distribuido en <strong>${bd.bvc_pct || 0}% en la Bolsa de Caracas</strong> y <strong>${bd.intl_pct || 0}% en Wall Street</strong>.
-      Actualmente el motor detecta <strong>${sellCount} recomendaciÃ³n(es) de toma de ganancias</strong> y 
-      <strong>${rotateCount} alerta(s) de rotaciÃ³n por rezago</strong>. Tu cobertura general contra la devaluaciÃ³n se mantiene en estado Ã³ptimo.
+      Actualmente el motor detecta <strong>${sellCount} recomendación(es) de toma de ganancias</strong> y 
+      <strong>${rotateCount} alerta(s) de rotación por rezago</strong>. Tu cobertura general contra la devaluación se mantiene en estado óptimo.
     `;
   }
 
@@ -4514,7 +4514,7 @@ function setupTelegramModal() {
       const input = document.getElementById('tg-chat-id-input');
       const val = input ? input.value.trim() : '';
       if (!val) {
-        showToast('Por favor ingresa un Chat ID vÃ¡lido de Telegram.', 'error');
+        showToast('Por favor ingresa un Chat ID válido de Telegram.', 'error');
         return;
       }
       btnSaveChatId.disabled = true;
@@ -4527,14 +4527,14 @@ function setupTelegramModal() {
         });
         const data = await res.json();
         if (res.ok) {
-          showToast('âœ… Â¡Cuenta vinculada exitosamente con Telegram!', 'success');
+          showToast('✅ ¡Cuenta vinculada exitosamente con Telegram!', 'success');
           playSound('success');
           await fetchTelegramStatus();
         } else {
           showToast(data.detail || 'Error al vincular con Telegram.', 'error');
         }
       } catch (err) {
-        showToast('Error de conexiÃ³n con el servidor.', 'error');
+        showToast('Error de conexión con el servidor.', 'error');
       } finally {
         btnSaveChatId.disabled = false;
         btnSaveChatId.innerHTML = '<i data-lucide="link"></i> Vincular';
@@ -4552,8 +4552,8 @@ function setupTelegramModal() {
       if (!code || code === 'Cargando...') return;
       const cmdToCopy = `/start ${code}`;
       navigator.clipboard.writeText(cmdToCopy).then(() => {
-        showToast(`ðŸ“‹ Comando copiado: ${cmdToCopy}`, 'info');
-        btnCopyCode.innerHTML = '<i data-lucide="check"></i> Â¡Copiado!';
+        showToast(`📋 Comando copiado: ${cmdToCopy}`, 'info');
+        btnCopyCode.innerHTML = '<i data-lucide="check"></i> ¡Copiado!';
         setTimeout(() => {
           btnCopyCode.innerHTML = '<i data-lucide="copy"></i> Copiar';
           if (window.lucide) lucide.createIcons();
@@ -4576,7 +4576,7 @@ function setupTelegramModal() {
           body: JSON.stringify({ enabled: enabled })
         });
         if (res.ok) {
-          showToast(enabled ? 'ðŸ”” Alertas de Telegram activadas.' : 'â¸ï¸ Alertas de Telegram pausadas.', 'info');
+          showToast(enabled ? '🔔 Alertas de Telegram activadas.' : '⏸️ Alertas de Telegram pausadas.', 'info');
           telegramCurrentStatus.alerts_enabled = enabled;
         }
       } catch (e) {
@@ -4600,19 +4600,19 @@ function setupTelegramModal() {
         const data = await res.json();
         if (res.ok) {
           if (data.result && data.result.mocked) {
-            showToast('âš ï¸ Prueba simulada: ID 6119366121 registrado. Se requiere TELEGRAM_BOT_TOKEN en .env para entrega fÃ­sica en tu app mÃ³vil.', 'warning');
+            showToast('⚠️ Prueba simulada: ID 6119366121 registrado. Se requiere TELEGRAM_BOT_TOKEN en .env para entrega física en tu app móvil.', 'warning');
           } else {
-            showToast('ðŸš€ Â¡Alerta de prueba enviada a tu Telegram!', 'success');
+            showToast('🚀 ¡Alerta de prueba enviada a tu Telegram!', 'success');
           }
           playSound('success');
         } else {
           showToast(data.detail || 'Error al enviar alerta de prueba.', 'error');
         }
       } catch (e) {
-        showToast('Error de comunicaciÃ³n con el servidor.', 'error');
+        showToast('Error de comunicación con el servidor.', 'error');
       } finally {
         btnSendTest.disabled = false;
-        btnSendTest.innerHTML = '<i data-lucide="send"></i> Enviar Alerta de Prueba al MÃ³vil';
+        btnSendTest.innerHTML = '<i data-lucide="send"></i> Enviar Alerta de Prueba al Móvil';
         if (window.lucide) lucide.createIcons();
       }
     });
@@ -4684,13 +4684,13 @@ function renderTelegramUI(status) {
   if (status.linked) {
     if (card) card.classList.add('connected');
     if (dot) dot.classList.add('connected');
-    if (title) title.textContent = `ðŸŸ¢ Conectado a Telegram (ID: ${status.chat_id})`;
+    if (title) title.textContent = `🟢 Conectado a Telegram (ID: ${status.chat_id})`;
     if (sub) {
-      const userTag = status.telegram_username ? ` Â· @${status.telegram_username}` : '';
+      const userTag = status.telegram_username ? ` · @${status.telegram_username}` : '';
       if (!status.bot_configured) {
-        sub.innerHTML = `Alertas mÃ³viles activas (ID: <b>${status.raw_chat_id || '6119366121'}</b>)${userTag}<br><span style="color: #fbbf24; font-size: 0.74rem;">âš ï¸ Servidor en modo simulaciÃ³n: Agrega TELEGRAM_BOT_TOKEN en .env para despachos a la app real.</span>`;
+        sub.innerHTML = `Alertas móviles activas (ID: <b>${status.raw_chat_id || '6119366121'}</b>)${userTag}<br><span style="color: #fbbf24; font-size: 0.74rem;">⚠️ Servidor en modo simulación: Agrega TELEGRAM_BOT_TOKEN en .env para despachos a la app real.</span>`;
       } else {
-        sub.textContent = `Alertas mÃ³viles en tiempo real activas${userTag}`;
+        sub.textContent = `Alertas móviles en tiempo real activas${userTag}`;
       }
     }
     if (actions) {
@@ -4706,8 +4706,8 @@ function renderTelegramUI(status) {
   } else {
     if (card) card.classList.remove('connected');
     if (dot) dot.classList.remove('connected');
-    if (title) title.textContent = 'âšª Desconectado de Telegram';
-    if (sub) sub.textContent = 'Vincula tu cuenta para recibir alertas de brecha y seÃ±ales en tu telÃ©fono.';
+    if (title) title.textContent = '⚪ Desconectado de Telegram';
+    if (sub) sub.textContent = 'Vincula tu cuenta para recibir alertas de brecha y señales en tu teléfono.';
     if (actions) actions.innerHTML = '';
     if (chatInput && !chatInput.value) {
       chatInput.value = '6119366121';
@@ -4743,11 +4743,11 @@ async function generateTelegramCode() {
 }
 
 async function unlinkTelegramAccount() {
-  if (!confirm('Â¿Deseas desvincular tu cuenta de Telegram? DejarÃ¡s de recibir alertas en tu telÃ©fono.')) return;
+  if (!confirm('¿Deseas desvincular tu cuenta de Telegram? Dejarás de recibir alertas en tu teléfono.')) return;
   try {
     const res = await fetch('/api/telegram/unlink', { method: 'POST' });
     if (res.ok) {
-      showToast('â„¹ï¸ Cuenta de Telegram desvinculada.', 'info');
+      showToast('ℹ️ Cuenta de Telegram desvinculada.', 'info');
       playSound('click');
       await fetchTelegramStatus();
     }
@@ -4830,7 +4830,7 @@ function handleLandingContactSubmit(event) {
       submitBtn.innerHTML = '<i data-lucide="send"></i> Enviar Mensaje a la Mesa de Asistencia';
     }
 
-    showToast(`âœ… Â¡Gracias ${name}! Tu consulta ha sido enviada a la Mesa de Asistencia. Responderemos a ${email} a la brevedad.`, 'success');
+    showToast(`✅ ¡Gracias ${name}! Tu consulta ha sido enviada a la Mesa de Asistencia. Responderemos a ${email} a la brevedad.`, 'success');
     playSound('success');
 
     // Reset form
@@ -4894,7 +4894,7 @@ function updateQuickWhatIf(val) {
 
   const deltaEl = document.getElementById('quick-whatif-delta');
   if (deltaEl) {
-    deltaEl.textContent = `DesviaciÃ³n: ${deviationPct.toFixed(1)}% (Blindado)`;
+    deltaEl.textContent = `Desviación: ${deviationPct.toFixed(1)}% (Blindado)`;
   }
 
   const vesEl = document.getElementById('quick-whatif-ves');
@@ -4907,8 +4907,8 @@ function triggerTelegramTestPing() {
   playSound('alert');
   if (typeof showToast === 'function') {
     showToast({
-      title: 'ðŸ“± NotificaciÃ³n MÃ³vil Enviada',
-      message: 'Se ha despachado una alerta instantÃ¡nea a tu bot @KixInvert_bot (Latencia: 84ms)',
+      title: '📱 Notificación Móvil Enviada',
+      message: 'Se ha despachado una alerta instantánea a tu bot @KixInvert_bot (Latencia: 84ms)',
       type: 'success',
       duration: 5000
     });
