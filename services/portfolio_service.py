@@ -229,17 +229,9 @@ def get_portfolio_summary(db: Session, bcv_rate: float, usdt_rate: float, portfo
         portfolio = db.query(Portfolio).filter(Portfolio.id == portfolio_id).first()
 
     if not portfolio:
-        portfolio = db.query(Portfolio).first()
-        if not portfolio:
-            # Create default portfolio if none exists
-            portfolio = Portfolio(
-                name="Portafolio Principal BVC",
-                cash_ves=5000.0,
-                cash_usd=10.0
-            )
-            db.add(portfolio)
-            db.commit()
-            db.refresh(portfolio)
+        # ANTI-IDOR: never fall back to another user's portfolio and never write on a read.
+        # Unsaved empty portfolio (not added to the session) so guests see an empty summary.
+        portfolio = Portfolio(name="Portafolio Demo", cash_ves=0.0, cash_usd=0.0)
 
     positions = db.query(Position).filter(Position.portfolio_id == portfolio.id).all()
     

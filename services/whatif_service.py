@@ -209,7 +209,8 @@ def generate_executive_report_data(
     if user_id is not None:
         portfolio = db.query(Portfolio).filter(Portfolio.user_id == user_id).first()
     else:
-        portfolio = db.query(Portfolio).first()
+        # Guests only get the read-only demo portfolio, never another user's data
+        portfolio = db.query(Portfolio).filter(Portfolio.id == 999).first()
 
     if not portfolio:
         return {}

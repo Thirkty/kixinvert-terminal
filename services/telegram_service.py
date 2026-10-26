@@ -199,9 +199,8 @@ def toggle_user_telegram_alerts(db: Session, user: User, enabled: Optional[bool]
 
 def get_user_portfolio_summary_text(db: Session, user: User) -> str:
     """Compiles a quick, beautiful Telegram summary of the user's portfolio."""
+    # Only the user's own portfolio; never another user's as a fallback
     portfolio = db.query(Portfolio).filter(Portfolio.user_id == user.id).first()
-    if not portfolio:
-        portfolio = db.query(Portfolio).first()
 
     if not portfolio:
         return "⚠️ No tienes ningún portafolio registrado aún en KixInvertAPP."
