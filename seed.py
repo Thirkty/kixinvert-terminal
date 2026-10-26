@@ -28,20 +28,26 @@ async def seed_data():
         print(f"📈 {len(quotes)} cotizaciones BVC cargadas en PostgreSQL.")
 
         # 3. Create initial User & Portfolio if empty
-        user = db.query(User).filter(User.username == "ferna").first()
+        # Credenciales del usuario inicial desde .env (nunca escritas en el código)
+        import os
+        seed_username = os.getenv("SEED_USERNAME", "demo")
+        seed_password = os.getenv("SEED_PASSWORD")
+        if not seed_password:
+            raise RuntimeError("Define SEED_PASSWORD en el archivo .env para crear el usuario inicial.")
+        user = db.query(User).filter(User.username == seed_username).first()
         if not user:
-            print("👤 Creando usuario principal 'ferna'...")
+            print(f"👤 Creando usuario principal '{seed_username}'...")
             import security
             user = User(
-                username="ferna",
-                email="fernandodaniel272006@gmail.com",
-                full_name="Fernando Daniel",
-                password_hash=security.hash_password("Hermana045*"),
+                username=seed_username,
+                email=os.getenv("SEED_EMAIL", f"{seed_username}@example.com"),
+                full_name=os.getenv("SEED_FULL_NAME", "Inversionista"),
+                password_hash=security.hash_password(seed_password),
                 broker="KixBroker BVC",
                 risk_profile="Agresivo",
                 subscription_tier="pro",
-                telegram_chat_id="6119366121",
-                telegram_alerts_enabled=True
+                telegram_chat_id=os.getenv("SEED_TELEGRAM_CHAT_ID") or None,
+                telegram_alerts_enabled=bool(os.getenv("SEED_TELEGRAM_CHAT_ID"))
             )
             db.add(user)
             db.commit()

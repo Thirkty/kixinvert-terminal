@@ -885,6 +885,22 @@ async def add_position(
             except Exception:
                 pass
 
+    # Reject purchases the available cash can't cover (before touching the position)
+    if item.deduct_from_cash:
+        pre_fees_ves = float(item.broker_commission or 0.0) + float(item.broker_iva or 0.0) + float(item.broker_registry_fee or 0.0)
+        if is_intl or item.currency.upper() == "USD":
+            pre_cost = float(item.net_total_amount) if (item.net_total_amount and item.net_total_amount > 0) else (item.shares * item.buy_price + (pre_fees_ves / bcv if bcv > 0 else 0.0))
+            available, label = float(portfolio.cash_usd or 0.0), "${:,.2f}"
+        else:
+            pre_cost = float(item.net_total_amount) if (item.net_total_amount and item.net_total_amount > 0) else (item.shares * buy_price_ves + pre_fees_ves)
+            available, label = float(portfolio.cash_ves or 0.0), "Bs {:,.2f}"
+        if pre_cost > available + 0.005:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Efectivo insuficiente: la compra cuesta {label.format(pre_cost)} y tu saldo disponible es {label.format(available)}. "
+                       "Ajusta tu saldo o desmarca 'Liquidar del efectivo'."
+            )
+
     # Atomicity: add or average down existing position
     existing_pos = db.query(Position).filter(
         Position.portfolio_id == portfolio.id,
@@ -1015,8 +1031,14 @@ def update_position(
     # Optional cash balance adjustment (e.g., if user added 150 shares too many and wants cash refunded)
     if item.adjust_cash and portfolio:
         diff = old_total_cost - new_total_cost
+        available = float(portfolio.cash_ves or 0.0)
+        if diff < 0 and -diff > available + 0.005:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Efectivo insuficiente: el ajuste cuesta Bs {-diff:,.2f} y tu saldo disponible es Bs {available:,.2f}."
+            )
         if abs(diff) > 0.0001:
-            new_cash = max(0.0, float(portfolio.cash_ves or 0.0) + diff)
+            new_cash = available + diff
             portfolio.cash_ves = new_cash
             cm = CashMovement(
                 portfolio_id=portfolio.id,
@@ -1705,13 +1727,17 @@ async def api_simulate_what_if(
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
-    portfolio = db.query(Portfolio).filter(Portfolio.user_id == user_id).first() if user_id else db.query(Portfolio).first()
+    # ANTI-IDOR: guests only ever see the read-only demo portfolio (same as /api/portfolio)
+    if user_id:
+        portfolio = db.query(Portfolio).filter(Portfolio.user_id == user_id).first()
+    else:
+        portfolio = db.query(Portfolio).filter(Portfolio.id == 999).first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="No hay portafolio disponible para simular.")
 
     rates = await fetch_current_rates(db)
     bcv = float(rates.get("bcv", 881.87))
-    usdt = float(rates.get("usdt_binance", 1007.60))
+    usdt = float(rates.get("usdt", 1007.60))
     summary = get_portfolio_summary(db=db, bcv_rate=bcv, usdt_rate=usdt, portfolio_id=portfolio.id)
 
     result = whatif_service.simulate_financial_stress_scenario(
