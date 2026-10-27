@@ -1,4 +1,5 @@
 """Portafolio: posiciones, compras, ventas, efectivo y simulador What-If."""
+import asyncio
 import datetime
 import logging
 from typing import Optional
@@ -74,14 +75,8 @@ async def get_portfolio(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Wall Street holdings are re-quoted by services/market_warmer.py, not on every request
     rates = await fetch_current_rates(db)
-
-    # Phase 3: Sync international stocks quotes for active holdings
-    try:
-        from services.international_service import sync_all_portfolio_international_quotes
-        sync_all_portfolio_international_quotes(db, rates["bcv"])
-    except Exception as e:
-        logger.error(f"Error syncing international quotes: {e}")
 
     # ANTI-IDOR: strictly isolated by current_user.id
     portfolio = get_or_create_portfolio(db, current_user)
@@ -143,7 +138,7 @@ async def add_position(
     # Pre-sync market quote for international asset so current price is immediately accurate
     if is_intl:
         try:
-            sync_international_market_quote(db, ticker, bcv)
+            await asyncio.to_thread(sync_international_market_quote, db, ticker, bcv)
         except Exception as e:
             logger.warning(f"Could not pre-sync international quote for {ticker}: {e}")
 

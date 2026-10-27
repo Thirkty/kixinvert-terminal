@@ -54,7 +54,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
         )
 
     payload = security.decode_access_token(token)
-    if not payload or "sub" not in payload:
+    # Tokens with a "purpose" (e.g. the 2FA challenge) are not sessions
+    if not payload or "sub" not in payload or payload.get("purpose"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Tu sesión ha expirado o el token es inválido. Por favor inicia sesión nuevamente.",

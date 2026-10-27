@@ -7,7 +7,8 @@ from models import ExchangeRate
 
 logger = logging.getLogger(__name__)
 
-# In-memory high-performance TTL cache (15 seconds)
+# In-memory cache. services/market_warmer.py renews it every 15 s; the 120 s TTL only
+# matters if the warmer stops, so requests never wait on the external APIs.
 _RATES_CACHE = {
     "data": None,
     "expires_at": 0.0
@@ -86,9 +87,8 @@ async def fetch_current_rates(db: Session = None, force_refresh: bool = False):
         "updated_at": datetime.datetime.now().strftime("%d/%m/%Y %I:%M %p")
     }
 
-    # Update memory cache with 15-second TTL
     _RATES_CACHE["data"] = result
-    _RATES_CACHE["expires_at"] = now_ts + 15.0
+    _RATES_CACHE["expires_at"] = now_ts + 120.0
 
     # Save to PostgreSQL throttled (at most once every 10 minutes to avoid DB bloat)
     if db and (now_ts - _LAST_DB_WRITE > 600.0):

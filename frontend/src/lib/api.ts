@@ -516,3 +516,17 @@ export async function fetchTelegramPairingUrl(): Promise<{
 }
 
 
+
+// Signed-in JSON call that throws an Error with the backend's message
+export async function authedJson<T>(path: string, method: 'GET' | 'POST' = 'GET', body?: object): Promise<T> {
+  const token = getAuthToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'No se pudo completar la solicitud.');
+  return data as T;
+}

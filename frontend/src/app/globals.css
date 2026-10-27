@@ -192,7 +192,6 @@ h1, h2, h3, h4, .brand-name, .kpi-main-metric {
   align-items: center;
   height: 44px;
   background: rgba(13, 20, 36, 0.85);
-  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
@@ -404,7 +403,6 @@ h1, h2, h3, h4, .brand-name, .kpi-main-metric {
 .currency-segmented-control {
   display: flex;
   background: rgba(20, 24, 33, 0.85);
-  backdrop-filter: blur(12px);
   padding: 5px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -495,7 +493,6 @@ h1, h2, h3, h4, .brand-name, .kpi-main-metric {
   left: 50%;
   transform: translateX(-50%) translateY(4px);
   background: rgba(20, 24, 33, 0.96);
-  backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #d5d9e0;
   padding: 8px 12px;
@@ -533,7 +530,6 @@ h1, h2, h3, h4, .brand-name, .kpi-main-metric {
   background: linear-gradient(145deg, rgba(20, 24, 33, 0.85) 0%, rgba(12, 15, 20, 0.95) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -1406,7 +1402,6 @@ input[type=number] {
 .sidebar-container {
   width: 250px;
   background: rgba(11, 15, 25, 0.92);
-  backdrop-filter: blur(18px);
   border-right: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
@@ -2076,7 +2071,7 @@ button:active:not(:disabled) { transform: scale(0.97); }
 /* Nav */
 .lx-nav {
   position: sticky; top: 0; z-index: 30;
-  background: rgba(12, 15, 20, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: rgba(12, 15, 20, 0.94);
   border-bottom: 1px solid var(--border-color);
 }
 .lx-nav-inner {

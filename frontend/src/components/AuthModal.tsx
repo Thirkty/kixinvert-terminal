@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Lock, User, Mail } from 'lucide-react';
+import { Lock, ShieldCheck } from 'lucide-react';
 import { UserSession } from '@/types';
 import { setAuthToken } from '@/lib/api';
+import { ModalShell, Field, ErrorBanner, digitsOnly } from './TradeModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,306 +13,158 @@ interface AuthModalProps {
   onSuccess: (session: UserSession, isNewRegistration?: boolean) => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({
-  isOpen,
-  initialMode = 'login',
-  onClose,
-  onSuccess,
-}) => {
+type ApiBody = { detail?: unknown; message?: string; token?: string; access_token?: string; challenge?: string; two_factor_required?: boolean; user?: { username?: string } };
+
+const postJson = async (url: string, body: object): Promise<ApiBody> => {
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const text = await res.text();
+  let data: ApiBody;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { detail: text || 'Error del servidor (500).' };
+  }
+  if (!res.ok) {
+    const d = data.detail;
+    const msg = typeof d === 'string' ? d : Array.isArray(d) ? d.map((e: { msg?: string }) => e.msg).join(', ') : data.message;
+    throw new Error(msg || 'Error en la solicitud');
+  }
+  return data;
+};
+
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialMode = 'login', onClose, onSuccess }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [challenge, setChallenge] = useState(''); // set when the account has 2FA
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const reset = (m: 'login' | 'register') => {
+    setMode(m);
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setChallenge('');
+    setCode('');
+    setErrorMsg('');
+  };
+
   React.useEffect(() => {
-    if (isOpen) {
-      setMode(initialMode);
-      setUsername('');
-      setEmail('');
-      setPassword('');
-      setErrorMsg('');
-    }
+    if (isOpen) reset(initialMode);
   }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
-  const formatError = (data: any, fallback: string): string => {
-    if (!data) return fallback;
-    if (typeof data.detail === 'string') return data.detail;
-    if (Array.isArray(data.detail)) {
-      return data.detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
-    }
-    if (data.message && typeof data.message === 'string') return data.message;
-    return fallback;
+  const finish = (data: ApiBody, isNew: boolean) => {
+    const token = (data.token || data.access_token) as string;
+    setAuthToken(token);
+    onSuccess({ username: data.user?.username || username, token, is_demo: false }, isNew);
+    onClose();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-
     try {
-      if (mode === 'login') {
-        const body: Record<string, string> = {
-          username_or_email: username.trim(),
-          password
-        };
-
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-
-        const text = await res.text();
-        let data: any = {};
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { detail: text || 'Error del servidor (500).' };
+      if (challenge) {
+        finish(await postJson('/api/auth/2fa/verify-login', { challenge, code }), false);
+      } else if (mode === 'login') {
+        const data = await postJson('/api/auth/login', { username_or_email: username.trim(), password });
+        if (data.two_factor_required && data.challenge) {
+          setChallenge(data.challenge);
+        } else {
+          finish(data, false);
         }
-
-        if (!res.ok) {
-          throw new Error(formatError(data, 'Error al iniciar sesión'));
-        }
-
-        const validToken = data.token || data.access_token;
-        setAuthToken(validToken);
-        onSuccess({
-          username: data.user?.username || username,
-          token: validToken,
-          is_demo: false,
-        }, false);
-        onClose();
       } else {
-        // Registro
-        const res = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: username.trim(),
-            email: email.trim(),
-            password,
-            full_name: username.trim(),
-          }),
+        const data = await postJson('/api/auth/register', {
+          username: username.trim(),
+          email: email.trim(),
+          password,
+          full_name: username.trim(),
         });
-
-        const text = await res.text();
-        let data: any = {};
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = { detail: text || 'Error del servidor (500).' };
-        }
-
-        if (!res.ok) {
-          throw new Error(formatError(data, 'Error al registrar usuario'));
-        }
-
-        const validToken = data.token || data.access_token;
-        setAuthToken(validToken);
-        onSuccess({
-          username: data.user?.username || username,
-          token: validToken,
-          is_demo: false,
-        }, true);
-        onClose();
+        finish(data, true);
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Error en la solicitud');
+    } catch (err) {
+      setErrorMsg((err as Error).message);
+      if (challenge) setCode('');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="kx-overlay"
+  const tab = (m: 'login' | 'register', label: string) => (
+    <button
+      type="button"
+      onClick={() => reset(m)}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 99999,
-        background: 'rgba(0,0,0,0.82)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
+        padding: '8px', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem',
+        background: mode === m ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+        color: mode === m ? 'var(--accent)' : 'var(--text-muted)',
       }}
     >
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>
-            {mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
-          </h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#9aa3b2', cursor: 'pointer' }}>
-            <X size={20} />
-          </button>
-        </div>
+      {label}
+    </button>
+  );
 
-        {/* Tab switch */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', background: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: '10px', marginBottom: '20px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('login');
-              setErrorMsg('');
-              setUsername('');
-              setEmail('');
-              setPassword('');
-            }}
-            style={{
-              padding: '8px',
-              borderRadius: '8px',
-              border: 'none',
-              background: mode === 'login' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
-              color: mode === 'login' ? '#7c8cff' : '#9aa3b2',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-            }}
-          >
-            Iniciar Sesión
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('register');
-              setErrorMsg('');
-              setUsername('');
-              setEmail('');
-              setPassword('');
-            }}
-            style={{
-              padding: '8px',
-              borderRadius: '8px',
-              border: 'none',
-              background: mode === 'register' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
-              color: mode === 'register' ? '#7c8cff' : '#9aa3b2',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-            }}
-          >
-            Registrarse
-          </button>
+  return (
+    <ModalShell
+      icon={challenge ? <ShieldCheck size={20} style={{ color: 'var(--accent)' }} /> : <Lock size={20} style={{ color: 'var(--accent)' }} />}
+      title={challenge ? 'Verificación en dos pasos' : mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+      subtitle={challenge ? 'Abre tu app de autenticación y escribe el código de 6 dígitos.' : undefined}
+      tone="accent"
+      onClose={onClose}
+    >
+      {!challenge && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', background: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: '10px', marginBottom: '18px' }}>
+          {tab('login', 'Iniciar Sesión')}
+          {tab('register', 'Registrarse')}
         </div>
+      )}
 
-        {errorMsg && (
-          <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(229, 97, 110, 0.1)', border: '1px solid rgba(229, 97, 110, 0.3)', color: '#e5616e', fontSize: '0.82rem', marginBottom: '16px' }}>
-            {errorMsg}
-          </div>
+      <ErrorBanner message={errorMsg} />
+
+      <form onSubmit={handleSubmit} autoComplete="off" className="tm-form">
+        {challenge ? (
+          <Field label="Código de verificación">
+            <input
+              type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required autoFocus
+              className="tm-input tm-num" placeholder="123456"
+              style={{ fontSize: '1.4rem', letterSpacing: '0.4em', textAlign: 'center' }}
+              value={code} onChange={digitsOnly(setCode)}
+            />
+          </Field>
+        ) : (
+          <>
+            <Field label="Nombre de Usuario">
+              <input type="text" name="kix_auth_user" autoComplete="off" required className="tm-input"
+                placeholder="inversionista_bvc" value={username} onChange={(e) => setUsername(e.target.value)} />
+            </Field>
+            {mode === 'register' && (
+              <Field label="Correo Electrónico">
+                <input type="email" name="kix_auth_email" autoComplete="off" required className="tm-input"
+                  placeholder="inversionista@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </Field>
+            )}
+            <Field label="Contraseña">
+              <input type="password" name="kix_auth_password" autoComplete="new-password" required className="tm-input"
+                placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </Field>
+          </>
         )}
 
-        <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
-              Nombre de Usuario
-            </label>
-            <div style={{ position: 'relative' }}>
-              <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
-              <input
-                type="text"
-                name="kix_auth_user"
-                autoComplete="off"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="inversionista_bvc"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px 10px 36px',
-                  borderRadius: '10px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#fff',
-                  fontSize: '0.88rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
-          </div>
-
-          {mode === 'register' && (
-            <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
-                Correo Electrónico
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
-                <input
-                  type="email"
-                  name="kix_auth_email"
-                  autoComplete="off"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="inversionista@email.com"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px 10px 36px',
-                    borderRadius: '10px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#fff',
-                    fontSize: '0.88rem',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
-              Contraseña
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Lock size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
-              <input
-                type="password"
-                name="kix_auth_password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px 10px 36px',
-                  borderRadius: '10px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#fff',
-                  fontSize: '0.88rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
-          </div>
-
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: '10px',
-              padding: '12px',
-              borderRadius: '10px',
-              background: 'var(--accent)',
-              color: 'var(--on-accent)',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? 'Procesando...' : mode === 'login' ? 'Entrar a Mi Terminal' : 'Crear Cuenta Gratis'}
+        <button type="submit" className="tm-btn tm-btn-primary" disabled={loading || (!!challenge && code.length !== 6)} style={{ marginTop: '6px', padding: '12px' }}>
+          {loading ? 'Procesando...' : challenge ? 'Verificar y entrar' : mode === 'login' ? 'Entrar a Mi Terminal' : 'Crear Cuenta Gratis'}
+        </button>
+        {challenge && (
+          <button type="button" className="tm-link" style={{ alignSelf: 'center' }} onClick={() => reset('login')}>
+            Volver al inicio de sesión
           </button>
-        </form>
-      </div>
-    </div>
+        )}
+      </form>
+    </ModalShell>
   );
 };

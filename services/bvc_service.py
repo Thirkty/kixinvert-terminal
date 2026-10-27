@@ -39,7 +39,7 @@ BVC_METADATA = {
 
 import time
 
-# In-memory high-performance TTL cache (15 seconds)
+# In-memory cache, renewed every 15 s by services/market_warmer.py (120 s TTL as a fallback)
 _BVC_QUOTES_CACHE = {
     "data": None,
     "expires_at": 0.0
@@ -242,8 +242,7 @@ async def fetch_bvc_market_data(db: Session = None, bcv_rate: float = 879.12, us
     final_list = list(results.values())
     final_list.sort(key=sort_key, reverse=True)
 
-    # Cache sorted results for 15 seconds
     _BVC_QUOTES_CACHE["data"] = final_list
-    _BVC_QUOTES_CACHE["expires_at"] = time.time() + 15.0
+    _BVC_QUOTES_CACHE["expires_at"] = time.time() + 120.0
 
     return final_list

@@ -14,6 +14,7 @@ import { AddPositionModal } from '@/components/AddPositionModal';
 import { EditPositionModal } from '@/components/EditPositionModal';
 import { SellPositionModal } from '@/components/SellPositionModal';
 import { AdjustCashModal } from '@/components/AdjustCashModal';
+import { AccountModal } from '@/components/AccountModal';
 import { TelegramModal } from '@/components/TelegramModal';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { Sidebar, NavView } from '@/components/Sidebar';
@@ -110,6 +111,7 @@ export default function Home() {
   const [selectedPosForSell, setSelectedPosForSell] = useState<Position | null>(null);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -184,11 +186,19 @@ export default function Home() {
       refreshAllData();
     }
 
+    // Poll every 15 s only while the tab is visible; catch up as soon as it comes back
     const interval = setInterval(() => {
-      refreshAllData();
+      if (!document.hidden) refreshAllData();
     }, 15000);
+    const onVisible = () => {
+      if (!document.hidden) refreshAllData();
+    };
+    document.addEventListener('visibilitychange', onVisible);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [refreshAllData]);
 
   const toggleSound = () => {
@@ -353,7 +363,7 @@ export default function Home() {
 
   return (
     <div className="app-container" style={{ padding: 0, maxWidth: '100%' }}>
-      <InteractiveBackground intensity={currentView === 'welcome' ? 1 : 0.6} />
+      <InteractiveBackground intensity={currentView === 'welcome' ? 1 : 0.6} interactive={currentView === 'welcome'} />
 
       {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA (UNIFICADO, SIN DOBLE HEADER NI OVERLAPPING) */}
       {currentView === 'welcome' && (
@@ -426,6 +436,7 @@ export default function Home() {
                 setIsAuthModalOpen(true);
               }}
               onGoWelcome={() => setCurrentView('welcome')}
+              onOpenAccount={() => setIsAccountOpen(true)}
             />
 
             {/* Ticker Tape en Tiempo Real para Caracas BVC o Wall Street */}
@@ -664,6 +675,8 @@ export default function Home() {
         onClose={() => setIsAdjustCashOpen(false)}
         onSave={handleSaveCash}
       />
+
+      <AccountModal isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
 
       <TelegramModal
         isOpen={isTelegramOpen}
