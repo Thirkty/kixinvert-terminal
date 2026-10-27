@@ -56,4 +56,20 @@ Plataforma profesional de seguimiento y análisis de inversiones para la **Bolsa
 
 O todo de una vez con `.\iniciar.ps1`. Para editar el frontend con recarga en caliente: `.\iniciar.ps1 -Desarrollo` (abre `localhost:3000`).
 
-**Al desplegar**, el servidor debe ejecutar `npm ci && npm run build` dentro de `frontend/` antes de arrancar `uvicorn`; si no, la raíz responde "Falta compilar el frontend".
+---
+
+## 🚀 Despliegue
+
+El `Dockerfile` compila el frontend y arranca el backend en una sola imagen, así que sirve igual en Railway, Render, Fly.io o un VPS. El proveedor detecta el `Dockerfile` solo; tú pones la base de datos PostgreSQL y estas variables:
+
+| Variable | Para qué |
+|---|---|
+| `DATABASE_URL` | PostgreSQL |
+| `JWT_SECRET_KEY` | Firma de sesiones (obligatoria en producción) |
+| `APP_ENCRYPTION_KEY` | Cifra los secretos de 2FA. **No la cambies después**: los 2FA activos dejarían de funcionar |
+| `SESSION_COOKIE_SECURE=true` | Cookie solo por HTTPS |
+| `ALLOWED_ORIGINS` | Tu dominio, p. ej. `https://kixinvert.com` |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` | Bot de alertas |
+| `BINANCE_PAY_API_KEY`, `BINANCE_PAY_SECRET_KEY` | Cobro del Plan PRO. En Binance Pay registra el webhook `https://TU-DOMINIO/api/payments/binance/webhook` |
+
+Corre un solo proceso a propósito: el bot de Telegram y el refresco de datos de mercado deben ejecutarse una sola vez.
