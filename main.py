@@ -126,12 +126,9 @@ async def on_startup():
     from db import SessionLocal
     asyncio.create_task(telegram_service.telegram_polling_worker(SessionLocal))
 
-# Mount static files directory securely
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
-if not os.path.exists(STATIC_DIR):
-    os.makedirs(STATIC_DIR)
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# The web app is the Next.js frontend compiled to static files (cd frontend && npm run build).
+# It is mounted at "/" at the end of this file, after every API route.
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "frontend", "out")
 
 # ==========================================================
 # AUDIT LOG HELPER
@@ -298,7 +295,13 @@ class WhatIfSimulateRequest(BaseModel):
 
 @app.get("/")
 def serve_index():
-    response = FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    index = os.path.join(FRONTEND_DIR, "index.html")
+    if not os.path.exists(index):
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Falta compilar el frontend: cd frontend && npm run build"},
+        )
+    response = FileResponse(index)
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -1853,6 +1856,10 @@ async def api_telegram_webhook(
 
     telegram_service.handle_incoming_telegram_message(db, payload)
     return {"status": "ok"}
+
+# Frontend assets (/_next/..., favicon, images). Mounted last so it never shadows an API route.
+if os.path.isdir(FRONTEND_DIR):
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
