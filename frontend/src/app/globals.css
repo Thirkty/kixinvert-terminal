@@ -5614,9 +5614,8 @@ button:active:not(:disabled) { transform: scale(0.97); }
   --lx-gutter: clamp(16px, 4vw, 32px);
   width: 100%;
   color: var(--text-main);
-  background:
-    radial-gradient(900px 480px at 78% -10%, rgba(124, 140, 255, 0.10), transparent 70%),
-    var(--bg-primary);
+  /* Transparent so the interactive canvas background shows through */
+  background: radial-gradient(900px 480px at 78% -10%, rgba(124, 140, 255, 0.10), transparent 70%);
 }
 .lx a { color: inherit; text-decoration: none; }
 .lx h1, .lx h2, .lx h3 { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; text-wrap: balance; }
@@ -5826,4 +5825,73 @@ button:active:not(:disabled) { transform: scale(0.97); }
 }
 @media (prefers-reduced-motion: reduce) {
   .lx-reveal-ready [data-reveal] { opacity: 1; transform: none; }
+}
+
+/* ==========================================================================
+   MOVIMIENTO GLOBAL: fondo interactivo, transiciones entre módulos, modales
+   ========================================================================== */
+:root { --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); }
+
+/* Interactive background canvas sits behind all content */
+.app-container { position: relative; isolation: isolate; }
+.kx-bg-canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+
+/* View Transitions: sidebar and header stay put, the module content slides in */
+.sidebar-container { view-transition-name: kx-sidebar; }
+.top-bar { view-transition-name: kx-header; }
+.terminal-main-view { view-transition-name: kx-main; }
+
+::view-transition-old(root) { animation: kx-vt-out 0.32s var(--ease-out) both; }
+::view-transition-new(root) { animation: kx-vt-in 0.5s var(--ease-out) both; }
+::view-transition-old(kx-main) { animation: kx-vt-main-out 0.22s ease both; }
+::view-transition-new(kx-main) { animation: kx-vt-main-in 0.48s var(--ease-out) both; }
+::view-transition-group(kx-sidebar),
+::view-transition-group(kx-header) { animation-duration: 0.4s; animation-timing-function: var(--ease-out); }
+
+@keyframes kx-vt-out { to { opacity: 0; transform: scale(0.985); filter: blur(2px); } }
+@keyframes kx-vt-in { from { opacity: 0; transform: scale(1.015); filter: blur(2px); } }
+@keyframes kx-vt-main-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes kx-vt-main-in { from { opacity: 0; transform: translateY(18px); } }
+
+/* Modals: backdrop fades, panel springs up */
+@keyframes kx-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes kx-pop { from { opacity: 0; transform: translateY(18px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes kx-drop-in { from { opacity: 0; transform: translateY(-10px) scale(0.97); } to { opacity: 1; transform: none; } }
+.kx-overlay { animation: kx-fade 0.25s ease both; }
+.kx-overlay > * { animation: kx-pop 0.45s var(--ease-spring) both; }
+.kx-drop { animation: kx-drop-in 0.35s var(--ease-out) both; transform-origin: top right; }
+
+/* Sidebar: hover nudge and active marker that grows in */
+.sidebar-nav-item { position: relative; transition: transform 0.2s var(--ease-out), background-color 0.2s ease, color 0.2s ease !important; }
+.sidebar-nav-item:hover { transform: translateX(3px); }
+.sidebar-nav-item::before {
+  content: ""; position: absolute; left: -2px; top: 50%; width: 3px; height: 0; border-radius: 2px;
+  background: var(--accent); transform: translateY(-50%); transition: height 0.3s var(--ease-spring);
+}
+.sidebar-nav-item.active::before { height: 60%; }
+
+/* Currency selector and tabs: active state pops */
+@keyframes kx-press { 0% { transform: scale(0.94); } 60% { transform: scale(1.03); } 100% { transform: scale(1); } }
+.curr-btn { transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease; }
+.curr-btn.active, .tab-btn.active { animation: kx-press 0.35s var(--ease-out); }
+
+/* Table rows enter one after another */
+@keyframes kx-row-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+.data-table tbody tr { animation: kx-row-in 0.4s var(--ease-out) both; }
+.data-table tbody tr:nth-child(1) { animation-delay: 60ms; }
+.data-table tbody tr:nth-child(2) { animation-delay: 100ms; }
+.data-table tbody tr:nth-child(3) { animation-delay: 140ms; }
+.data-table tbody tr:nth-child(4) { animation-delay: 180ms; }
+.data-table tbody tr:nth-child(5) { animation-delay: 220ms; }
+.data-table tbody tr:nth-child(6) { animation-delay: 260ms; }
+.data-table tbody tr:nth-child(7) { animation-delay: 300ms; }
+.data-table tbody tr:nth-child(n+8) { animation-delay: 340ms; }
+
+/* Cards lift a touch on hover everywhere in the terminal */
+.kpi-card, .glass-panel { transition: transform 0.25s var(--ease-out), border-color 0.25s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root),
+  ::view-transition-old(kx-main), ::view-transition-new(kx-main) { animation: none; }
+  .sidebar-nav-item:hover { transform: none; }
 }

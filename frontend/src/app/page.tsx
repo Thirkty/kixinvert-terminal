@@ -19,6 +19,8 @@ import { NotificationCenter } from '@/components/NotificationCenter';
 import { Sidebar, NavView } from '@/components/Sidebar';
 import { WhatIfSimulator } from '@/components/WhatIfSimulator';
 import { OnboardingModal } from '@/components/OnboardingModal';
+import { InteractiveBackground } from '@/components/InteractiveBackground';
+import { runViewTransition } from '@/components/Motion';
 import {
   CurrencyMode,
   MarketRates,
@@ -49,10 +51,28 @@ import { isSoundEnabled, setSoundEnabled, playTerminalSound } from '@/lib/audio'
 
 export default function Home() {
   // Navigation & Ecosystem State (Default to Landing for guests, Terminal for logged-in users)
-  const [currentView, setCurrentView] = useState<'terminal' | 'welcome'>('welcome');
-  const [currentNav, setCurrentNav] = useState<NavView>('dashboard');
-  const [currentEcosystem, setCurrentEcosystem] = useState<Ecosystem>('BVC');
-  const [currentMode, setCurrentMode] = useState<CurrencyMode>('compare');
+  const [currentView, setCurrentViewRaw] = useState<'terminal' | 'welcome'>('welcome');
+  const [currentNav, setCurrentNavRaw] = useState<NavView>('dashboard');
+  const [currentEcosystem, setCurrentEcosystemRaw] = useState<Ecosystem>('BVC');
+  const [currentMode, setCurrentModeRaw] = useState<CurrencyMode>('compare');
+
+  // Every move between views, modules, markets and currencies is animated with a View Transition
+  const setCurrentView = (v: 'terminal' | 'welcome') => {
+    if (v === currentView) return;
+    runViewTransition(() => setCurrentViewRaw(v));
+  };
+  const setCurrentNav = (n: NavView) => {
+    if (n === currentNav) return;
+    runViewTransition(() => setCurrentNavRaw(n));
+  };
+  const setCurrentEcosystem = (e: Ecosystem) => {
+    if (e === currentEcosystem) return;
+    runViewTransition(() => setCurrentEcosystemRaw(e));
+  };
+  const setCurrentMode = (m: CurrencyMode) => {
+    if (m === currentMode) return;
+    runViewTransition(() => setCurrentModeRaw(m));
+  };
 
   // Market & Portfolio Data State
   // Empty until the backend answers: no placeholder rates that could pass for real ones
@@ -128,7 +148,7 @@ export default function Home() {
         has_2fa: true,
       });
       // Usuario autenticado entra directo al Terminal en un ecosistema separado
-      setCurrentView('terminal');
+      setCurrentViewRaw('terminal');
 
       // Validar sesión con el backend
       fetch('/api/auth/me', {
@@ -138,7 +158,7 @@ export default function Home() {
           if (!res.ok) {
             setAuthToken(null);
             setSession(null);
-            setCurrentView('welcome');
+            setCurrentViewRaw('welcome');
             return null;
           }
           return res.json();
@@ -162,7 +182,7 @@ export default function Home() {
         });
     } else {
       setSession(null);
-      setCurrentView('welcome');
+      setCurrentViewRaw('welcome');
       refreshAllData();
     }
 
@@ -335,6 +355,8 @@ export default function Home() {
 
   return (
     <div className="app-container" style={{ padding: 0, maxWidth: '100%' }}>
+      <InteractiveBackground intensity={currentView === 'welcome' ? 1 : 0.6} />
+
       {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA (UNIFICADO, SIN DOBLE HEADER NI OVERLAPPING) */}
       {currentView === 'welcome' && (
         <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -418,7 +440,8 @@ export default function Home() {
               }}
             />
 
-            <main className="terminal-main-view" style={{ flex: 1, padding: '24px 32px' }}>
+            {/* Keyed by module so each one re-enters with its staggered animation */}
+            <main key={`${currentNav}-${currentEcosystem}`} className="terminal-main-view" style={{ flex: 1, padding: '24px 32px' }}>
               {/* Header de controles y selector de divisa */}
               <div
                 className="controls-section"
