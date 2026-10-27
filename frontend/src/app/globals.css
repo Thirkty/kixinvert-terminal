@@ -2316,3 +2316,117 @@ button:active:not(:disabled) { transform: scale(0.97); }
   ::view-transition-old(kx-main), ::view-transition-new(kx-main) { animation: none; }
   .sidebar-nav-item:hover { transform: none; }
 }
+
+/* ==========================================================
+   MODALES DE OPERACIONES (comprar, vender, editar, efectivo)
+   Piezas en components/TradeModal.tsx
+   ========================================================== */
+.tm-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; overflow-y: auto;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px);
+}
+.tm-panel {
+  width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto;
+  padding: 26px; border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+}
+.tm-panel.tm-tone-accent { border-color: rgba(124, 140, 255, 0.3); }
+.tm-panel.tm-tone-danger { border-color: rgba(229, 97, 110, 0.3); max-width: 520px; }
+
+.tm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.tm-title { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; color: #fff; }
+.tm-sub { margin-top: 4px; font-size: 0.8rem; color: var(--text-muted); }
+.tm-sub strong { color: #fff; }
+.tm-close { flex-shrink: 0; padding: 6px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+
+.tm-form { display: flex; flex-direction: column; gap: 14px; }
+.tm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tm-label-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.tm-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+.tm-aside { font-size: 0.74rem; color: var(--text-dim); }
+.tm-link { font-size: 0.74rem; color: var(--accent); text-decoration: underline; }
+
+.tm-panel .tm-input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; outline: none;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff; font-size: 0.88rem;
+}
+.tm-panel select.tm-input { background-color: var(--surface-2); border-color: rgba(255, 255, 255, 0.15); }
+.tm-panel .tm-input[type="date"] { padding: 9px 12px; font-size: 0.84rem; }
+.tm-panel .tm-input.tm-num { font-size: 1rem; font-weight: 700; font-family: monospace; }
+.tm-panel .tm-input.tm-invalid { border-color: var(--down); }
+.tm-panel .tm-input:focus { border-color: var(--border-focus); background-color: rgba(255, 255, 255, 0.08); }
+.tm-field-error { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.74rem; color: #ee8a94; }
+
+.tm-error, .tm-success {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem;
+}
+.tm-error { margin-bottom: 14px; background: rgba(229, 97, 110, 0.1); border: 1px solid rgba(229, 97, 110, 0.3); color: #ee8a94; }
+.tm-success { background: rgba(124, 140, 255, 0.15); border: 1px solid rgba(124, 140, 255, 0.3); color: #c9cfff; }
+
+.tm-card { padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); }
+.tm-stats {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 10px; font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.tm-stats.tm-tinted { margin-bottom: 18px; background: rgba(124, 140, 255, 0.06); border-color: rgba(124, 140, 255, 0.2); }
+.tm-stats > div:nth-child(2) { text-align: center; }
+.tm-stats > div:last-child { text-align: right; }
+.tm-stats span { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
+.tm-stats strong { color: #fff; }
+
+.tm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tm-chips.tm-chips-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.tm-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 5px 8px; border-radius: 6px; font-size: 0.74rem; color: #b9c0cb;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.tm-chip.tm-chip-danger { color: #f3b0b7; font-weight: 700; background: rgba(229, 97, 110, 0.15); border-color: rgba(229, 97, 110, 0.3); }
+
+/* Liquidación Mercosur */
+.tm-fees-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.82rem; font-weight: 700; color: #fff; }
+.tm-fees-head > span { display: flex; align-items: center; gap: 6px; }
+.tm-seg { display: flex; gap: 4px; padding: 2px; border-radius: 6px; background: rgba(0, 0, 0, 0.3); }
+.tm-seg button { padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+.tm-seg button.is-auto { background: var(--accent); color: #fff; }
+.tm-seg button.is-manual { background: var(--warn); color: #fff; }
+.tm-hint {
+  margin-bottom: 10px; padding: 8px 10px; border-radius: 8px; font-size: 0.74rem; color: #f5e6c8;
+  background: rgba(217, 164, 65, 0.08); border: 1px solid rgba(217, 164, 65, 0.2);
+}
+.tm-rows { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; }
+.tm-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--text-muted); }
+.tm-row.tm-row-sm { font-size: 0.76rem; }
+.tm-mono { font-family: monospace; color: #fff; }
+.tm-total { padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.tm-total strong:first-child { font-size: 0.9rem; color: #fff; }
+.tm-total strong:last-child { font-size: 1.05rem; font-family: monospace; color: var(--accent); }
+.tm-fee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.tm-fee-grid label { display: block; margin-bottom: 2px; font-size: 0.7rem; color: var(--text-muted); }
+.tm-panel .tm-fee-grid .tm-input { padding: 6px 8px; border-radius: 6px; font-size: 0.8rem; font-family: monospace; background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.1); }
+.tm-fee-grid .tm-net label { color: var(--warn); font-weight: 600; }
+.tm-panel .tm-fee-grid .tm-net .tm-input { font-weight: 700; color: #f5e6c8; background: rgba(217, 164, 65, 0.1); border-color: rgba(217, 164, 65, 0.3); }
+
+/* Casilla grande (liquidar / acreditar / ajustar efectivo) */
+.tm-check {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; text-align: left; user-select: none;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: var(--text-dim);
+}
+.tm-check.is-on { background: rgba(124, 140, 255, 0.1); border-color: rgba(124, 140, 255, 0.3); color: var(--accent); }
+.tm-check > span { display: flex; flex-direction: column; }
+.tm-check b { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+.tm-check.is-on b { color: #c9cfff; }
+.tm-check small { font-size: 0.72rem; color: var(--text-dim); }
+
+.tm-actions { display: flex; gap: 10px; margin-top: 6px; }
+.tm-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; border-radius: 10px; font-weight: 600; }
+.tm-btn-ghost { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+.tm-btn-primary, .tm-btn-danger { flex: 2; font-weight: 700; }
+.tm-btn-primary { background: var(--accent); color: var(--on-accent); }
+.tm-btn-danger { background: linear-gradient(135deg, #e5616e, #b91c1c); color: #fff; }
+.tm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
