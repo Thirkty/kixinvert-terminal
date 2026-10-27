@@ -1,47 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  UserPlus,
+  ArrowRight,
+  ArrowDownRight,
+  ArrowUpRight,
+  Bot,
+  Check,
+  ChevronDown,
+  Coins,
+  Crown,
+  Globe,
+  KeyRound,
+  Landmark,
+  LineChart,
   Lock,
   LogOut,
-  Zap,
-  Coins,
-  TrendingUp,
-  Bot,
-  Globe,
-  Sliders,
-  Send,
-  Check,
-  X,
-  Crown,
-  Calendar,
-  AlertTriangle,
-  Layers,
-  ChevronDown,
   Mail,
-  Briefcase,
-  Clock,
+  Send,
   ShieldCheck,
-  ShieldAlert,
-  PlayCircle,
-  Sparkles,
-  ArrowRight,
+  Sliders,
+  TrendingUp,
+  UserPlus,
+  Wallet,
 } from 'lucide-react';
-import { SpotlightCard } from './SpotlightCard';
 import { TickerTape } from './TickerTape';
-import { UserSession, BvcTicker, InternationalQuote, Ecosystem } from '@/types';
-import {
-  AnimatedPulseBeacon,
-  AnimatedTelegram,
-  AnimatedSparkles,
-  AnimatedTrend,
-} from './AnimatedIcons';
+import { CountUp } from './Motion';
+import { UserSession, BvcTicker, InternationalQuote, Ecosystem, MarketRates } from '@/types';
+import { formatVES } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
 
 interface WelcomeLandingProps {
-  onEnterDemo: () => void;
   onOpenRegister: () => void;
   onOpenLogin: () => void;
   onGoTerminal?: () => void;
@@ -50,10 +39,97 @@ interface WelcomeLandingProps {
   bvcTickers?: BvcTicker[];
   intlTickers?: InternationalQuote[];
   currentEcosystem?: Ecosystem;
+  rates?: MarketRates;
+}
+
+const FEATURES = [
+  {
+    icon: Coins,
+    title: 'Tres monedas a la vez',
+    text: 'Cada acción y tu patrimonio total en bolívares, dólar BCV y USDT. Ves al instante si tu ganancia en Bs le gana a la devaluación.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Señales por posición',
+    text: 'Indicadores de toma de ganancia, mantener o reforzar, calculados con tu costo de compra y el rendimiento real en USDT.',
+  },
+  {
+    icon: Bot,
+    title: 'Asistente KixInvert AI',
+    text: 'Pregunta cuántas acciones vender o cómo vas frente al dólar. Responde con los números de tu propio portafolio.',
+  },
+  {
+    icon: Globe,
+    title: 'Caracas y Wall Street',
+    text: 'Las 46 acciones de la BVC y acciones o ETFs de EE.UU. en dólares, en carteras separadas para no mezclar monedas.',
+  },
+  {
+    icon: Sliders,
+    title: 'Simulador What-If',
+    text: 'Mueve el dólar BCV y el USDT a futuro y mira cuánto valdría tu cartera. Planifica antes de que pase.',
+  },
+  {
+    icon: Send,
+    title: 'Alertas en Telegram',
+    text: 'Vincula @KixInvert_bot y recibe avisos de brecha cambiaria y señales. Consulta tu saldo con /balance.',
+  },
+];
+
+const STEPS = [
+  { icon: UserPlus, title: 'Crea tu cuenta', text: 'Gratis, con correo y contraseña. Puedes activar doble factor (2FA) desde el primer día.' },
+  { icon: Wallet, title: 'Registra tus compras', text: 'Ticker, cantidad y precio. KixInvert guarda la tasa BCV y USDT del día para medir tu rendimiento real.' },
+  { icon: LineChart, title: 'Decide con datos', text: 'Sigue tus tres monedas, revisa las señales y recibe alertas en el móvil.' },
+];
+
+const FAQ = [
+  {
+    q: '¿Por qué tres monedas para cada acción?',
+    a: 'Las acciones de la BVC cotizan en bolívares, pero tu poder de compra real se mide en dólares. KixInvert compara tu rendimiento en Bs con el dólar oficial BCV y con el USDT de Binance P2P para que sepas si de verdad estás ganando.',
+  },
+  {
+    q: '¿Cómo vinculo el bot de Telegram?',
+    a: 'Desde el terminal, en "Bot Telegram", generas un código de un solo uso y lo envías a @KixInvert_bot con /start. Desde ese momento recibes alertas y puedes consultar /balance.',
+  },
+  {
+    q: '¿Cómo se paga el Plan PRO?',
+    a: 'Con USDT a través de Binance Pay, 5 USDT al mes. El plan se activa cuando Binance confirma el pago.',
+  },
+  {
+    q: '¿Qué tan seguros están mis datos?',
+    a: 'Las contraseñas se guardan con bcrypt, la sesión usa tokens firmados con vencimiento, los datos sensibles se cifran en la base de datos y puedes activar 2FA con Google Authenticator. Cada usuario solo puede ver su propio portafolio.',
+  },
+  {
+    q: '¿KixInvert compra o vende acciones por mí?',
+    a: 'No. KixInvert es una herramienta de seguimiento y análisis: tú operas con tu casa de bolsa y registras tus compras y ventas aquí.',
+  },
+];
+
+// Reveals sections as they scroll into view; content is visible by default if JS or IntersectionObserver is missing
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || typeof IntersectionObserver === 'undefined') return;
+    root.classList.add('lx-reveal-ready');
+    const items = root.querySelectorAll<HTMLElement>('[data-reveal]');
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('lx-in');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+    );
+    items.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  return ref;
 }
 
 export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
-  onEnterDemo,
   onOpenRegister,
   onOpenLogin,
   onGoTerminal,
@@ -62,959 +138,349 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
   bvcTickers,
   intlTickers,
   currentEcosystem,
+  rates,
 }) => {
-  // FAQ accordion state
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const rootRef = useReveal();
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Contact form state
-  const [contactSubmitted, setContactSubmitted] = useState(false);
-  const [contactForm, setContactForm] = useState({
-    name: '',
-    email: '',
-    topic: 'pro_subscription',
-    message: '',
-  });
+  // Nominal illusion calculator
+  const [stockGain, setStockGain] = useState(25);
+  const [dollarJump, setDollarJump] = useState(35);
+  const realReturn = ((1 + stockGain / 100) / (1 + dollarJump / 100) - 1) * 100;
 
-  const toggleFaq = (idx: number) => {
-    playTerminalSound('click');
-    setOpenFaqIndex((prev) => (prev === idx ? null : idx));
-  };
+  const hasRates = Boolean(rates && rates.bcv > 0 && rates.usdt > 0);
 
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Today's biggest movers, from the real BVC board
+  const movers = useMemo(
+    () =>
+      [...(bvcTickers || [])]
+        .filter((t) => t.price > 0 && t.change_pct !== 0)
+        .sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
+        .slice(0, 4),
+    [bvcTickers]
+  );
+
+  const register = () => {
     playTerminalSound('success');
-    setContactSubmitted(true);
-    setTimeout(() => {
-      setContactSubmitted(false);
-      setContactForm({ name: '', email: '', topic: 'pro_subscription', message: '' });
-    }, 4500);
+    onOpenRegister();
+  };
+  const login = () => {
+    playTerminalSound('click');
+    onOpenLogin();
   };
 
   return (
-    <div className="welcome-view-container" style={{ width: '100%', maxWidth: '1280px', margin: '0 auto' }}>
-      {/* 1. FLOATING LANDING QUICK SUB-NAVBAR */}
-      <nav className="welcome-nav-bar glass-panel animate-fade-in" id="welcome-subnav">
-        <div className="welcome-nav-brand">
-          <AnimatedPulseBeacon color="#7c8cff" size={8} />
-          <span className="welcome-nav-brand-text">
-            KixInvertAPP <span className="badge-v6">v6.0</span>
-          </span>
-        </div>
-
-        <div className="welcome-nav-links">
-          <a href="#sec-story" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Historia
+    <div className="lx" ref={rootRef}>
+      {/* NAV */}
+      <nav className="lx-nav">
+        <div className="lx-nav-inner">
+          <a href="#top" className="lx-brand" aria-label="KixInvert, inicio">
+            <span className="lx-brand-mark"><TrendingUp size={16} /></span>
+            KixInvert
           </a>
-          <a href="#sec-gallery" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Galería
-          </a>
-          <a href="#sec-features" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Funciones
-          </a>
-          <a href="#sec-pricing" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Precios
-          </a>
-          <a href="#sec-changelog" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Changelog
-          </a>
-          <a href="#sec-faq" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            FAQ
-          </a>
-          <a href="#sec-contact" className="welcome-nav-link" onClick={() => playTerminalSound('click')}>
-            Contacto
-          </a>
-        </div>
-
-        <div className="welcome-nav-cta" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {onGoTerminal && (
-            <button
-              className="btn-nav-terminal"
-              onClick={() => {
-                playTerminalSound('click');
-                onGoTerminal();
-              }}
-              title="Ir directamente al Terminal Bursátil en Vivo"
-            >
-              <TrendingUp size={14} /> Abrir Terminal
-            </button>
-          )}
-          <button
-            className="btn-nav-demo"
-            onClick={() => {
-              playTerminalSound('success');
-              onEnterDemo();
-            }}
-          >
-            <PlayCircle size={15} /> Probar Demo
-          </button>
-          {session ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="nav-user-pill">
-                <span className="user-online-dot"></span>
-                {session.username}
-              </span>
-              {onLogout && (
-                <button
-                  className="btn-nav-logout"
-                  onClick={() => {
-                    playTerminalSound('click');
-                    onLogout();
-                  }}
-                  title="Cerrar Sesión"
-                >
-                  <LogOut size={13} />
+          <div className="lx-nav-links">
+            <a href="#funciones">Funciones</a>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#precios">Precios</a>
+            <a href="#faq">Preguntas</a>
+          </div>
+          <div className="lx-nav-actions">
+            {session ? (
+              <>
+                <button type="button" className="lx-btn lx-btn-primary lx-btn-sm" onClick={onGoTerminal}>
+                  Abrir terminal <ArrowRight size={14} />
                 </button>
-              )}
-            </div>
-          ) : (
-            <button
-              className="btn-hero-secondary"
-              style={{ padding: '6px 14px', fontSize: '0.8rem', borderRadius: '20px' }}
-              onClick={() => {
-                playTerminalSound('click');
-                onOpenLogin();
-              }}
-            >
-              <Lock size={13} /> Entrar
-            </button>
-          )}
+                <span className="lx-user"><span className="lx-dot" />{session.username}</span>
+                {onLogout && (
+                  <button type="button" className="lx-icon-btn" onClick={onLogout} aria-label="Cerrar sesión" title="Cerrar sesión">
+                    <LogOut size={15} />
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <button type="button" className="lx-btn lx-btn-ghost lx-btn-sm" onClick={login}>
+                  <Lock size={14} /> Entrar
+                </button>
+                <button type="button" className="lx-btn lx-btn-primary lx-btn-sm" onClick={register}>
+                  Crear cuenta
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
-      {/* Live Financial Ticker on Landing */}
       {bvcTickers && bvcTickers.length > 0 && (
-        <div style={{ margin: '0 auto 16px auto', maxWidth: '1240px', width: 'calc(100% - 32px)' }}>
+        <div className="lx-tape">
           <TickerTape
             tickers={bvcTickers}
             intlTickers={intlTickers}
             currentEcosystem={currentEcosystem || 'BVC'}
-            onSelectTicker={() => {
-              if (onGoTerminal) onGoTerminal();
-            }}
+            onSelectTicker={() => onGoTerminal?.()}
           />
         </div>
       )}
 
-      {/* 2. HERO SECTION */}
-      <section className="welcome-hero glass-panel">
-        <div className="hero-glow-blob blob-1"></div>
-        <div className="hero-glow-blob blob-2"></div>
-
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="pulse-dot"></span>
-            <span>TERMINAL BURSÁTIL BVC & WALL STREET · VERSIÓN 6.0 OFICIAL</span>
-          </div>
-
-          <h1 className="hero-title">
-            Domina la Rueda Bursátil: Protección Patrimonial contra la Devaluación en{' '}
-            <span className="gradient-text">Caracas y Wall Street</span>
+      {/* HERO */}
+      <header className="lx-hero" id="top">
+        <div className="lx-hero-copy">
+          <span className="lx-eyebrow lx-rise" style={{ animationDelay: '40ms' }}>
+            Bolsa de Valores de Caracas · Wall Street
+          </span>
+          <h1 className="lx-rise" style={{ animationDelay: '110ms' }}>
+            Tu ganancia en bolívares, <span className="lx-accent-text">medida en dólares reales</span>
           </h1>
-
-          <p className="hero-description">
-            Bienvenido a <strong>KixInvertAPP</strong>, la primera plataforma financiera con motor{' '}
-            <strong>Tri-Monetario (VES, BCV y USDT)</strong> diseñada para eliminar la ilusión nominal en Venezuela.
-            Monitorea las 46 acciones de la <strong>Bolsa de Valores de Caracas (BVC)</strong>, invierte en gigantes
-            de <strong>Wall Street (NYSE / NASDAQ)</strong>, ejecuta señales tácticas cuantitativas y recibe alertas push
-            instantáneas en Telegram.
+          <p className="lx-lead lx-rise" style={{ animationDelay: '180ms' }}>
+            KixInvert sigue tu portafolio de la BVC en bolívares, dólar BCV y USDT al mismo tiempo, para que sepas
+            si tus acciones le están ganando a la devaluación.
           </p>
-
-          <div className="hero-actions">
-            <button
-              className="btn-hero-primary"
-              id="btn-hero-register"
-              onClick={() => {
-                playTerminalSound('success');
-                onOpenRegister();
-              }}
-            >
-              <UserPlus size={18} /> Crear Cuenta Gratis
-            </button>
-            <button
-              className="btn-hero-secondary"
-              id="btn-hero-login"
-              onClick={() => {
-                playTerminalSound('click');
-                onOpenLogin();
-              }}
-            >
-              <Lock size={18} /> Iniciar Sesión
-            </button>
-            <button
-              className="btn-hero-accent"
-              id="btn-hero-explore-demo"
-              onClick={() => {
-                playTerminalSound('success');
-                onEnterDemo();
-              }}
-            >
-              <Zap size={18} /> Probar Demo en Vivo
-            </button>
-          </div>
-
-          <div className="hero-stats-row">
-            <div className="hero-stat-item">
-              <span className="stat-number">46</span>
-              <span className="stat-label">Títulos BVC Caracas en Vivo</span>
-            </div>
-            <div className="hero-stat-divider"></div>
-            <div className="hero-stat-item">
-              <span className="stat-number">15+</span>
-              <span className="stat-label">Wall Street (AAPL, NVDA, SPY)</span>
-            </div>
-            <div className="hero-stat-divider"></div>
-            <div className="hero-stat-item">
-              <span className="stat-number">Tri-Moneda</span>
-              <span className="stat-label">VES • Dólar BCV • USDT Binance</span>
-            </div>
-            <div className="hero-stat-divider"></div>
-            <div className="hero-stat-item">
-              <span className="stat-number">IA + Bot</span>
-              <span className="stat-label">Analista IA & Push Telegram</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. HISTORIA DEL PRODUCTO SECTION */}
-      <section className="welcome-story-section" id="sec-story">
-        <div className="section-badge-center">
-          <Layers size={14} /> NUESTRA HISTORIA Y MISIÓN
-        </div>
-        <h2 className="section-title-large text-center">
-          Por qué creamos KixInvertAPP: La solución a la Ilusión Nominal
-        </h2>
-        <p className="section-subtitle-center text-center">
-          Nacimos para resolver el mayor dilema de los inversionistas venezolanos: el impacto destructivo del desfase cambiario en las acciones locales.
-        </p>
-
-        <div className="story-grid">
-          {/* Story Block 1 */}
-          <SpotlightCard className="story-card" spotlightColor="rgba(229, 97, 110, 0.15)">
-            <div className="story-card-icon bg-rose">
-              <AlertTriangle size={24} />
-            </div>
-            <h3>1. El Dilema de la Ilusión Nominal</h3>
-            <p>
-              Invertir en la Bolsa de Caracas tradicionalmente significaba volar a ciegas. Una acción podía subir{' '}
-              <strong>+25% en Bolívares</strong> en una semana, pero si la tasa del dólar libre saltaba <strong>+35%</strong>{' '}
-              en el mismo período, el inversionista en realidad había <strong>perdido un 10% de su poder adquisitivo en dólares</strong>{' '}
-              sin darse cuenta. Las plataformas bancarias tradicionales solo muestran bolívares, ocultando esta erosión patrimonial.
-            </p>
-          </SpotlightCard>
-
-          {/* Story Block 2 */}
-          <SpotlightCard className="story-card highlighted-border" spotlightColor="rgba(124, 140, 255, 0.18)">
-            <div className="story-card-icon bg-cyan">
-              <Layers size={24} />
-            </div>
-            <h3>2. La Solución Tri-Monetaria en Tiempo Real</h3>
-            <p>
-              KixInvertAPP fue fundada por operadores bursátiles y desarrolladores para terminar con la ceguera cambiaria. Desarrollamos un motor cuantitativo que sincroniza cada rueda bursátil de la BVC con los tipos de cambio oficiales del{' '}
-              <strong>Banco Central de Venezuela (BCV)</strong> y el mercado libre <strong>(Binance P2P USDT)</strong>. Cada posición calcula al segundo su rentabilidad real en moneda dura y advierte del rezago cambiario.
-            </p>
-          </SpotlightCard>
-
-          {/* Story Block 3 */}
-          <SpotlightCard className="story-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="story-card-icon bg-purple">
-              <Globe size={24} />
-            </div>
-            <h3>3. De Caracas a Wall Street & Móvil</h3>
-            <p>
-              Nuestra comunidad exigía diversificar el riesgo país. Integramos <strong>Wall Street en dólares nativos</strong>, permitiendo gestionar en una misma terminal títulos de Caracas (BNC, Mercantil, Santa Teresa) junto a gigantes globales (Apple, NVIDIA, S&P 500). Hoy, con la versión 6.0, KixInvertAPP es un ecosistema SaaS institucional con analista IA, simulador de estrés cambiario What-If y alertas móviles en Telegram.
-            </p>
-          </SpotlightCard>
-        </div>
-
-        {/* Story Metrics Bar */}
-        <div className="story-metrics-bar glass-panel" style={{ marginTop: '32px' }}>
-          <div className="story-metric">
-            <strong className="metric-big text-cyan">+Bs 250M+</strong>
-            <span>Operaciones de mercado analizadas en rueda bursátil</span>
-          </div>
-          <div className="story-metric-divider"></div>
-          <div className="story-metric">
-            <strong className="metric-big text-green">100%</strong>
-            <span>Protección transparente contra el desfase cambiario</span>
-          </div>
-          <div className="story-metric-divider"></div>
-          <div className="story-metric">
-            <strong className="metric-big text-amber">&lt; 3 seg</strong>
-            <span>Tiempo de cálculo para señales de compra y venta</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. VISUAL SHOWCASE: 3 PROJECT IMAGES */}
-      <section className="welcome-gallery-section" id="sec-gallery">
-        <div className="gallery-header text-center">
-          <div className="section-badge-center">
-            <Sparkles size={14} /> VISTA PREVIA DEL SISTEMA
-          </div>
-          <h2>El Terminal en Funcionamiento Real</h2>
-          <p className="subtitle">
-            Ecosistemas especializados, aislados y diseñados bajo estándares de Bloomberg Terminal
-          </p>
-        </div>
-
-        <div className="gallery-grid">
-          {/* Card 1: Ecosistema BVC Caracas */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
-              <Image
-                src="/img/preview-dashboard.png"
-                alt="Ecosistema BVC Caracas KixInvertAPP"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'top' }}
-              />
-              <div className="img-badge">Terminal BVC Caracas</div>
-            </div>
-            <div className="gallery-card-body">
-              <h3>1. Terminal BVC (Bolsa de Caracas)</h3>
-              <p>
-                Ecosistema especializado en acciones venezolanas (BNC, Mercantil, Santa Teresa). Monitoreo simultáneo en{' '}
-                <strong>Bolívares (VES)</strong>, <strong>Dólar BCV</strong> y <strong>USDT Binance</strong> con medidor en vivo de{' '}
-                <strong>Brecha Cambiaria</strong>.
-              </p>
-            </div>
-          </SpotlightCard>
-
-          {/* Card 2: Ecosistema Wall Street Global */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
-              <Image
-                src="/img/preview-positions.png"
-                alt="Ecosistema Wall Street KixInvertAPP"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'top' }}
-              />
-              <div className="img-badge">Terminal Wall Street</div>
-            </div>
-            <div className="gallery-card-body">
-              <h3>2. Terminal Wall Street & ETFs</h3>
-              <p>
-                Ecosistema independiente en Dólares (USD). Monitorea gigantes como{' '}
-                <strong>Apple, NVIDIA, Tesla, Microsoft</strong> y fondos globales como el <strong>S&P 500 (SPY)</strong> y{' '}
-                <strong>Nasdaq 100 (QQQ)</strong> con cotizaciones en tiempo real.
-              </p>
-            </div>
-          </SpotlightCard>
-
-          {/* Card 3: Patrimonio Consolidado & AI */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
-              <Image
-                src="/img/preview-allocation.png"
-                alt="Patrimonio Consolidado KixInvertAPP"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'top' }}
-              />
-              <div className="img-badge">Patrimonio Consolidado</div>
-            </div>
-            <div className="gallery-card-body">
-              <h3>3. Consolidación Global & AI</h3>
-              <p>
-                Visualiza tu patrimonio neto total unificado sin mezclar tus operaciones. Tu analista bursátil autónomo{' '}
-                <strong>KixInvert AI</strong> te asesora sobre diversificación bimonetaria entre Caracas y Nueva York.
-              </p>
-            </div>
-          </SpotlightCard>
-        </div>
-      </section>
-
-      {/* 5. FEATURE PILLARS SECTION */}
-      <section className="welcome-features-section" id="sec-features">
-        <div className="section-badge-center">
-          <Zap size={14} /> TECNOLOGÍA BURSÁTIL INSTITUCIONAL
-        </div>
-        <h2 className="section-title-large text-center">Seis Pilares de Alto Rendimiento para tu Portafolio</h2>
-        <p className="section-subtitle-center text-center">
-          Herramientas profesionales que reemplazan múltiples hojas de Excel por un sistema automático e infalible.
-        </p>
-
-        <div className="features-grid-6">
-          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="feature-icon bg-green">
-              <Coins size={24} />
-            </div>
-            <h4>1. Matemática Tri-Monetaria</h4>
-            <p>
-              Calcula automáticamente la equivalencia en Bolívares, Dólares BCV y USDT de Binance P2P para cada título, detectando el rendimiento real en moneda dura.
-            </p>
-          </SpotlightCard>
-
-          <SpotlightCard className="feature-box" spotlightColor="rgba(217, 164, 65, 0.15)">
-            <div className="feature-icon bg-amber">
-              <TrendingUp size={24} />
-            </div>
-            <h4>2. Señales Tácticas Cuantitativas</h4>
-            <p>
-              Badges en vivo que te indican cuándo tomar ganancias (+25% a +40% USDT), cuándo comprar en descuento cambiario y cuándo rotar títulos por rezago.
-            </p>
-          </SpotlightCard>
-
-          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="feature-icon bg-purple">
-              <Bot size={24} />
-            </div>
-            <h4>3. Analista KixInvert AI</h4>
-            <p>
-              Diagnóstico conversacional multi-turno con IA bursátil que evalúa la salud de tu cartera, calcula cobertura contra la devaluación y sugiere rebalanceos exactos.
-            </p>
-          </SpotlightCard>
-
-          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="feature-icon bg-blue">
-              <Globe size={24} />
-            </div>
-            <h4>4. Terminal Wall Street Integrada</h4>
-            <p>
-              Invierte en acciones de EE.UU. (NYSE / NASDAQ) con cotizaciones en vivo en USD. Cero confusiones cambiarias gracias a la separación estricta de ecosistemas.
-            </p>
-          </SpotlightCard>
-
-          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <div className="feature-icon bg-cyan">
-              <Sliders size={24} />
-            </div>
-            <h4>5. Simulador What-If & PDF</h4>
-            <p>
-              Modela saltos del dólar BCV (+15%, +30%, +50%) y choques de mercado. Emite estados de cuenta ejecutivos A4 en PDF listos para imprimir con un clic.
-            </p>
-          </SpotlightCard>
-
-          <SpotlightCard className="feature-box" spotlightColor="rgba(0, 136, 204, 0.15)">
-            <div className="feature-icon bg-telegram">
-              <Send size={24} />
-            </div>
-            <h4>6. Bot de Telegram Móvil</h4>
-            <p>
-              Recibe alertas push instantáneas en tu celular con @KixInvert_bot ante brechas cambiarias críticas (&gt;=18%) y consulta tus saldos con el comando /balance.
-            </p>
-          </SpotlightCard>
-        </div>
-      </section>
-
-      {/* 6. PRICING & SUBSCRIPTION SECTION */}
-      <section className="welcome-pricing-section" id="sec-pricing">
-        <div className="section-badge-center">
-          <Crown size={14} /> PRECIOS Y PLANES
-        </div>
-        <h2 className="section-title-large text-center">Inversión Inteligente a un Precio Transparente</h2>
-        <p className="section-subtitle-center text-center">
-          Paga en USDT con Binance Pay (sin comisiones), Pago Móvil en Bolívares o Tarjeta Internacional. Cancela cuando quieras.
-        </p>
-
-        <div className="pricing-grid">
-          {/* Plan Free */}
-          <SpotlightCard className="pricing-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-            <div className="pricing-header">
-              <span className="plan-tag">INVERSIONISTA INICIAL</span>
-              <h3 className="plan-name">Plan Free</h3>
-              <p className="plan-desc">Para inversionistas particulares que desean monitorear su cartera sin costo.</p>
-              <div className="plan-price">
-                <span className="currency">$</span>
-                <span className="amount">0</span>
-                <span className="period">/ siempre gratis</span>
-              </div>
-            </div>
-
-            <ul className="plan-features">
-              <li><Check size={16} className="text-green" /> Monitoreo Tri-Monetario (VES / BCV / USDT)</li>
-              <li><Check size={16} className="text-green" /> Posiciones ilimitadas en BVC y Wall Street</li>
-              <li><Check size={16} className="text-green" /> Pizarra bursátil en tiempo real</li>
-              <li><Check size={16} className="text-green" /> 10 consultas mensuales a KixInvert AI</li>
-              <li><Check size={16} className="text-green" /> Medidor de brecha cambiaria en vivo</li>
-              <li className="disabled"><X size={16} /> Alertas móviles 24/7 en Telegram</li>
-              <li className="disabled"><X size={16} /> Simulador What-If ilimitado</li>
-              <li className="disabled"><X size={16} /> Reportes Ejecutivos PDF descargables</li>
-            </ul>
-
-            <button
-              className="btn-plan-secondary"
-              onClick={() => {
-                playTerminalSound('click');
-                onOpenRegister();
-              }}
-            >
-              Comenzar Gratis
-            </button>
-          </SpotlightCard>
-
-          {/* Plan PRO (Featured) */}
-          <SpotlightCard className="pricing-card featured-pricing" spotlightColor="rgba(124, 140, 255, 0.22)">
-            <div className="featured-badge">
-              <Crown size={14} /> MÁS POPULAR
-            </div>
-            <div className="pricing-header">
-              <span className="plan-tag text-cyan">INVERSIONISTA ACTIVO</span>
-              <h3 className="plan-name">Plan PRO Ilimitado</h3>
-              <p className="plan-desc">Para operadores bursátiles exigentes que demandan señales cuantitativas y alertas móviles.</p>
-              <div className="plan-price">
-                <span className="currency">$</span>
-                <span className="amount">7</span>
-                <span className="period">/ mes (o equivalente en Bs / USDT)</span>
-              </div>
-            </div>
-
-            <ul className="plan-features">
-              <li><Check size={16} className="text-cyan" /> <strong>Todo lo incluido en el Plan Free</strong></li>
-              <li><Check size={16} className="text-cyan" /> <strong>Consultas ILIMITADAS a KixInvert AI</strong></li>
-              <li><Check size={16} className="text-cyan" /> <strong>Bot de Telegram @KixInvert_bot 24/7</strong></li>
-              <li><Check size={16} className="text-cyan" /> <strong>Simulador What-If de Devaluación ilimitado</strong></li>
-              <li><Check size={16} className="text-cyan" /> <strong>Reportes Ejecutivos Oficiales en PDF A4</strong></li>
-              <li><Check size={16} className="text-cyan" /> <strong>Detalle de Señales Tácticas</strong> con precios objetivo</li>
-              <li><Check size={16} className="text-cyan" /> Pagos en Binance Pay USDT o Pago Móvil VES</li>
-            </ul>
-
-            <button
-              className="btn-plan-primary"
-              onClick={() => {
-                playTerminalSound('success');
-                onOpenRegister();
-              }}
-            >
-              <Zap size={16} /> Suscribirme a PRO
-            </button>
-          </SpotlightCard>
-
-          {/* Plan Institucional */}
-          <SpotlightCard className="pricing-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-            <div className="pricing-header">
-              <span className="plan-tag">CASAS DE BOLSA & FONDOS</span>
-              <h3 className="plan-name">Plan Institucional</h3>
-              <p className="plan-desc">Para corredores bursátiles, firmas de corretaje y asesores de inversión registrados.</p>
-              <div className="plan-price">
-                <span className="amount-custom">Personalizado</span>
-                <span className="period">/ facturación corporativa</span>
-              </div>
-            </div>
-
-            <ul className="plan-features">
-              <li><Check size={16} className="text-green" /> Multi-portafolio consolidado de clientes</li>
-              <li><Check size={16} className="text-green" /> Reportes PDF con marca blanca y logo propio</li>
-              <li><Check size={16} className="text-green" /> API Webhook para sincronizar sistemas internos</li>
-              <li><Check size={16} className="text-green" /> Acceso a data histórica de transacciones BVC</li>
-              <li><Check size={16} className="text-green" /> Canal de soporte prioritario directo vía Telegram/WhatsApp</li>
-            </ul>
-
-            <a
-              href="#sec-contact"
-              className="btn-plan-secondary"
-              onClick={() => playTerminalSound('click')}
-              style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
-            >
-              Contactar Asesor Institucional
-            </a>
-          </SpotlightCard>
-        </div>
-      </section>
-
-      {/* 7. CHANGELOG / PRODUCT TIMELINE SECTION */}
-      <section className="welcome-changelog-section" id="sec-changelog">
-        <div className="section-badge-center">
-          <Calendar size={14} /> REGISTRO DE VERSIONES
-        </div>
-        <h2 className="section-title-large text-center">Evolución Continua · Changelog KixInvertAPP</h2>
-        <p className="section-subtitle-center text-center">
-          Desarrollo ágil e iterativo enfocado en resolver las necesidades reales de los inversionistas.
-        </p>
-
-        <div className="changelog-timeline">
-          {/* Release v6.0 */}
-          <div className="changelog-item">
-            <div className="cl-point active-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-              <div className="cl-header">
-                <span className="cl-version-badge badge-current">v6.0 · VERSIÓN ACTUAL</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Bot de Telegram (@KixInvert_bot) & Alertas Push Móviles</h3>
-              <p className="cl-desc">Lanzamiento del canal móvil en tiempo real para no tener que estar frente a la pantalla todo el día.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Bot Telegram Oficial</span>
-                <span className="cl-tag tag-new"><Check size={13} /> Emparejamiento por código /start KIX-XXXX</span>
-                <span className="cl-tag tag-new"><Check size={13} /> Alertas push de Brecha Crítica (&gt;=18%)</span>
-                <span className="cl-tag tag-new"><Check size={13} /> Comandos /balance, /alertas y /ayuda</span>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          {/* Release v5.0 */}
-          <div className="changelog-item">
-            <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(124, 140, 255, 0.12)">
-              <div className="cl-header">
-                <span className="cl-version-badge">v5.0</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Simulador de Estrés What-If & Reportes Ejecutivos PDF</h3>
-              <p className="cl-desc">Herramientas matemáticas para planificar escenarios de devaluación y emitir estados de cuenta bancarios.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Simulador What-If (+15%, +30%, +50% BCV)</span>
-                <span className="cl-tag tag-new"><Check size={13} /> Reportes Ejecutivos A4 imprimibles</span>
-                <span className="cl-tag tag-improve"><ShieldCheck size={13} /> Medición de poder adquisitivo salvado vs efectivo</span>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          {/* Release v4.0 */}
-          <div className="changelog-item">
-            <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-              <div className="cl-header">
-                <span className="cl-version-badge">v4.0</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Centro de Notificaciones Inteligente & Feed Bursátil</h3>
-              <p className="cl-desc">Campanita en el navbar con categorización de alertas y algoritmo de deduplicación de 4 horas.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Filtros de alertas (Tácticas / Mercado)</span>
-                <span className="cl-tag tag-improve"><Sliders size={13} /> Ventana de deduplicación inteligente anti-spam</span>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          {/* Release v3.0 */}
-          <div className="changelog-item">
-            <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-              <div className="cl-header">
-                <span className="cl-version-badge">v3.0</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Terminal Wall Street & Arquitectura Bimonetaria</h3>
-              <p className="cl-desc">Integración de activos estadounidenses (NYSE/NASDAQ) con cotizaciones en vivo en USD vía Yahoo Finance.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Cotizaciones en vivo de AAPL, NVDA, SPY, QQQ</span>
-                <span className="cl-tag tag-improve"><Layers size={13} /> Aislamiento estricto de carteras Caracas vs. Nueva York</span>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          {/* Release v2.0 */}
-          <div className="changelog-item">
-            <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-              <div className="cl-header">
-                <span className="cl-version-badge">v2.0</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Motor de Señales Tácticas Cuantitativas</h3>
-              <p className="cl-desc">Detección matemática de toma de ganancias en dólares y riesgo de sobreconcentración.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Badges de Vender 40% (+25% a +40% USDT)</span>
-                <span className="cl-tag tag-improve"><Check size={13} /> Alerta de rotación por desfase cambiario</span>
-              </div>
-            </SpotlightCard>
-          </div>
-
-          {/* Release v1.0 */}
-          <div className="changelog-item">
-            <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(255, 255, 255, 0.08)">
-              <div className="cl-header">
-                <span className="cl-version-badge">v1.0</span>
-                <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
-              </div>
-              <h3 className="cl-title">Lanzamiento Fundacional del Terminal BVC Tri-Monetario</h3>
-              <p className="cl-desc">El primer monitor bursátil de Venezuela con valuación simultánea en Bolívares, BCV y USDT.</p>
-              <div className="cl-tags">
-                <span className="cl-tag tag-new"><Check size={13} /> Scraping en vivo de 46 títulos de la BVC</span>
-                <span className="cl-tag tag-new"><Check size={13} /> Conexión con tasas BCV y Binance P2P</span>
-              </div>
-            </SpotlightCard>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. FAQ SECTION */}
-      <section className="welcome-faq-section" id="sec-faq">
-        <div className="section-badge-center">
-          <ShieldAlert size={14} /> PREGUNTAS FRECUENTES
-        </div>
-        <h2 className="section-title-large text-center">Respuestas a tus Dudas Financieras</h2>
-        <p className="section-subtitle-center text-center">
-          Todo lo que necesitas saber antes de registrarte en KixInvertAPP.
-        </p>
-
-        <div className="faq-accordion">
-          {[
-            {
-              q: '¿Por qué KixInvertAPP calcula tres monedas diferentes para cada acción?',
-              a: 'En Venezuela, una acción se compra en Bolívares (VES), pero su costo de reposición se rige por el Dólar Oficial BCV y su liquidez efectiva se compara con el Dólar Cripto USDT (Binance P2P). KixInvertAPP calcula las tres monedas en tiempo real para que sepas si tu ganancia nominal en bolívares supera la devaluación real y estás verdaderamente ganando dinero en moneda dura.',
-            },
-            {
-              q: '¿Cómo funciona el Bot de Telegram (@KixInvert_bot)?',
-              a: 'Una vez creada tu cuenta, puedes vincular tu Telegram en un solo clic enviando el comando /start KIX-XXXX a nuestro bot oficial. A partir de ese momento, el sistema te enviará alertas automáticas cada vez que la brecha cambiaria supere el 18% o cuando una acción de tu cartera alcance una señal táctica de toma de ganancias. Además, puedes escribirle /balance para consultar el saldo de tu cartera en cualquier momento.',
-            },
-            {
-              q: '¿Puedo pagar el Plan PRO con métodos locales de Venezuela?',
-              a: '¡Sí! Aceptamos Binance Pay USDT (pago automático en 5 segundos con 0% de comisiones), Pago Móvil en Bolívares (VES) a la tasa oficial, y tarjetas internacionales de débito/crédito.',
-            },
-            {
-              q: '¿Mis datos financieros y compras de acciones son confidenciales?',
-              a: 'Totalmente. Tus posiciones, compras y saldos están protegidos con cifrado de grado bancario (AES-256), autenticación por doble factor (2FA TOTP), y estricta separación de datos multi-inquilino. Ningún otro usuario ni tercero puede acceder a la composición de tu patrimonio.',
-            },
-            {
-              q: '¿Puedo monitorear acciones de Caracas y Wall Street a la vez?',
-              a: 'Sí. KixInvertAPP cuenta con dos ecosistemas especializados y estrictamente aislados: el Terminal BVC Caracas (en Bolívares y Dólares) y el Terminal Wall Street Global (en Dólares nativos). Puedes alternar entre ellos con un solo clic y consultar un banner superior que consolida tu patrimonio neto global sin mezclar tus operaciones.',
-            },
-            {
-              q: '¿Qué es el Simulador de Estrés What-If?',
-              a: 'Es una herramienta interactiva que te permite mover sliders para simular saltos en la tasa BCV (+15%, +30%, +50%) o cambios en la brecha cambiaria. El motor recalcula instantáneamente el valor proyectado de tu portafolio y te muestra exactamente cuántos dólares de poder adquisitivo salvaste al estar invertido en acciones en lugar de mantener bolívares ociosos en el banco.',
-            },
-          ].map((item, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
-              <div key={idx} className={`faq-card glass-panel ${isOpen ? 'open' : ''}`}>
-                <button type="button" className="faq-question-btn" onClick={() => toggleFaq(idx)}>
-                  <span>{item.q}</span>
-                  <ChevronDown
-                    size={18}
-                    className="faq-arrow"
-                    style={{
-                      transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease',
-                      color: isOpen ? '#9aa6ff' : '#9aa3b2',
-                    }}
-                  />
+          <div className="lx-cta lx-rise" style={{ animationDelay: '250ms' }}>
+            {session ? (
+              <button type="button" className="lx-btn lx-btn-primary" onClick={onGoTerminal}>
+                Ir a mi terminal <ArrowRight size={16} />
+              </button>
+            ) : (
+              <>
+                <button type="button" className="lx-btn lx-btn-primary" onClick={register}>
+                  Crear cuenta gratis <ArrowRight size={16} />
                 </button>
-                {isOpen && (
-                  <div className="faq-answer-content">
-                    <p>{item.a}</p>
-                  </div>
-                )}
+                <button type="button" className="lx-btn lx-btn-ghost" onClick={login}>
+                  Ya tengo cuenta
+                </button>
+              </>
+            )}
+          </div>
+          <ul className="lx-trust lx-rise" style={{ animationDelay: '320ms' }}>
+            <li><Check size={14} /> Plan gratuito sin tarjeta</li>
+            <li><ShieldCheck size={14} /> 2FA con Google Authenticator</li>
+            <li><Send size={14} /> Alertas en Telegram</li>
+          </ul>
+        </div>
+
+        {/* Live market card: every number here comes from the backend */}
+        <aside className="lx-market lx-rise" style={{ animationDelay: '200ms' }} aria-label="Mercado en vivo">
+          <div className="lx-market-head">
+            <span className="lx-live"><span className="lx-dot" /> Mercado ahora</span>
+            <span className="lx-muted">{rates?.updated_at ? `Actualizado ${rates.updated_at}` : 'Tasas en vivo'}</span>
+          </div>
+          <div className="lx-rates">
+            <div className="lx-rate">
+              <span className="lx-rate-label"><Landmark size={13} /> Dólar BCV</span>
+              <strong>{hasRates ? <CountUp value={rates!.bcv} format={formatVES} /> : '—'}</strong>
+            </div>
+            <div className="lx-rate">
+              <span className="lx-rate-label"><Coins size={13} /> USDT P2P</span>
+              <strong>{hasRates ? <CountUp value={rates!.usdt} format={formatVES} /> : '—'}</strong>
+            </div>
+            <div className="lx-rate lx-rate-gap">
+              <span className="lx-rate-label">Brecha</span>
+              <strong>{hasRates ? <CountUp value={rates!.brecha_pct} format={(n) => `${n.toFixed(2)}%`} /> : '—'}</strong>
+            </div>
+          </div>
+          <div className="lx-movers">
+            <div className="lx-movers-title">Mayores movimientos de hoy en la BVC</div>
+            {movers.length === 0 ? (
+              <div className="lx-muted lx-movers-empty">Cargando la pizarra de la BVC…</div>
+            ) : (
+              <ul>
+                {movers.map((t, i) => {
+                  const up = t.change_pct > 0;
+                  return (
+                    <li key={t.symbol} style={{ animationDelay: `${380 + i * 70}ms` }}>
+                      <span className="lx-tk">{t.symbol}</span>
+                      <span className="lx-tk-name">{t.name}</span>
+                      <span className="lx-tk-price">{formatVES(t.price)}</span>
+                      <span className={`lx-chg ${up ? 'up' : 'down'}`}>
+                        {up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
+                        {Math.abs(t.change_pct).toFixed(2)}%
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </aside>
+      </header>
+
+      {/* NOMINAL ILLUSION */}
+      <section className="lx-section lx-illusion" data-reveal>
+        <div className="lx-section-head">
+          <span className="lx-eyebrow">La ilusión nominal</span>
+          <h2>Subir en bolívares no siempre es ganar</h2>
+          <p>
+            Si tu acción sube 25% pero el dólar sube 35% en el mismo tiempo, en dólares perdiste dinero.
+            Mueve los valores y compruébalo.
+          </p>
+        </div>
+        <div className="lx-calc">
+          <div className="lx-calc-inputs">
+            <label htmlFor="lx-stock-gain">
+              <span>Tu acción subió en bolívares</span>
+              <strong>+{stockGain}%</strong>
+            </label>
+            <input id="lx-stock-gain" type="range" min={0} max={150} value={stockGain} onChange={(e) => setStockGain(Number(e.target.value))} />
+            <label htmlFor="lx-dollar-jump">
+              <span>El dólar subió en el mismo período</span>
+              <strong>+{dollarJump}%</strong>
+            </label>
+            <input id="lx-dollar-jump" type="range" min={0} max={150} value={dollarJump} onChange={(e) => setDollarJump(Number(e.target.value))} />
+          </div>
+          <div className={`lx-calc-result ${realReturn >= 0 ? 'up' : 'down'}`} aria-live="polite">
+            <span className="lx-muted">Tu rendimiento real en dólares</span>
+            <strong className="lx-calc-big">{realReturn >= 0 ? '+' : ''}{realReturn.toFixed(2)}%</strong>
+            <p>
+              {realReturn >= 0
+                ? 'Le ganaste a la devaluación: tu poder de compra creció.'
+                : 'Ganaste en bolívares, pero perdiste poder de compra en dólares.'}
+            </p>
+            <div className="lx-bars" aria-hidden="true">
+              <div className="lx-bar"><span>En Bs</span><i style={{ width: `${Math.min(100, stockGain / 1.5)}%` }} /></div>
+              <div className="lx-bar lx-bar-dollar"><span>Dólar</span><i style={{ width: `${Math.min(100, dollarJump / 1.5)}%` }} /></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="lx-section" id="funciones" data-reveal>
+        <div className="lx-section-head">
+          <span className="lx-eyebrow">Funciones</span>
+          <h2>Todo lo que necesitas para seguir tu cartera</h2>
+        </div>
+        <div className="lx-features">
+          {FEATURES.map(({ icon: Icon, title, text }, i) => (
+            <article key={title} className="lx-feature" data-reveal style={{ transitionDelay: `${i * 60}ms` }}>
+              <span className="lx-feature-icon"><Icon size={20} /></span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS (a real sequence, so the numbers carry meaning) */}
+      <section className="lx-section" id="como-funciona" data-reveal>
+        <div className="lx-section-head">
+          <span className="lx-eyebrow">Cómo funciona</span>
+          <h2>Empieza en tres pasos</h2>
+        </div>
+        <ol className="lx-steps">
+          {STEPS.map(({ icon: Icon, title, text }, i) => (
+            <li key={title} className="lx-step" data-reveal style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="lx-step-num">{i + 1}</span>
+              <span className="lx-step-icon"><Icon size={18} /></span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* PRICING */}
+      <section className="lx-section" id="precios" data-reveal>
+        <div className="lx-section-head">
+          <span className="lx-eyebrow">Precios</span>
+          <h2>Gratis para empezar, PRO cuando lo necesites</h2>
+        </div>
+        <div className="lx-pricing">
+          <article className="lx-plan">
+            <h3>Gratuito</h3>
+            <div className="lx-price"><strong>0</strong><span>USDT / mes</span></div>
+            <ul>
+              <li><Check size={15} /> Portafolio en Bs, dólar BCV y USDT</li>
+              <li><Check size={15} /> Pizarra de la BVC y Wall Street</li>
+              <li><Check size={15} /> Simulador What-If</li>
+              <li><Check size={15} /> Alertas en Telegram</li>
+              <li><Check size={15} /> 10 consultas al mes a KixInvert AI</li>
+            </ul>
+            <button type="button" className="lx-btn lx-btn-ghost lx-btn-block" onClick={session ? onGoTerminal : register}>
+              {session ? 'Ir al terminal' : 'Crear cuenta gratis'}
+            </button>
+          </article>
+          <article className="lx-plan lx-plan-pro">
+            <span className="lx-plan-tag"><Crown size={13} /> PRO</span>
+            <h3>PRO</h3>
+            <div className="lx-price"><strong>5</strong><span>USDT / mes</span></div>
+            <ul>
+              <li><Check size={15} /> Todo lo del plan gratuito</li>
+              <li><Check size={15} /> Consultas ilimitadas a KixInvert AI</li>
+              <li><Check size={15} /> Pago con Binance Pay</li>
+            </ul>
+            <button type="button" className="lx-btn lx-btn-primary lx-btn-block" onClick={session ? onGoTerminal : register}>
+              {session ? 'Activar desde el terminal' : 'Empezar y pasar a PRO'}
+            </button>
+          </article>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="lx-section" id="faq" data-reveal>
+        <div className="lx-section-head">
+          <span className="lx-eyebrow">Preguntas frecuentes</span>
+          <h2>Lo que suelen preguntarnos</h2>
+        </div>
+        <div className="lx-faq">
+          {FAQ.map((item, idx) => {
+            const open = openFaq === idx;
+            return (
+              <div key={item.q} className={`lx-faq-item ${open ? 'open' : ''}`}>
+                <button
+                  type="button"
+                  id={`lx-faq-q-${idx}`}
+                  aria-expanded={open}
+                  aria-controls={`lx-faq-a-${idx}`}
+                  onClick={() => setOpenFaq(open ? null : idx)}
+                >
+                  <span>{item.q}</span>
+                  <ChevronDown size={18} />
+                </button>
+                <div id={`lx-faq-a-${idx}`} role="region" aria-labelledby={`lx-faq-q-${idx}`} className="lx-faq-a">
+                  <div><p>{item.a}</p></div>
+                </div>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* 9. CONTACT & SUPPORT SECTION */}
-      <section className="welcome-contact-section" id="sec-contact">
-        <div className="section-badge-center">
-          <Mail size={14} /> MESA DE ATENCIÓN AL INVERSIONISTA
+      {/* FINAL CTA */}
+      <section className="lx-final" data-reveal>
+        <h2>Empieza a medir tu cartera en dólares reales</h2>
+        <p>Crea tu cuenta gratis y registra tu primera compra en menos de un minuto.</p>
+        <div className="lx-cta lx-cta-center">
+          {session ? (
+            <button type="button" className="lx-btn lx-btn-primary" onClick={onGoTerminal}>
+              Ir a mi terminal <ArrowRight size={16} />
+            </button>
+          ) : (
+            <>
+              <button type="button" className="lx-btn lx-btn-primary" onClick={register}>
+                Crear cuenta gratis <ArrowRight size={16} />
+              </button>
+              <button type="button" className="lx-btn lx-btn-ghost" onClick={login}>
+                <KeyRound size={15} /> Iniciar sesión
+              </button>
+            </>
+          )}
         </div>
-        <h2 className="section-title-large text-center">¿Tienes Preguntas o Necesitas Soporte?</h2>
-        <p className="section-subtitle-center text-center">
-          Estamos a tu disposición para ayudarte a configurar tu terminal bursátil o responder dudas sobre el Plan PRO.
+      </section>
+
+      {/* FOOTER */}
+      <footer className="lx-footer">
+        <div className="lx-footer-row">
+          <span className="lx-brand"><span className="lx-brand-mark"><TrendingUp size={14} /></span>KixInvert</span>
+          <div className="lx-footer-links">
+            <a href="https://t.me/KixInvert_bot" target="_blank" rel="noopener noreferrer"><Send size={14} /> @KixInvert_bot</a>
+            <span><Mail size={14} /> soporte@kixinvert.com</span>
+          </div>
+        </div>
+        <p className="lx-disclaimer">
+          KixInvert es una herramienta de seguimiento y análisis. Las señales y respuestas del asistente son informativas y no
+          constituyen asesoría financiera. Invertir en bolsa implica riesgo de pérdida.
         </p>
-
-        <div className="contact-grid">
-          {/* Contact Direct Channels */}
-          <SpotlightCard className="contact-info-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <h3>Canales Oficiales Directos</h3>
-            <p className="text-dim text-sm">Nuestro equipo bursátil responde en menos de 2 horas durante ruedas de mercado.</p>
-
-            <div className="contact-methods-list">
-              <div className="contact-method-item">
-                <div className="method-icon bg-telegram">
-                  <AnimatedTelegram size={20} />
-                </div>
-                <div>
-                  <strong>Bot & Canal Oficial Telegram</strong>
-                  <span>
-                    <a href="https://t.me/KixInvert_bot" target="_blank" rel="noopener noreferrer">
-                      @KixInvert_bot
-                    </a>
-                  </span>
-                </div>
-              </div>
-
-              <div className="contact-method-item">
-                <div className="method-icon bg-cyan">
-                  <Mail size={18} />
-                </div>
-                <div>
-                  <strong>Correo de Soporte Técnico</strong>
-                  <span>soporte@kixinvert.com</span>
-                </div>
-              </div>
-
-              <div className="contact-method-item">
-                <div className="method-icon bg-blue">
-                  <Briefcase size={18} />
-                </div>
-                <div>
-                  <strong>Ventas & Planes Institucionales</strong>
-                  <span>ventas@kixinvert.com</span>
-                </div>
-              </div>
-
-              <div className="contact-method-item">
-                <div className="method-icon bg-green">
-                  <Clock size={18} />
-                </div>
-                <div>
-                  <strong>Horario Rueda Bursátil BVC</strong>
-                  <span>Lunes a Viernes · 8:30 AM a 5:00 PM (Hora Caracas)</span>
-                </div>
-              </div>
-            </div>
-          </SpotlightCard>
-
-          {/* Interactive Contact Form */}
-          <SpotlightCard className="contact-form-card" spotlightColor="rgba(124, 140, 255, 0.15)">
-            <h3>Envíanos un Mensaje</h3>
-            {contactSubmitted ? (
-              <div style={{ padding: '32px 16px', textAlign: 'center' }}>
-                <div style={{ color: '#7c8cff', marginBottom: '12px' }}>
-                  <ShieldCheck size={48} style={{ margin: '0 auto' }} />
-                </div>
-                <h4 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '8px' }}>¡Mensaje Enviado con Éxito!</h4>
-                <p style={{ color: '#9aa3b2', fontSize: '0.9rem' }}>
-                  Un asesor bursátil se comunicará contigo a tu correo en menos de 2 horas.
-                </p>
-              </div>
-            ) : (
-              <form id="landing-contact-form" onSubmit={handleContactSubmit}>
-                <div className="form-group-contact">
-                  <label htmlFor="contact-name">Nombre y Apellido</label>
-                  <input
-                    type="text"
-                    id="contact-name"
-                    className="contact-input"
-                    placeholder="Tu nombre completo"
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-group-contact">
-                  <label htmlFor="contact-email">Correo Electrónico</label>
-                  <input
-                    type="email"
-                    id="contact-email"
-                    className="contact-input"
-                    placeholder="tu.correo@ejemplo.com"
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div className="form-group-contact">
-                  <label htmlFor="contact-topic">Tipo de Consulta</label>
-                  <select
-                    id="contact-topic"
-                    className="contact-select"
-                    value={contactForm.topic}
-                    onChange={(e) => setContactForm({ ...contactForm, topic: e.target.value })}
-                  >
-                    <option value="pro_subscription">Consulta sobre el Plan PRO y Pagos</option>
-                    <option value="technical_support">Soporte Técnico / Conexión de Bot</option>
-                    <option value="institutional">Plan Institucional para Casas de Bolsa</option>
-                    <option value="general">Duda General sobre la Plataforma</option>
-                  </select>
-                </div>
-
-                <div className="form-group-contact">
-                  <label htmlFor="contact-message">Mensaje</label>
-                  <textarea
-                    id="contact-message"
-                    className="contact-textarea"
-                    rows={4}
-                    placeholder="Escribe tu consulta aquí..."
-                    value={contactForm.message}
-                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                    required
-                  ></textarea>
-                </div>
-
-                <button type="submit" className="btn-submit-contact" id="btn-submit-contact">
-                  <Send size={16} /> Enviar Mensaje a la Mesa de Asistencia
-                </button>
-              </form>
-            )}
-          </SpotlightCard>
-        </div>
-      </section>
-
-      {/* 10. FINAL WELCOME CTA */}
-      <section className="welcome-cta-banner glass-panel" style={{ marginTop: '48px' }}>
-        <div className="cta-banner-content">
-          <h2>¿Listo para elevar tus decisiones en la Bolsa de Caracas?</h2>
-          <p>Crea tu cuenta de inversionista en 30 segundos y comienza a monitorear tu capital con claridad tri-monetaria.</p>
-        </div>
-        <div className="cta-banner-actions">
-          <button
-            className="btn-hero-primary"
-            onClick={() => {
-              playTerminalSound('success');
-              onOpenRegister();
-            }}
-          >
-            <UserPlus size={18} /> Crear Mi Cuenta Gratis
-          </button>
-          <button
-            className="btn-hero-secondary"
-            onClick={() => {
-              playTerminalSound('click');
-              onOpenLogin();
-            }}
-          >
-            <Lock size={18} /> Ya Tengo Cuenta
-          </button>
-        </div>
-      </section>
-
-      {/* 11. COMPREHENSIVE LANDING FOOTER */}
-      <footer className="welcome-footer-full glass-panel" style={{ marginTop: '40px', padding: '40px 32px' }}>
-        <div className="footer-top-grid">
-          <div className="footer-col-brand">
-            <div className="footer-brand-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <TrendingUp size={22} className="text-cyan" />
-              <strong>KixInvertAPP</strong>
-            </div>
-            <p className="footer-brand-desc">
-              La plataforma de inteligencia bursátil tri-monetaria líder para inversionistas de la Bolsa de Valores de Caracas (BVC) y Wall Street Global.
-            </p>
-            <div className="footer-badges">
-              <span className="badge-ft"><ShieldCheck size={14} /> 2FA Habilitado</span>
-              <span className="badge-ft"><Lock size={14} /> Cifrado AES-256</span>
-              <span className="badge-ft"><Sparkles size={14} /> AI Cuantitativa</span>
-            </div>
-          </div>
-
-          <div className="footer-col-links">
-            <h4>Ecosistemas</h4>
-            <a href="#sec-gallery" onClick={onEnterDemo}>Bolsa de Caracas (BVC)</a>
-            <a href="#sec-gallery" onClick={onEnterDemo}>Wall Street Global (USD)</a>
-            <a href="#sec-gallery" onClick={onEnterDemo}>Patrimonio Consolidado</a>
-            <a href="#sec-features">Señales Tácticas de Venta</a>
-          </div>
-
-          <div className="footer-col-links">
-            <h4>Herramientas</h4>
-            <a href="#sec-features">Analista KixInvert AI</a>
-            <a href="#sec-features">Simulador What-If</a>
-            <a href="#sec-features">Reportes Ejecutivos PDF</a>
-            <a href="#sec-features">Bot Telegram @KixInvert_bot</a>
-          </div>
-
-          <div className="footer-col-links">
-            <h4>Legal & Plataforma</h4>
-            <a href="#sec-faq">Términos del Servicio</a>
-            <a href="#sec-faq">Aviso de Riesgo Bursátil</a>
-            <a href="#sec-faq">Política de Privacidad</a>
-            <a href="#sec-contact">Mesa de Asistencia</a>
-          </div>
-        </div>
-
-        <div className="footer-bottom-bar" style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ color: '#667085', fontSize: '0.8rem', margin: 0 }}>
-            © 2026 KixInvertAPP. Todos los derechos reservados. Diseñado para inversionistas independientes y casas de bolsa.
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ color: '#7c8cff', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#7c8cff', boxShadow: '0 0 8px #7c8cff' }}></span>
-              Sistemas Operativos 100%
-            </span>
-          </div>
-        </div>
+        <p className="lx-muted lx-copy">© 2026 KixInvert</p>
       </footer>
     </div>
   );

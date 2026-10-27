@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bot, Send, X, AlertCircle, Sparkles, UserPlus, FastForward, Cpu } from 'lucide-react';
+import { Bot, Send, X, AlertCircle, Sparkles, FastForward, Cpu } from 'lucide-react';
 import { askKixInvertAI } from '@/lib/api';
 import { UserSession } from '@/types';
 
@@ -9,7 +9,6 @@ interface AIModalProps {
   isOpen: boolean;
   onClose: () => void;
   session: UserSession | null;
-  onOpenRegister: () => void;
 }
 
 const THINKING_THOUGHTS = [
@@ -27,7 +26,7 @@ const SUGGESTIONS = [
   '¿En cuáles acciones puedo comprar más?',
 ];
 
-export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOpenRegister }) => {
+export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose }) => {
   const [prompt, setPrompt] = useState('');
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
     {
@@ -41,7 +40,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
   const [thinkingIndex, setThinkingIndex] = useState(0);
   const [thinkingSeconds, setThinkingSeconds] = useState(0);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [demoQueryCount, setDemoQueryCount] = useState(0);
+  const [isLimitReached, setIsLimitReached] = useState(false);
+  const [queriesRemaining, setQueriesRemaining] = useState<number | string | null>(null);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const streamAbortRef = useRef<(() => void) | null>(null);
@@ -81,10 +81,9 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
 
   if (!isOpen) return null;
 
-  const isDemo = session?.is_demo ?? true;
-  const isLimitReached = isDemo && demoQueryCount >= 2;
-
   const typeWriterEffect = (fullText: string): Promise<void> => {
+    // Split by code points so emojis and accents are never cut in half (that showed "�" while typing)
+    const chars = Array.from(fullText);
     return new Promise((resolve) => {
       setIsStreaming(true);
       // Create empty assistant message placeholder
@@ -116,8 +115,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
         }
 
         currentLength += chunkSize;
-        if (currentLength >= fullText.length) {
-          currentLength = fullText.length;
+        if (currentLength >= chars.length) {
+          currentLength = chars.length;
           clearInterval(timer);
           setMessages((prev) => {
             const updated = [...prev];
@@ -130,7 +129,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
           streamAbortRef.current = null;
           resolve();
         } else {
-          const slice = fullText.slice(0, currentLength);
+          const slice = chars.slice(0, currentLength).join('');
           setMessages((prev) => {
             const updated = [...prev];
             if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
@@ -157,30 +156,26 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
     setLoading(true);
     setIsThinking(true);
 
-    if (isDemo) {
-      setDemoQueryCount((prev) => prev + 1);
-    }
-
     try {
       // Humanized deliberate thinking: enforce minimum 1.6s so the user sees the AI thinking process
       const minThinkDelay = new Promise((res) => setTimeout(res, 1600));
-      const [response] = await Promise.all([askKixInvertAI(userMsg, demoQueryCount), minThinkDelay]);
+      const [response] = await Promise.all([askKixInvertAI(userMsg), minThinkDelay]);
 
       setIsThinking(false);
-
-      if (response.limit_reached) {
-        setDemoQueryCount(2);
-      }
+      setIsLimitReached(response.limit_reached);
+      if (response.queries_remaining !== undefined) setQueriesRemaining(response.queries_remaining);
 
       // Smooth streaming reveal
       await typeWriterEffect(response.answer);
-    } catch {
+    } catch (err) {
       setIsThinking(false);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'No pude procesar la consulta en este momento. Por favor intenta de nuevo en unos minutos.',
+          content: err instanceof Error && err.message
+            ? `No pude procesar la consulta: ${err.message}`
+            : 'No pude procesar la consulta en este momento. Intenta de nuevo en unos minutos.',
         },
       ]);
     } finally {
@@ -314,7 +309,11 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 </span>
               </div>
               <span style={{ fontSize: '0.74rem', color: '#9aa3b2' }}>
-                {isDemo ? `Modo Práctica Demo (${Math.max(0, 2 - demoQueryCount)} consultas restantes)` : 'Acceso Ilimitado'}
+                {queriesRemaining === null
+                  ? 'Consultas sobre tu portafolio real'
+                  : queriesRemaining === 'ilimitadas'
+                    ? 'Plan PRO · consultas ilimitadas'
+                    : `Plan Gratuito · ${queriesRemaining} consultas restantes este mes`}
               </span>
             </div>
           </div>
@@ -500,7 +499,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
             </div>
           )}
 
-          {/* Banner de Límite de Consultas en Demo */}
+          {/* Banner de límite mensual del Plan Gratuito */}
           {isLimitReached && (
             <div
               style={{
@@ -517,16 +516,13 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
             >
               <AlertCircle size={24} style={{ color: '#9aa6ff' }} />
               <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>
-                ¡Has completado tus 2 consultas de práctica en modo Demo!
+                Usaste tus 10 consultas gratuitas de este mes
               </div>
               <p style={{ color: '#9aa3b2', fontSize: '0.8rem', margin: 0 }}>
-                Para seguir disfrutando de diagnósticos bursátiles ilimitados y guardar tu portafolio, regístrate gratis.
+                El contador se reinicia cada 30 días. Con el Plan PRO las consultas son ilimitadas.
               </p>
               <button
-                onClick={() => {
-                  onClose();
-                  onOpenRegister();
-                }}
+                onClick={onClose}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -542,7 +538,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   marginTop: '4px',
                 }}
               >
-                <UserPlus size={16} /> Registrarme para IA Ilimitada
+                Entendido
               </button>
             </div>
           )}

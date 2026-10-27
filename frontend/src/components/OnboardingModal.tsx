@@ -52,7 +52,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   >([]);
   const [selectedTicker, setSelectedTicker] = useState<string>('BNC');
   const [stockShares, setStockShares] = useState<number>(500);
-  const [stockPrice, setStockPrice] = useState<number>(15.5);
+  // Pre-filled with the ticker's live price (never a hardcoded one) so a skipped field can't fake a gain
+  const livePriceOf = (ticker: string) => bvcTickers?.find((t) => t.symbol === ticker)?.price ?? 0;
+  const [stockPrice, setStockPrice] = useState<number>(0);
   const [isAddingStock, setIsAddingStock] = useState<boolean>(false);
 
   // Paso 3: Telegram
@@ -64,6 +66,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStep(1);
+      setStockPrice(livePriceOf(selectedTicker));
       // Cargar deep-link de Telegram
       fetchTelegramPairingUrl().then((res) => {
         if (res.direct_url) setPairingUrl(res.direct_url);
@@ -439,7 +442,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     </label>
                     <select
                       value={selectedTicker}
-                      onChange={(e) => setSelectedTicker(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedTicker(e.target.value);
+                        setStockPrice(livePriceOf(e.target.value));
+                      }}
                       style={{
                         width: '100%',
                         padding: '8px 10px',

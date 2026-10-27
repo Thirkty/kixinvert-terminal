@@ -227,7 +227,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                 <div className="meter-marker" style={{ left: `${markerPercent}%` }} title="Nivel de la Brecha Cambiaria"></div>
               </div>
               <div className="meter-caption">
-                <span><Target size={13} className="inline-icon" />Cobertura cambiaria neta: <strong className={isNetCoveragePositive ? 'text-green' : 'text-amber'}>{isNetCoveragePositive ? `+${netCoverage}%` : `${netCoverage}%`} neto por encima del dólar</strong></span>
+                <span><Target size={13} className="inline-icon" />Cobertura cambiaria neta: <strong className={isNetCoveragePositive ? 'text-green' : 'text-amber'}>{Math.abs(parseFloat(netCoverage)).toFixed(2)}% {isNetCoveragePositive ? 'por encima' : 'por debajo'} de la brecha del dólar</strong></span>
               </div>
             </div>
 
@@ -236,9 +236,11 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
               <div className={`pnl-verdict-pill ${isUsdtPos ? 'badge-success' : 'badge-danger'}`}>
                 <Shield size={13} />
                 <span>
-                  {isUsdtPos
-                    ? `Ganancia Real: +${totals.usdt.pnl_pct.toFixed(2)}% USDT (Superas la devaluación)`
-                    : `Riesgo Cambiario: ${totals.usdt.pnl_pct.toFixed(2)}% USDT (La devaluación absorbe ganancia)`}
+                  {totals.usdt.pnl_pct > 0
+                    ? `Ganancia real: +${totals.usdt.pnl_pct.toFixed(2)}% en USDT (le ganas a la devaluación)`
+                    : totals.usdt.pnl_pct === 0
+                      ? 'Sin rendimiento todavía: registra tus compras para medirlo'
+                      : `Riesgo cambiario: ${totals.usdt.pnl_pct.toFixed(2)}% en USDT (la devaluación absorbe tu ganancia)`}
                 </span>
               </div>
             </div>
