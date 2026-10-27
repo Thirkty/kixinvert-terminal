@@ -30,7 +30,7 @@ Plataforma profesional de seguimiento y análisis de inversiones para la **Bolsa
 - **Base de Datos**: PostgreSQL 18.
 - **APIs de Tasas**: Integración con DolarApi (BCV Oficial) y CriptoYa (Binance P2P USDT).
 - **APIs de Bolsa**: Scraper / AJAX client de la Bolsa de Valores de Caracas (`bolsadecaracas.com`).
-- **Frontend**: HTML5, Vanilla CSS (Dark Mode con Glassmorphism), Chart.js y Lucide Icons.
+- **Frontend**: Next.js (React) en `frontend/`, compilado a archivos estáticos que sirve el mismo FastAPI. Chart.js y Lucide Icons.
 
 ---
 
@@ -41,10 +41,19 @@ Plataforma profesional de seguimiento y análisis de inversiones para la **Bolsa
    .\.venv\Scripts\Activate.ps1
    ```
 
-2. **Iniciar el servidor FastAPI**:
+2. **Compilar el frontend** (cada vez que cambies algo en `frontend/`):
+   ```powershell
+   cd frontend; npm ci; npm run build; cd ..
+   ```
+
+3. **Iniciar el servidor FastAPI** (sirve la API y la web):
    ```powershell
    .\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
    ```
 
-3. **Abrir en el navegador**:
+4. **Abrir en el navegador**:
    Visita [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+O todo de una vez con `.\iniciar.ps1`. Para editar el frontend con recarga en caliente: `.\iniciar.ps1 -Desarrollo` (abre `localhost:3000`).
+
+**Al desplegar**, el servidor debe ejecutar `npm ci && npm run build` dentro de `frontend/` antes de arrancar `uvicorn`; si no, la raíz responde "Falta compilar el frontend".
