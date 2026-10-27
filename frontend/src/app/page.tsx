@@ -184,11 +184,19 @@ export default function Home() {
       refreshAllData();
     }
 
+    // Poll every 15 s only while the tab is visible; catch up as soon as it comes back
     const interval = setInterval(() => {
-      refreshAllData();
+      if (!document.hidden) refreshAllData();
     }, 15000);
+    const onVisible = () => {
+      if (!document.hidden) refreshAllData();
+    };
+    document.addEventListener('visibilitychange', onVisible);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [refreshAllData]);
 
   const toggleSound = () => {
@@ -353,7 +361,7 @@ export default function Home() {
 
   return (
     <div className="app-container" style={{ padding: 0, maxWidth: '100%' }}>
-      <InteractiveBackground intensity={currentView === 'welcome' ? 1 : 0.6} />
+      <InteractiveBackground intensity={currentView === 'welcome' ? 1 : 0.6} interactive={currentView === 'welcome'} />
 
       {/* VISTA 1: LANDING OPCIONAL DE BIENVENIDA (UNIFICADO, SIN DOBLE HEADER NI OVERLAPPING) */}
       {currentView === 'welcome' && (

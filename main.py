@@ -5,6 +5,7 @@ import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -14,6 +15,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 from db import engine, Base
 import services.telegram_service as telegram_service
+from services.market_warmer import market_warmer
 from deps import limiter
 from routers import market, auth, portfolio, ai, notifications, telegram
 
@@ -80,6 +82,8 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SecurityHeadersMiddleware)
+# JS, CSS and JSON compress to ~25-30% of their size
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 # Allowed CORS origins
 raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000")
@@ -97,6 +101,7 @@ app.add_middleware(
 async def on_startup():
     from db import SessionLocal
     asyncio.create_task(telegram_service.telegram_polling_worker(SessionLocal))
+    asyncio.create_task(market_warmer(SessionLocal))
 
 # The web app is the Next.js frontend compiled to static files (cd frontend && npm run build).
 # It is mounted at "/" at the end of this file, after every API route.
@@ -125,7 +130,15 @@ for module in (market, auth, portfolio, ai, notifications, telegram):
 
 # Frontend assets (/_next/..., favicon, images). Mounted last so it never shadows an API route.
 if os.path.isdir(FRONTEND_DIR):
-    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+    class FrontendFiles(StaticFiles):
+        # Next.js puts a content hash in every /_next/static file name, so the browser can keep them forever
+        async def get_response(self, path, scope):
+            response = await super().get_response(path, scope)
+            if path.replace("\\", "/").startswith("_next/static/") and response.status_code == 200:
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return response
+
+    app.mount("/", FrontendFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn

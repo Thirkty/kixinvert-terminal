@@ -1,4 +1,5 @@
 """Tasas de cambio, pizarra de la BVC y acciones de Wall Street."""
+import asyncio
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -29,8 +30,9 @@ async def get_quotes(force: bool = False, db: Session = Depends(get_db)):
 async def get_popular_international_stocks():
     """Returns curated popular Wall Street stocks and ETFs with real-time quotes."""
     from services.international_service import POPULAR_INTERNATIONAL_ASSETS, fetch_international_quote
-    results = []
-    for ticker, info in POPULAR_INTERNATIONAL_ASSETS.items():
-        q = fetch_international_quote(ticker)
-        results.append(q if q else info)
-    return results
+
+    def collect():
+        return [fetch_international_quote(t) or info for t, info in POPULAR_INTERNATIONAL_ASSETS.items()]
+
+    # yfinance is synchronous; usually this is a cache hit kept warm by market_warmer
+    return await asyncio.to_thread(collect)
