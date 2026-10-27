@@ -19,8 +19,10 @@ from cryptography.fernet import Fernet, InvalidToken
 
 # 1. JWT Secret Key (strictly from environment or dynamic fallback)
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not SECRET_KEY:
-    # If not set, generate a cryptographic ephemeral secret for runtime safety
+if not SECRET_KEY or SECRET_KEY.startswith("change_this"):
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        # A random per-boot key would silently log everyone out on every restart
+        raise RuntimeError("JWT_SECRET_KEY must be set to a strong random value in production.")
     SECRET_KEY = secrets.token_hex(32)
 
 ALGORITHM = "HS256"

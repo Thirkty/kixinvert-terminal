@@ -772,7 +772,7 @@ async def get_user_audit_logs(current_user: User = Depends(get_current_user), db
 
 @app.get("/api/portfolio")
 async def get_portfolio(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     rates = await fetch_current_rates(db)
@@ -785,24 +785,18 @@ async def get_portfolio(
         logger.error(f"Error syncing international quotes: {e}")
 
     # ANTI-IDOR: strictly isolated by current_user.id
-    if current_user:
-        portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
-        if not portfolio:
-            portfolio = Portfolio(
-                user_id=current_user.id,
-                name=f"Portafolio BVC de {current_user.full_name}",
-                cash_ves=0.0,
-                cash_usd=0.0
-            )
-            db.add(portfolio)
-            db.commit()
-            db.refresh(portfolio)
-        summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], portfolio_id=portfolio.id, user_id=current_user.id)
-    else:
-        # Unauthenticated guest: return dedicated read-only demo portfolio
-        demo_port = db.query(Portfolio).filter(Portfolio.id == 999).first()
-        demo_id = demo_port.id if demo_port else None
-        summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], portfolio_id=demo_id)
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
+    if not portfolio:
+        portfolio = Portfolio(
+            user_id=current_user.id,
+            name=f"Portafolio BVC de {current_user.full_name}",
+            cash_ves=0.0,
+            cash_usd=0.0
+        )
+        db.add(portfolio)
+        db.commit()
+        db.refresh(portfolio)
+    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], portfolio_id=portfolio.id, user_id=current_user.id)
 
     summary["rates"] = rates
     return summary
@@ -1442,23 +1436,11 @@ async def get_single_international_quote(ticker: str):
 @limiter.limit("15/minute")
 async def get_ai_diagnosis(
     request: Request,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     rates = await fetch_current_rates(db)
-    portfolio_id = None
-    user_id = None
-    if current_user:
-        user_id = current_user.id
-        port = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
-        if port:
-            portfolio_id = port.id
-    else:
-        demo_port = db.query(Portfolio).filter(Portfolio.id == 999).first()
-        if demo_port:
-            portfolio_id = demo_port.id
-
-    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], portfolio_id=portfolio_id, user_id=user_id)
+    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], user_id=current_user.id)
     diagnosis = generate_local_ai_diagnosis(summary, rates)
     return diagnosis
 
@@ -1467,85 +1449,41 @@ async def get_ai_diagnosis(
 async def chat_with_bvc_ai(
     req: AIChatRequest,
     request: Request,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # 1. Enforce demo practice limit (max 2 queries for unauthenticated guests)
-    if not current_user:
-        if (req.demo_count or 0) > 2:
-            return {
-                "answer": (
-                    "🔒 **Has alcanzado el límite de 2 consultas de práctica gratuitas en el Modo Demo.**\n\n"
-                    "Para continuar disfrutando de **consultas ilimitadas**, conectar tu portafolio personalizado en la Bolsa de Caracas, "
-                    "recibir alertas de brecha cambiaria y recomendaciones tácticas exclusivas, **regístrate gratis en KixInvert**."
-                ),
-                "limit_reached": True,
-                "subscription_tier": "demo",
-                "queries_remaining": 0,
-                "upgrade_required": False
-            }
-    else:
-        # 2. Authenticated user: Check PRO status and monthly limit
-        is_pro = check_and_refresh_user_subscription(current_user, db)
-        if not is_pro:
-            # Free tier: 10 queries limit per month
-            if (current_user.ai_queries_used_this_month or 0) >= 10:
-                return {
-                    "answer": (
-                        "🔒 **Has alcanzado tu límite mensual de 10 consultas en el Plan Gratuito.**\n\n"
-                        "Para continuar realizando **consultas ilimitadas**, recibir señales de compra/venta en tiempo real "
-                        "y acceder a diagnósticos avanzados de cobertura cambiaria, **activa el Plan PRO 👑 por solo $5 USDT/mes con Binance Pay**."
-                    ),
-                    "limit_reached": True,
-                    "subscription_tier": "free",
-                    "queries_used": current_user.ai_queries_used_this_month,
-                    "queries_remaining": 0,
-                    "queries_limit": 10,
-                    "upgrade_required": True
-                }
+    # Free tier: 10 queries per month, counted on the server
+    is_pro = check_and_refresh_user_subscription(current_user, db)
+    if not is_pro and (current_user.ai_queries_used_this_month or 0) >= 10:
+        return {
+            "answer": (
+                "Llegaste al límite de 10 consultas de este mes en el Plan Gratuito.\n\n"
+                "Con el Plan PRO (5 USDT al mes, con Binance Pay) tienes consultas ilimitadas, "
+                "señales de compra y venta en tiempo real y diagnósticos avanzados de cobertura cambiaria."
+            ),
+            "limit_reached": True,
+            "subscription_tier": "free",
+            "queries_used": current_user.ai_queries_used_this_month,
+            "queries_remaining": 0,
+            "queries_limit": 10,
+            "upgrade_required": True
+        }
 
-    sanitized_question = security.sanitize_text(req.question, 500)
+    # Plain text: React escapes it on render, so HTML-escaping here would show "&quot;" in answers
+    question = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", req.question).strip()[:500]
 
     rates = await fetch_current_rates(db)
-    portfolio_id = None
-    user_id = None
-    if current_user:
-        user_id = current_user.id
-        port = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
-        if port:
-            portfolio_id = port.id
-    else:
-        demo_port = db.query(Portfolio).filter(Portfolio.id == 999).first()
-        if demo_port:
-            portfolio_id = demo_port.id
+    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], user_id=current_user.id)
+    answer = await answer_bvc_ai_question(question, summary, rates)
 
-    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], portfolio_id=portfolio_id, user_id=user_id)
-    answer = await answer_bvc_ai_question(sanitized_question, summary, rates)
+    current_user.ai_queries_used_this_month = (current_user.ai_queries_used_this_month or 0) + 1
+    db.commit()
+    db.refresh(current_user)
 
-    queries_remaining = None
-    subscription_tier = "demo"
-    queries_limit = 2
-    queries_used = 1
-
-    if not current_user:
-        count = req.demo_count or 1
-        queries_remaining = max(0, 2 - count)
-        queries_used = count
-        if queries_remaining == 0:
-            answer += (
-                "\n\n💡 *Has utilizado tus 2 consultas de práctica del Modo Demo. "
-                "Regístrate gratis para continuar realizando consultas con tu propio portafolio.*"
-            )
-    else:
-        current_user.ai_queries_used_this_month = (current_user.ai_queries_used_this_month or 0) + 1
-        db.commit()
-        db.refresh(current_user)
-        
-        is_pro = current_user.subscription_tier == "pro"
-        subscription_tier = "pro" if is_pro else "free"
-        queries_used = current_user.ai_queries_used_this_month
-        queries_limit = None if is_pro else 10
-        queries_remaining = "ilimitadas" if is_pro else max(0, 10 - current_user.ai_queries_used_this_month)
+    subscription_tier = "pro" if is_pro else "free"
+    queries_used = current_user.ai_queries_used_this_month
+    queries_limit = None if is_pro else 10
+    queries_remaining = "ilimitadas" if is_pro else max(0, 10 - current_user.ai_queries_used_this_month)
 
     return {
         "answer": answer,
@@ -1560,9 +1498,11 @@ async def chat_with_bvc_ai(
 # BINANCE PAY PAYMENTS & PRO SUBSCRIPTION ENDPOINTS
 # ==========================================================
 
+# Prices live on the server; whatever amount the browser sends is ignored
+PLAN_PRICES_USDT = {"pro_monthly": 5.00}
+
 class CreateOrderRequest(BaseModel):
     plan: Optional[str] = "pro_monthly"
-    amount_usdt: Optional[float] = 5.00
 
 @app.post("/api/payments/create-binance-order")
 @limiter.limit("15/minute")
@@ -1572,11 +1512,14 @@ async def api_create_binance_order(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    plan = item.plan or "pro_monthly"
+    if plan not in PLAN_PRICES_USDT:
+        raise HTTPException(status_code=400, detail="Plan no disponible.")
     order_data = create_binance_pay_order(
-        db, 
-        current_user, 
-        plan=item.plan or "pro_monthly", 
-        amount_usdt=item.amount_usdt or 5.00
+        db,
+        current_user,
+        plan=plan,
+        amount_usdt=PLAN_PRICES_USDT[plan]
     )
     return {
         "success": True,
@@ -1612,13 +1555,18 @@ async def api_simulate_binance_success(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Sandbox only: never available in production or when real Binance Pay is configured
+    if ENVIRONMENT != "development" or BINANCE_PAY_SECRET_KEY:
+        raise HTTPException(status_code=404, detail="Not Found")
     order = db.query(PaymentOrder).filter(
-        PaymentOrder.order_id == order_id, 
+        PaymentOrder.order_id == order_id,
         PaymentOrder.user_id == current_user.id
     ).first()
     if not order:
         raise HTTPException(status_code=404, detail="Orden no encontrada.")
-    
+    if order.status == "PAID":
+        raise HTTPException(status_code=400, detail="Esta orden ya fue pagada.")
+
     result = activate_user_pro(db, current_user, order)
     return result
 
@@ -1627,37 +1575,48 @@ async def api_binance_webhook(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    try:
-        body_bytes = await request.body()
-        body_str = body_bytes.decode('utf-8')
-        payload = json.loads(body_str) if body_str else {}
-        
-        if BINANCE_PAY_SECRET_KEY:
-            timestamp = request.headers.get("BinancePay-Timestamp", "")
-            nonce = request.headers.get("BinancePay-Nonce", "")
-            signature = request.headers.get("BinancePay-Signature", "")
-            expected_sig = hmac.new(
-                BINANCE_PAY_SECRET_KEY.encode("utf-8"),
-                f"{timestamp}\n{nonce}\n{body_str}\n".encode("utf-8"),
-                hashlib.sha512
-            ).hexdigest().upper()
-            if signature != expected_sig:
-                raise HTTPException(status_code=400, detail="Firma inválida")
+    # Without a configured secret nobody can prove a payment happened: reject everything
+    if not BINANCE_PAY_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Pagos no configurados.")
 
-        biz_status = payload.get("bizStatus")
+    body_bytes = await request.body()
+    body_str = body_bytes.decode("utf-8")
+    timestamp = request.headers.get("BinancePay-Timestamp", "")
+    nonce = request.headers.get("BinancePay-Nonce", "")
+    signature = request.headers.get("BinancePay-Signature", "")
+    expected_sig = hmac.new(
+        BINANCE_PAY_SECRET_KEY.encode("utf-8"),
+        f"{timestamp}\n{nonce}\n{body_str}\n".encode("utf-8"),
+        hashlib.sha512
+    ).hexdigest().upper()
+    if not signature or not hmac.compare_digest(signature.upper(), expected_sig):
+        log_audit(db, "PAYMENT_WEBHOOK_REJECTED", request=request, details="Invalid Binance Pay signature")
+        raise HTTPException(status_code=400, detail="Firma inválida")
+
+    try:
+        payload = json.loads(body_str) if body_str else {}
         data = payload.get("data", {})
+        if isinstance(data, str):
+            data = json.loads(data)
         merchant_trade_no = data.get("merchantTradeNo")
 
-        if biz_status == "PAY_SUCCESS" and merchant_trade_no:
+        if payload.get("bizStatus") == "PAY_SUCCESS" and merchant_trade_no:
             order = db.query(PaymentOrder).filter(PaymentOrder.order_id == merchant_trade_no).first()
+            paid_amount = float(data.get("totalFee") or data.get("orderAmount") or 0)
             if order and order.status != "PAID":
+                # The paid amount must cover the order price set by the server
+                if paid_amount + 0.001 < float(order.amount_usdt):
+                    log_audit(db, "PAYMENT_AMOUNT_MISMATCH", user_id=order.user_id, request=request,
+                              details=f"Order {order.order_id}: paid {paid_amount} < {order.amount_usdt}")
+                    return {"returnCode": "FAIL", "returnMessage": "Amount mismatch"}
                 user = db.query(User).filter(User.id == order.user_id).first()
                 if user:
                     activate_user_pro(db, user, order)
 
         return {"returnCode": "SUCCESS", "returnMessage": None}
-    except Exception as e:
-        return {"returnCode": "FAIL", "returnMessage": str(e)}
+    except Exception:
+        logger.exception("Binance Pay webhook processing failed")
+        return {"returnCode": "FAIL", "returnMessage": "Processing error"}
 
 # ==========================================================
 # NOTIFICATIONS & ALERTS API
@@ -1667,7 +1626,7 @@ async def api_binance_webhook(
 async def api_get_notifications(
     category: Optional[str] = Query(None, description="Category filter: tactical, market, or all"),
     limit: int = Query(30, ge=1, le=100),
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
@@ -1681,7 +1640,7 @@ async def api_get_notifications(
 @app.post("/api/notifications/{notification_id}/read")
 async def api_mark_notification_read(
     notification_id: int,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
@@ -1693,7 +1652,7 @@ async def api_mark_notification_read(
 
 @app.post("/api/notifications/read-all")
 async def api_mark_all_notifications_read(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
@@ -1702,7 +1661,7 @@ async def api_mark_all_notifications_read(
 
 @app.post("/api/notifications/refresh")
 async def api_refresh_notifications(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
@@ -1723,15 +1682,10 @@ async def api_refresh_notifications(
 @app.post("/api/portfolio/simulate-what-if")
 async def api_simulate_what_if(
     payload: WhatIfSimulateRequest,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user_id = current_user.id if current_user else None
-    # ANTI-IDOR: guests only ever see the read-only demo portfolio (same as /api/portfolio)
-    if user_id:
-        portfolio = db.query(Portfolio).filter(Portfolio.user_id == user_id).first()
-    else:
-        portfolio = db.query(Portfolio).filter(Portfolio.id == 999).first()
+    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="No hay portafolio disponible para simular.")
 
@@ -1751,7 +1705,7 @@ async def api_simulate_what_if(
 
 @app.get("/api/portfolio/executive-report")
 async def api_get_executive_report(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
@@ -1764,21 +1718,15 @@ async def api_get_executive_report(
 # TELEGRAM BOT INTEGRATION API (@KixInvertAlertsBot)
 # ==========================================================
 
-class TelegramLinkRequest(BaseModel):
-    chat_id: str = Field(..., min_length=1, max_length=50)
-    telegram_username: Optional[str] = None
-
 class TelegramToggleAlertsRequest(BaseModel):
     enabled: Optional[bool] = None
 
 @app.get("/api/telegram/status")
 async def api_get_telegram_status(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     is_linked = bool(user.telegram_chat_id)
     masked_chat_id = ""
@@ -1799,12 +1747,10 @@ async def api_get_telegram_status(
 
 @app.post("/api/telegram/generate-code")
 async def api_generate_telegram_code(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     code = telegram_service.generate_pairing_code(db, user)
     return {
@@ -1816,12 +1762,10 @@ async def api_generate_telegram_code(
 
 @app.get("/api/telegram/pairing-url")
 def get_telegram_pairing_url(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     if not user.telegram_link_code:
         user.telegram_link_code = telegram_service.generate_pairing_code(db, user)
@@ -1838,37 +1782,12 @@ def get_telegram_pairing_url(
         "chat_id": user.telegram_chat_id
     }
 
-@app.post("/api/telegram/link")
-async def api_link_telegram(
-    payload: TelegramLinkRequest,
-    current_user: Optional[User] = Depends(get_optional_current_user),
-    db: Session = Depends(get_db)
-):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
-
-    telegram_service.link_user_by_chat_id(
-        db=db,
-        user=user,
-        chat_id=payload.chat_id,
-        telegram_username=payload.telegram_username
-    )
-    return {
-        "status": "ok",
-        "message": "Cuenta vinculada exitosamente con Telegram.",
-        "chat_id": payload.chat_id,
-        "alerts_enabled": True
-    }
-
 @app.post("/api/telegram/unlink")
 async def api_unlink_telegram(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     telegram_service.unlink_user_telegram(db, user)
     return {
@@ -1879,12 +1798,10 @@ async def api_unlink_telegram(
 @app.post("/api/telegram/toggle-alerts")
 async def api_toggle_telegram_alerts(
     payload: Optional[TelegramToggleAlertsRequest] = None,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     enabled = payload.enabled if payload else None
     new_state = telegram_service.toggle_user_telegram_alerts(db, user, enabled)
@@ -1895,12 +1812,10 @@ async def api_toggle_telegram_alerts(
 
 @app.post("/api/telegram/test-alert")
 async def api_test_telegram_alert(
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = current_user if current_user else db.query(User).order_by(User.id.asc()).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    user = current_user
 
     if not user.telegram_chat_id:
         raise HTTPException(status_code=400, detail="Debes vincular tu cuenta de Telegram antes de enviar una alerta de prueba.")
@@ -1926,13 +1841,18 @@ async def api_telegram_webhook(
     request: Request,
     db: Session = Depends(get_db)
 ):
+    # Only Telegram knows this secret (set via setWebhook secret_token); reject forged updates
+    expected = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
+    received = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+    if not expected or not hmac.compare_digest(received, expected):
+        raise HTTPException(status_code=403, detail="Webhook no autorizado.")
     try:
         payload = await request.json()
     except Exception:
         payload = {}
 
-    result = telegram_service.handle_incoming_telegram_message(db, payload)
-    return {"status": "ok", "result": result}
+    telegram_service.handle_incoming_telegram_message(db, payload)
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn

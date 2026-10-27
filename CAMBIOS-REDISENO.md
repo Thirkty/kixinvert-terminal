@@ -1,5 +1,44 @@
 # Cambios: rediseño índigo + correcciones
 
+## Ronda 2: seguridad, sin modo demo y nueva bienvenida
+
+### Seguridad (crítico)
+| Problema | Corrección |
+|---|---|
+| Sin sesión, todas las rutas de Telegram actuaban sobre el primer usuario registrado: cualquiera podía ver su chat, vincular su propio Telegram a esa cuenta o desvincularla | Todas exigen sesión; se eliminó `/api/telegram/link` (vincular un chat_id arbitrario) |
+| El webhook de Telegram aceptaba mensajes falsos de cualquiera | Exige el header secreto `X-Telegram-Bot-Api-Secret-Token` = `TELEGRAM_WEBHOOK_SECRET` |
+| Código de vinculación `KIX-` + 4 dígitos (9.000 opciones, adivinable por fuerza bruta) | 8 caracteres aleatorios criptográficos, de un solo uso |
+| `/api/payments/simulate-binance-success` daba PRO gratis a cualquiera, también en producción | Solo funciona con `ENVIRONMENT=development` y sin Binance configurado; una orden no se puede canjear dos veces |
+| Sin `BINANCE_PAY_SECRET_KEY`, el webhook de Binance aceptaba "pagado" sin firma | Rechaza todo si no hay clave; compara la firma en tiempo constante; verifica que el monto pagado cubra el precio |
+| El navegador elegía el precio de la orden (`amount_usdt`) | El precio lo fija el servidor (`PLAN_PRICES_USDT`) |
+| El límite de consultas gratis de la IA lo enviaba el navegador (`demo_count`) | La IA exige sesión y el límite lo cuenta el servidor |
+| Un invitado podía marcar como leída cualquier notificación por id; leer una global la marcaba para todos | Notificaciones solo del propio usuario y con sesión |
+| En producción, sin `JWT_SECRET_KEY` se generaba una clave al azar en cada arranque | En producción el servidor no arranca sin clave |
+
+### Errores de lógica
+- `/api/ai/diagnosis` fallaba (500) con un portafolio vacío; el texto decía "Tu cartera marcha muy bien" aunque estuvieras perdiendo.
+- La pregunta a la IA se escapaba como HTML (`&quot;` en las respuestas).
+- El efecto de escritura de la IA cortaba emojis por la mitad (símbolos `�`).
+- Si la IA, las tasas, las cotizaciones, Wall Street o las notificaciones fallaban, el frontend mostraba datos inventados como si fueran reales. Ahora conserva los últimos datos reales o muestra el error.
+- El asistente de bienvenida proponía 15,5 Bs como costo de cualquier acción (BNC cotiza ~248 Bs), lo que mostraba ganancias falsas de +1.499%. Ahora usa el precio en vivo.
+- El panel decía "Superas la devaluación" con 0% y "−12,92% por encima del dólar" (era por debajo).
+- Cerrar sesión no borraba la cookie de sesión ni los datos del portafolio en memoria.
+
+### Modo demo eliminado
+- Sin cuenta solo se ve la página de bienvenida; el terminal exige iniciar sesión.
+- El backend ya no sirve el portafolio demo (id 999) ni nada sin sesión salvo tasas, cotizaciones y Wall Street.
+
+### Nueva página de bienvenida
+- Datos en vivo reales: tasas BCV/USDT/brecha y mayores movimientos de la BVC.
+- Calculadora interactiva de la ilusión nominal (la cuenta anterior estaba mal: +25% vs +35% da −7,41%, no −10%).
+- Animaciones de entrada y al hacer scroll, respetando "reducir movimiento".
+- Se quitaron afirmaciones falsas: "AES-256" (es AES-128), "+Bs 250M analizados", "100% de protección", precio PRO de $7 (el backend cobra 5 USDT), Pago Móvil y tarjetas (no existen), plan institucional y un formulario de contacto que no enviaba nada.
+- Aviso de riesgo: no es asesoría financiera.
+
+### Verificado
+- 43/44 pruebas de API y seguridad pasan (la que falla esperaba el comportamiento viejo de invitados).
+- Registro, asistente de bienvenida, terminal y chat de IA probados en el navegador. Usuarios de prueba borrados.
+
 ## Errores corregidos
 
 | Problema | Archivo |
