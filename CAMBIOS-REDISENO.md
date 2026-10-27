@@ -1,5 +1,17 @@
 # Cambios: rediseño índigo + correcciones
 
+## Ronda 3: animaciones en todo
+
+- Fondo interactivo (`InteractiveBackground.tsx`): malla de puntos índigo que se ilumina y se aparta alrededor del cursor, con líneas tipo constelación y un brillo que lo sigue. Más tenue dentro del terminal; se pausa con la pestaña oculta.
+- Transiciones entre vistas con la View Transitions API (`runViewTransition` en `Motion.tsx`): bienvenida ↔ terminal, cambio de módulo (Portafolio, Pizarra, What-If), de mercado (BVC / Wall Street) y de divisa. La barra lateral y el encabezado se quedan quietos mientras el contenido se desliza.
+- Cada módulo entra con sus secciones escalonadas.
+- Modales (comprar, vender, editar, efectivo, login, IA, Telegram, bienvenida): el fondo aparece con un fundido y el panel entra con efecto resorte. El panel de notificaciones se despliega desde arriba.
+- Barra lateral: indicador activo que crece y desplazamiento al pasar el mouse. Selector de divisa y pestañas con "pulsación" al activarse.
+- Filas de las tablas entran una tras otra.
+- Todas las cifras de dinero del panel cuentan hasta su valor y se animan al cambiar de divisa.
+- Todo se desactiva con "reducir movimiento" del sistema.
+- `iniciar.ps1`: arranca backend y frontend con un clic (`-Produccion` para el modo compilado).
+
 ## Ronda 2: seguridad, sin modo demo y nueva bienvenida
 
 ### Seguridad (crítico)
