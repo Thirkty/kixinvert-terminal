@@ -3,14 +3,22 @@ import re
 import datetime
 import hashlib
 import html
+import io
+import base64
 import secrets
 from typing import Optional, Tuple, List
 import bcrypt
 import jwt
+from dotenv import load_dotenv
+import pyotp
+import qrcode
+from cryptography.fernet import Fernet
 
 # ==========================================================
 # CRYPTOGRAPHIC KEYS & SECRETS CONFIGURATION
 # ==========================================================
+
+load_dotenv()
 
 # 1. JWT Secret Key (strictly from environment or dynamic fallback)
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -22,6 +30,26 @@ if not SECRET_KEY or SECRET_KEY.startswith("change_this"):
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
+
+# 2. Key for data encrypted at rest (2FA secrets). It must survive restarts: a random
+#    per-boot key would make every stored secret unreadable and lock people out.
+_RAW_ENC_KEY = os.getenv("APP_ENCRYPTION_KEY") or os.getenv("JWT_SECRET_KEY")
+if _RAW_ENC_KEY and not _RAW_ENC_KEY.startswith("change_this"):
+    _FERNET = Fernet(base64.urlsafe_b64encode(hashlib.sha256(_RAW_ENC_KEY.encode("utf-8")).digest()))
+else:
+    _FERNET = None
+
+
+def encrypt_secret(plaintext: str) -> str:
+    if not _FERNET:
+        raise RuntimeError("Falta APP_ENCRYPTION_KEY en el .env para guardar secretos cifrados.")
+    return _FERNET.encrypt(plaintext.encode("utf-8")).decode("utf-8")
+
+
+def decrypt_secret(ciphertext: str) -> str:
+    if not _FERNET:
+        raise RuntimeError("Falta APP_ENCRYPTION_KEY en el .env para leer secretos cifrados.")
+    return _FERNET.decrypt(ciphertext.encode("utf-8")).decode("utf-8")
 
 # ==========================================================
 # INPUT SANITIZATION & SECURITY HELPERS
@@ -144,3 +172,38 @@ def decode_access_token(token: str) -> Optional[dict]:
         return payload
     except (jwt.PyJWTError, Exception):
         return None
+
+
+# ==========================================================
+# 2FA (TOTP: Google Authenticator, Authy, Microsoft Authenticator)
+# ==========================================================
+
+TOTP_ISSUER = "KixInvert"
+TWO_FACTOR_CHALLENGE_MINUTES = 5
+
+
+def new_totp_secret() -> str:
+    return pyotp.random_base32()
+
+
+def totp_qr_data_uri(secret: str, account: str) -> str:
+    """QR built in memory (the secret never goes to a third-party service)."""
+    uri = pyotp.TOTP(secret).provisioning_uri(name=account, issuer_name=TOTP_ISSUER)
+    img = qrcode.make(uri, box_size=8, border=2)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    """Accepts the current 30-second code and the previous/next one (clock drift)."""
+    digits = re.sub(r"\D", "", code or "")
+    return len(digits) == 6 and pyotp.TOTP(secret).verify(digits, valid_window=1)
+
+
+def create_2fa_challenge(user_id: int) -> str:
+    """Short-lived token proving the password step passed. It is NOT a session token."""
+    return create_access_token(
+        {"sub": str(user_id), "purpose": "2fa"},
+        expires_delta=datetime.timedelta(minutes=TWO_FACTOR_CHALLENGE_MINUTES),
+    )

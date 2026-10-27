@@ -35,6 +35,15 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=1, max_length=128)
     system_website_hp: Optional[str] = Field(None, max_length=100) # Honeypot
 
+class TwoFactorCode(BaseModel):
+    code: str = Field(..., min_length=6, max_length=7)
+
+class TwoFactorLogin(TwoFactorCode):
+    challenge: str = Field(..., min_length=20, max_length=1000)
+
+class TwoFactorDisable(TwoFactorCode):
+    password: str = Field(..., min_length=1, max_length=128)
+
 
 def _start_session(response: Response, user: User) -> str:
     """Firma el token de sesión y lo deja también en una cookie HttpOnly."""
@@ -66,6 +75,7 @@ def _user_payload(user: User, portfolio: Optional[Portfolio], is_pro: bool) -> d
         "broker": user.broker,
         "risk_profile": user.risk_profile,
         "role": user.role,
+        "two_factor_enabled": bool(user.two_factor_enabled),
         "portfolio_id": portfolio.id if portfolio else None,
         "subscription_tier": user.subscription_tier or "free",
         "subscription_expires_at": user.subscription_expires_at.isoformat() if user.subscription_expires_at else None,
@@ -221,11 +231,33 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
     user.locked_until = None
     db.commit()
 
-    # 4. ISSUE JWT ACCESS TOKEN & SECURE COOKIE
+    # 4. WITH 2FA: the password alone is not enough, ask for the authenticator code
+    if user.two_factor_enabled:
+        log_audit(db, "2FA_REQUIRED", user_id=user.id, request=request, details="Password ok, waiting for 2FA code")
+        return {
+            "success": True,
+            "two_factor_required": True,
+            "challenge": security.create_2fa_challenge(user.id),
+            "message": "Escribe el código de 6 dígitos de tu app de autenticación."
+        }
+
+    return _complete_login(request, response, db, user, "Successful login")
+
+
+def _record_failed_attempt(db: Session, request: Request, user: User, action: str) -> None:
+    user.failed_login_attempts += 1
+    if user.failed_login_attempts >= 5:
+        user.locked_until = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        action = "ACCOUNT_LOCKED"
+    log_audit(db, action, user_id=user.id, request=request, details=f"Failed attempt {user.failed_login_attempts}")
+    db.commit()
+
+
+def _complete_login(request: Request, response: Response, db: Session, user: User, detail: str) -> dict:
     portfolio = get_or_create_portfolio(db, user)
     token = _start_session(response, user)
 
-    log_audit(db, "LOGIN_SUCCESS", user_id=user.id, request=request, details="Successful login")
+    log_audit(db, "LOGIN_SUCCESS", user_id=user.id, request=request, details=detail)
 
     is_pro = check_and_refresh_user_subscription(user, db)
 
@@ -237,6 +269,73 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
         "token_type": "bearer",
         "user": _user_payload(user, portfolio, is_pro)
     }
+
+
+@router.post("/api/auth/2fa/verify-login")
+@limiter.limit("10/minute")
+async def verify_2fa_login(request: Request, response: Response, item: TwoFactorLogin, db: Session = Depends(get_db)):
+    payload = security.decode_access_token(item.challenge)
+    if not payload or payload.get("purpose") != "2fa":
+        raise HTTPException(status_code=401, detail="El paso de verificación expiró. Inicia sesión de nuevo.")
+    user = db.query(User).filter(User.id == int(payload["sub"])).first()
+    if not user or not user.is_active or not user.two_factor_enabled or not user.two_factor_secret:
+        raise HTTPException(status_code=401, detail="El paso de verificación expiró. Inicia sesión de nuevo.")
+    if user.locked_until and user.locked_until > datetime.datetime.utcnow():
+        raise HTTPException(status_code=403, detail="Cuenta temporalmente bloqueada por exceso de intentos fallidos. Intenta más tarde.")
+
+    if not security.verify_totp(security.decrypt_secret(user.two_factor_secret), item.code):
+        _record_failed_attempt(db, request, user, "2FA_LOGIN_FAILED")
+        raise HTTPException(status_code=401, detail="Código incorrecto o vencido. Revisa que la hora de tu teléfono esté bien.")
+
+    user.failed_login_attempts = 0
+    db.commit()
+    return _complete_login(request, response, db, user, "Successful login with 2FA")
+
+
+@router.post("/api/auth/2fa/setup")
+@limiter.limit("10/minute")
+async def setup_2fa(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="La verificación en dos pasos ya está activa.")
+    secret = security.new_totp_secret()
+    # Stored (encrypted) as pending; it only takes effect after a correct code in /enable
+    current_user.two_factor_secret = security.encrypt_secret(secret)
+    db.commit()
+    return {
+        "qr": security.totp_qr_data_uri(secret, current_user.email),
+        "manual_key": " ".join(secret[i:i + 4] for i in range(0, len(secret), 4)),
+    }
+
+
+@router.post("/api/auth/2fa/enable")
+@limiter.limit("10/minute")
+async def enable_2fa(request: Request, item: TwoFactorCode, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="La verificación en dos pasos ya está activa.")
+    if not current_user.two_factor_secret:
+        raise HTTPException(status_code=400, detail="Primero genera el código QR.")
+    if not security.verify_totp(security.decrypt_secret(current_user.two_factor_secret), item.code):
+        raise HTTPException(status_code=400, detail="Código incorrecto. Escribe los 6 dígitos que muestra la app ahora mismo.")
+    current_user.two_factor_enabled = True
+    db.commit()
+    log_audit(db, "2FA_ENABLED", user_id=current_user.id, request=request, details="TOTP activated")
+    return {"success": True, "message": "Verificación en dos pasos activada."}
+
+
+@router.post("/api/auth/2fa/disable")
+@limiter.limit("10/minute")
+async def disable_2fa(request: Request, item: TwoFactorDisable, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not current_user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="La verificación en dos pasos no está activa.")
+    is_valid, _ = security.verify_and_maybe_upgrade_password(item.password, current_user.password_hash)
+    if not is_valid or not security.verify_totp(security.decrypt_secret(current_user.two_factor_secret), item.code):
+        _record_failed_attempt(db, request, current_user, "2FA_DISABLE_FAILED")
+        raise HTTPException(status_code=400, detail="Contraseña o código incorrectos.")
+    current_user.two_factor_enabled = False
+    current_user.two_factor_secret = None
+    db.commit()
+    log_audit(db, "2FA_DISABLED", user_id=current_user.id, request=request, details="TOTP deactivated")
+    return {"success": True, "message": "Verificación en dos pasos desactivada."}
 
 
 @router.post("/api/auth/logout")

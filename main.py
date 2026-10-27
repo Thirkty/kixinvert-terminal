@@ -17,7 +17,7 @@ from db import engine, Base
 import services.telegram_service as telegram_service
 from services.market_warmer import market_warmer
 from deps import limiter
-from routers import market, auth, portfolio, ai, notifications, telegram
+from routers import market, auth, portfolio, ai, notifications, telegram, payments
 
 # Ensure database tables exist
 Base.metadata.create_all(bind=engine)
@@ -125,7 +125,7 @@ def serve_index():
     response.headers["Expires"] = "0"
     return response
 
-for module in (market, auth, portfolio, ai, notifications, telegram):
+for module in (market, auth, portfolio, ai, notifications, telegram, payments):
     app.include_router(module.router)
 
 # Frontend assets (/_next/..., favicon, images). Mounted last so it never shadows an API route.

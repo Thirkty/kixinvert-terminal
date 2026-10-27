@@ -14,6 +14,7 @@ import { AddPositionModal } from '@/components/AddPositionModal';
 import { EditPositionModal } from '@/components/EditPositionModal';
 import { SellPositionModal } from '@/components/SellPositionModal';
 import { AdjustCashModal } from '@/components/AdjustCashModal';
+import { AccountModal } from '@/components/AccountModal';
 import { TelegramModal } from '@/components/TelegramModal';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { Sidebar, NavView } from '@/components/Sidebar';
@@ -110,6 +111,7 @@ export default function Home() {
   const [selectedPosForSell, setSelectedPosForSell] = useState<Position | null>(null);
   const [isAdjustCashOpen, setIsAdjustCashOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -434,6 +436,7 @@ export default function Home() {
                 setIsAuthModalOpen(true);
               }}
               onGoWelcome={() => setCurrentView('welcome')}
+              onOpenAccount={() => setIsAccountOpen(true)}
             />
 
             {/* Ticker Tape en Tiempo Real para Caracas BVC o Wall Street */}
@@ -672,6 +675,8 @@ export default function Home() {
         onClose={() => setIsAdjustCashOpen(false)}
         onSave={handleSaveCash}
       />
+
+      <AccountModal isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
 
       <TelegramModal
         isOpen={isTelegramOpen}

@@ -34,8 +34,8 @@ async def chat_with_bvc_ai(
         return {
             "answer": (
                 "Llegaste al límite de 10 consultas de este mes en el Plan Gratuito.\n\n"
-                "Con el Plan PRO (5 USDT al mes, con Binance Pay) tienes consultas ilimitadas, "
-                "señales de compra y venta en tiempo real y diagnósticos avanzados de cobertura cambiaria."
+                "Con el Plan PRO (5 USDT por 30 días, con Binance Pay) las consultas son ilimitadas. "
+                "Actívalo en Mi cuenta: toca tu usuario arriba a la derecha."
             ),
             "limit_reached": True,
             "subscription_tier": "free",

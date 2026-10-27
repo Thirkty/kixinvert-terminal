@@ -35,6 +35,7 @@ interface TopHeaderProps {
   onLogout: () => void;
   onOpenAuth: () => void;
   onGoWelcome?: () => void;
+  onOpenAccount?: () => void;
 }
 
 const TopHeaderComponent: React.FC<TopHeaderProps> = ({
@@ -53,6 +54,7 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
   onLogout,
   onOpenAuth,
   onGoWelcome,
+  onOpenAccount,
 }) => {
   return (
     <header
@@ -412,7 +414,10 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
         {/* User Session / Auth Controls */}
         {session ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
+            <button
+              type="button"
+              onClick={onOpenAccount}
+              title="Mi cuenta: plan y seguridad"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -426,7 +431,7 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
             >
               <User size={14} style={{ color: '#7c8cff' }} />
               <strong>{session.is_demo ? 'Inversionista' : session.username}</strong>
-            </div>
+            </button>
             <button
               onClick={() => {
                 playTerminalSound('click');
