@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Layers, LayoutList, Bot, Trash2, Zap, Search, Globe, DollarSign, Pencil, TrendingDown, PlusCircle } from 'lucide-react';
+import { Layers, LayoutList, Trash2, Zap, Search, Pencil, TrendingDown, PlusCircle } from 'lucide-react';
 import { Position, BvcTicker, CurrencyMode, MarketRates, Ecosystem, InternationalQuote } from '@/types';
-import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
+import { formatVES, formatUSD, formatUSDT } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
 import { SpotlightCard } from './SpotlightCard';
 import { FlashOnChange } from './Motion';

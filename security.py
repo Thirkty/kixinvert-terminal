@@ -1,7 +1,5 @@
 import os
 import re
-import io
-import base64
 import datetime
 import hashlib
 import html
@@ -9,9 +7,6 @@ import secrets
 from typing import Optional, Tuple, List
 import bcrypt
 import jwt
-import pyotp
-import qrcode
-from cryptography.fernet import Fernet, InvalidToken
 
 # ==========================================================
 # CRYPTOGRAPHIC KEYS & SECRETS CONFIGURATION
@@ -27,52 +22,6 @@ if not SECRET_KEY or SECRET_KEY.startswith("change_this"):
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
-
-# 2. Symmetric Field Encryption Key (Fernet - AES-128-CBC + HMAC-SHA256)
-RAW_ENC_KEY = os.getenv("APP_ENCRYPTION_KEY")
-if RAW_ENC_KEY:
-    try:
-        cipher_suite = Fernet(RAW_ENC_KEY.encode("utf-8"))
-    except Exception:
-        # Normalize to valid 32-byte urlsafe base64 key
-        derived_key = base64.urlsafe_b64encode(hashlib.sha256(RAW_ENC_KEY.encode("utf-8")).digest())
-        cipher_suite = Fernet(derived_key)
-else:
-    # Derive from SECRET_KEY deterministically
-    derived_key = base64.urlsafe_b64encode(hashlib.sha256(SECRET_KEY.encode("utf-8")).digest())
-    cipher_suite = Fernet(derived_key)
-
-# ==========================================================
-# FIELD-LEVEL ENCRYPTION (FOR SENSITIVE DATA AT REST)
-# ==========================================================
-
-def encrypt_sensitive_data(plaintext: Optional[str]) -> Optional[str]:
-    """
-    Encrypts sensitive data (e.g. 2FA secrets, private tokens)
-    before writing to the database using authenticated symmetric encryption.
-    """
-    if not plaintext:
-        return plaintext
-    try:
-        encrypted = cipher_suite.encrypt(plaintext.encode("utf-8"))
-        return encrypted.decode("utf-8")
-    except Exception as e:
-        print(f"Encryption error: {e}")
-        return plaintext
-
-def decrypt_sensitive_data(ciphertext: Optional[str]) -> Optional[str]:
-    """
-    Decrypts sensitive data upon retrieval from the database.
-    If the data is legacy unencrypted, safely returns plaintext.
-    """
-    if not ciphertext:
-        return ciphertext
-    try:
-        decrypted = cipher_suite.decrypt(ciphertext.encode("utf-8"))
-        return decrypted.decode("utf-8")
-    except (InvalidToken, Exception):
-        # Fallback for unencrypted legacy rows
-        return ciphertext
 
 # ==========================================================
 # INPUT SANITIZATION & SECURITY HELPERS
@@ -195,53 +144,3 @@ def decode_access_token(token: str) -> Optional[dict]:
         return payload
     except (jwt.PyJWTError, Exception):
         return None
-
-# ==========================================================
-# 2FA (TOTP - GOOGLE AUTHENTICATOR / AUTHY)
-# ==========================================================
-
-def generate_totp_secret() -> str:
-    """Generates a secure random base32 seed for Google Authenticator."""
-    return pyotp.random_base32()
-
-def get_totp_provisioning_uri(secret: str, username: str) -> str:
-    """Generates the otpauth:// URI recognized by Google Authenticator and Authy."""
-    totp = pyotp.TOTP(secret)
-    return totp.provisioning_uri(name=username, issuer_name="KixInvertAPP BVC")
-
-def generate_qr_code_base64(provisioning_uri: str) -> str:
-    """
-    Generates a high-contrast QR code completely in-memory (no external services)
-    and returns a base64 Data URI string ready to be rendered in an <img> tag.
-    """
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_M,
-        box_size=8,
-        border=3,
-    )
-    qr.add_data(provisioning_uri)
-    qr.make(fit=True)
-
-    img = qr.make_image(fill_color="#0f172a", back_color="#ffffff")
-    buffered = io.BytesIO()
-    img.save(buffered)
-    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    return f"data:image/png;base64,{img_str}"
-
-def verify_totp_code(secret: str, code: str) -> bool:
-    """
-    Verifies a 6-digit TOTP code against the user's secret.
-    Allows valid_window=1 (30s clock drift tolerance) for real-world devices.
-    """
-    if not secret or not code:
-        return False
-    # Clean non-digits
-    clean_code = re.sub(r"\D", "", str(code))
-    if len(clean_code) != 6:
-        return False
-    try:
-        totp = pyotp.TOTP(secret)
-        return totp.verify(clean_code, valid_window=1)
-    except Exception:
-        return False

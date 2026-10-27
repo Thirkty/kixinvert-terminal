@@ -145,7 +145,6 @@ export default function Home() {
         username: savedUser || 'Inversionista',
         token,
         is_demo: false,
-        has_2fa: true,
       });
       // Usuario autenticado entra directo al Terminal en un ecosistema separado
       setCurrentViewRaw('terminal');
@@ -169,7 +168,6 @@ export default function Home() {
               username: userData.username,
               token,
               is_demo: false,
-              has_2fa: userData.two_factor_enabled,
             });
             if (typeof window !== 'undefined') {
               localStorage.setItem('kix_username', userData.username);

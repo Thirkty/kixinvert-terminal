@@ -31,12 +31,6 @@ export function formatUSDT(amount: number): string {
   return `${formatted} USDT`;
 }
 
-export function formatCurrencyByMode(amount: number, mode: 'ves' | 'usd_bcv' | 'usdt'): string {
-  if (mode === 'ves') return formatVES(amount);
-  if (mode === 'usd_bcv') return formatUSD(amount);
-  return formatUSDT(amount);
-}
-
 export function formatPercent(value: number, showSign: boolean = true): string {
   if (isNaN(value)) return '0.00%';
   const sign = showSign && value > 0 ? '+' : '';

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 from sqlalchemy.orm import Session
 from models import Portfolio, Position, Asset, MarketQuote
 

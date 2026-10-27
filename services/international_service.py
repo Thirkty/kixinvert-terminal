@@ -11,7 +11,7 @@ Includes in-memory quote caching, graceful fallback, and popular asset directory
 import time
 import logging
 import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from models import Asset, MarketQuote
 
@@ -306,18 +306,3 @@ def sync_all_portfolio_international_quotes(db: Session, bcv_rate: float):
         except Exception as e:
             logger.error(f"Failed to sync intl quote for {ticker}: {e}")
 
-def search_international_assets(query: str = "") -> List[Dict[str, Any]]:
-    """Returns matching international assets from catalogue."""
-    q = (query or "").strip().upper()
-    results = []
-    for ticker, info in POPULAR_INTERNATIONAL_ASSETS.items():
-        if not q or q in ticker or q in info["name"].upper() or q in info["sector"].upper():
-            results.append({
-                "ticker": info["ticker"],
-                "name": info["name"],
-                "market": info["market"],
-                "currency": info["currency"],
-                "sector": info["sector"],
-                "reference_price_usd": info["reference_price_usd"]
-            })
-    return results

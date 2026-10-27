@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Wallet, PlusCircle, History, Sliders, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2 } from 'lucide-react';
+import { X, Wallet, PlusCircle, History, Sliders, ArrowUpRight, ArrowDownRight, CheckCircle2 } from 'lucide-react';
 import { formatVES, formatUSD } from '@/lib/formatters';
 import { depositCashApi, fetchCashMovementsApi } from '@/lib/api';
 import { playTerminalSound } from '@/lib/audio';

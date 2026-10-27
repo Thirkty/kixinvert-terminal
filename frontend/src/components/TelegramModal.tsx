@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Send, Bell, CheckCircle2, AlertCircle, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
+import { X, Send, CheckCircle2, AlertCircle, ExternalLink, ShieldCheck, RefreshCw } from 'lucide-react';
 import { TelegramStatus } from '@/types';
 import { fetchTelegramStatus, sendTelegramTestAlert, toggleTelegramAlerts, fetchTelegramPairingUrl } from '@/lib/api';
 import { AnimatedBell, AnimatedPulseBeacon, AnimatedTelegram } from './AnimatedIcons';

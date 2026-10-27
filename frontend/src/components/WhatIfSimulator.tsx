@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Calculator,
-  ArrowRight,
   ShieldCheck,
   AlertTriangle,
   TrendingUp,

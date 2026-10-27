@@ -1,8 +1,4 @@
-import datetime
-from typing import Dict, Any, List, Optional
-from sqlalchemy.orm import Session
-from models import Portfolio, Position, Asset, MarketQuote, ExchangeRate
-from services.portfolio_service import get_portfolio_summary
+from typing import Dict, Any
 
 def simulate_financial_stress_scenario(
     portfolio_summary: Dict[str, Any],
@@ -192,56 +188,3 @@ def simulate_financial_stress_scenario(
         "simulated_positions": simulated_positions
     }
 
-def generate_executive_report_data(
-    db: Session,
-    user_id: Optional[int] = None
-) -> Dict[str, Any]:
-    """
-    Builds structured, comprehensive data for the printable Executive Wealth Statement.
-    """
-    rate_bcv_rec = db.query(ExchangeRate).filter(ExchangeRate.rate_type == "BCV").order_by(ExchangeRate.recorded_at.desc()).first()
-    rate_usdt_rec = db.query(ExchangeRate).filter(ExchangeRate.rate_type == "USDT_BINANCE").order_by(ExchangeRate.recorded_at.desc()).first()
-
-    bcv = float(rate_bcv_rec.rate_value) if rate_bcv_rec else 881.87
-    usdt = float(rate_usdt_rec.rate_value) if rate_usdt_rec else 1007.60
-
-    portfolio = None
-    if user_id is not None:
-        portfolio = db.query(Portfolio).filter(Portfolio.user_id == user_id).first()
-    else:
-        # Guests only get the read-only demo portfolio, never another user's data
-        portfolio = db.query(Portfolio).filter(Portfolio.id == 999).first()
-
-    if not portfolio:
-        return {}
-
-    summary = get_portfolio_summary(db=db, bcv_rate=bcv, usdt_rate=usdt, portfolio_id=portfolio.id)
-    now = datetime.datetime.utcnow()
-
-    # User identification
-    user_name = "Inversionista KixInvert"
-    user_broker = "KixBroker BVC"
-    user_tier = "Plan Free"
-    if user_id:
-        from models import User
-        user = db.query(User).filter(User.id == user_id).first()
-        if user:
-            user_name = user.full_name
-            user_broker = user.broker or "KixBroker BVC"
-            user_tier = "Plan PRO 👑" if user.subscription_tier == "pro" else "Plan Free"
-
-    return {
-        "statement_id": f"KIX-REP-{now.strftime('%Y%m%d')}-{portfolio.id:04d}",
-        "generated_at": now.strftime("%d/%m/%Y %I:%M %p"),
-        "investor": {
-            "name": user_name,
-            "broker": user_broker,
-            "tier": user_tier
-        },
-        "rates": {
-            "bcv": round(bcv, 4),
-            "usdt": round(usdt, 4),
-            "gap_pct": round(((usdt - bcv) / bcv) * 100, 2) if bcv > 0 else 0.0
-        },
-        "summary": summary
-    }

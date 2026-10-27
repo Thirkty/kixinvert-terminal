@@ -6,12 +6,10 @@ import {
   Landmark,
   Coins,
   ArrowLeftRight,
-  Bot,
   LogOut,
   User,
   RefreshCw,
   Cpu,
-  DollarSign,
   House,
   LayoutDashboard,
 } from 'lucide-react';

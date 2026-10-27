@@ -37,7 +37,6 @@ export interface UserSession {
   token?: string;
   is_demo: boolean;
   role?: string;
-  has_2fa?: boolean;
 }
 
 export interface PnLCalculation {
@@ -105,27 +104,6 @@ export interface InternationalQuote {
   category?: string;
 }
 
-export interface PositionUpdatePayload {
-  shares: number;
-  buy_price: number;
-  adjust_cash?: boolean;
-  notes?: string;
-}
-
-export interface PositionSellPayload {
-  ticker: string;
-  shares_to_sell: number;
-  sell_price: number;
-  currency?: string;
-  credit_to_cash?: boolean;
-  broker_commission?: number;
-  broker_iva?: number;
-  broker_registry_fee?: number;
-  net_total_amount?: number;
-  execution_date?: string;
-  notes?: string;
-}
-
 export interface MercosurFeeDetails {
   grossAmount: number;
   commissionPct: number;
@@ -137,19 +115,3 @@ export interface MercosurFeeDetails {
   netAmountBuy: number;
   netAmountSell: number;
 }
-
-export interface TransactionItem {
-  id: number;
-  ticker: string;
-  tx_type: 'BUY' | 'SELL' | 'DIVIDEND';
-  shares: number;
-  price_ves: number;
-  fee_ves: number;
-  rate_bcv?: number | null;
-  rate_usdt?: number | null;
-  notes?: string;
-  executed_at?: string;
-}
-
-
-

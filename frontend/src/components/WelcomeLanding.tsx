@@ -9,7 +9,6 @@ import {
   Check,
   ChevronDown,
   Coins,
-  Crown,
   Globe,
   KeyRound,
   Landmark,
@@ -18,7 +17,6 @@ import {
   LogOut,
   Mail,
   Send,
-  ShieldCheck,
   Sliders,
   TrendingUp,
   UserPlus,
@@ -76,7 +74,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { icon: UserPlus, title: 'Crea tu cuenta', text: 'Gratis, con correo y contraseña. Puedes activar doble factor (2FA) desde el primer día.' },
+  { icon: UserPlus, title: 'Crea tu cuenta', text: 'Gratis, con correo y contraseña.' },
   { icon: Wallet, title: 'Registra tus compras', text: 'Ticker, cantidad y precio. KixInvert guarda la tasa BCV y USDT del día para medir tu rendimiento real.' },
   { icon: LineChart, title: 'Decide con datos', text: 'Sigue tus tres monedas, revisa las señales y recibe alertas en el móvil.' },
 ];
@@ -91,12 +89,8 @@ const FAQ = [
     a: 'Desde el terminal, en "Bot Telegram", generas un código de un solo uso y lo envías a @KixInvert_bot con /start. Desde ese momento recibes alertas y puedes consultar /balance.',
   },
   {
-    q: '¿Cómo se paga el Plan PRO?',
-    a: 'Con USDT a través de Binance Pay, 5 USDT al mes. El plan se activa cuando Binance confirma el pago.',
-  },
-  {
     q: '¿Qué tan seguros están mis datos?',
-    a: 'Las contraseñas se guardan con bcrypt, la sesión usa tokens firmados con vencimiento, los datos sensibles se cifran en la base de datos y puedes activar 2FA con Google Authenticator. Cada usuario solo puede ver su propio portafolio.',
+    a: 'Las contraseñas se guardan con bcrypt, la sesión usa tokens firmados con vencimiento y cada usuario solo puede ver su propio portafolio.',
   },
   {
     q: '¿KixInvert compra o vende acciones por mí?',
@@ -181,7 +175,6 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           <div className="lx-nav-links">
             <a href="#funciones">Funciones</a>
             <a href="#como-funciona">Cómo funciona</a>
-            <a href="#precios">Precios</a>
             <a href="#faq">Preguntas</a>
           </div>
           <div className="lx-nav-actions">
@@ -253,7 +246,6 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </div>
           <ul className="lx-trust lx-rise" style={{ animationDelay: '320ms' }}>
             <li><Check size={14} /> Plan gratuito sin tarjeta</li>
-            <li><ShieldCheck size={14} /> 2FA con Google Authenticator</li>
             <li><Send size={14} /> Alertas en Telegram</li>
           </ul>
         </div>
@@ -376,43 +368,6 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </li>
           ))}
         </ol>
-      </section>
-
-      {/* PRICING */}
-      <section className="lx-section" id="precios" data-reveal>
-        <div className="lx-section-head">
-          <span className="lx-eyebrow">Precios</span>
-          <h2>Gratis para empezar, PRO cuando lo necesites</h2>
-        </div>
-        <div className="lx-pricing">
-          <article className="lx-plan">
-            <h3>Gratuito</h3>
-            <div className="lx-price"><strong>0</strong><span>USDT / mes</span></div>
-            <ul>
-              <li><Check size={15} /> Portafolio en Bs, dólar BCV y USDT</li>
-              <li><Check size={15} /> Pizarra de la BVC y Wall Street</li>
-              <li><Check size={15} /> Simulador What-If</li>
-              <li><Check size={15} /> Alertas en Telegram</li>
-              <li><Check size={15} /> 10 consultas al mes a KixInvert AI</li>
-            </ul>
-            <button type="button" className="lx-btn lx-btn-ghost lx-btn-block" onClick={session ? onGoTerminal : register}>
-              {session ? 'Ir al terminal' : 'Crear cuenta gratis'}
-            </button>
-          </article>
-          <article className="lx-plan lx-plan-pro">
-            <span className="lx-plan-tag"><Crown size={13} /> PRO</span>
-            <h3>PRO</h3>
-            <div className="lx-price"><strong>5</strong><span>USDT / mes</span></div>
-            <ul>
-              <li><Check size={15} /> Todo lo del plan gratuito</li>
-              <li><Check size={15} /> Consultas ilimitadas a KixInvert AI</li>
-              <li><Check size={15} /> Pago con Binance Pay</li>
-            </ul>
-            <button type="button" className="lx-btn lx-btn-primary lx-btn-block" onClick={session ? onGoTerminal : register}>
-              {session ? 'Activar desde el terminal' : 'Empezar y pasar a PRO'}
-            </button>
-          </article>
-        </div>
       </section>
 
       {/* FAQ */}

@@ -5,26 +5,19 @@ import {
   LayoutDashboard,
   TrendingUp,
   Zap,
-  Bot,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  Coins,
   LogOut,
   User,
-  SlidersHorizontal,
   PlusCircle,
   Volume2,
   VolumeX,
-  FileText,
-  ShieldCheck,
-  Crown,
   RefreshCw,
   House,
 } from 'lucide-react';
 import { MarketCode } from './Motion';
 import { MarketRates, UserSession, Ecosystem } from '@/types';
-import { formatVES } from '@/lib/formatters';
+
 import { playTerminalSound } from '@/lib/audio';
 import { AnimatedBell, AnimatedPulseBeacon, AnimatedTelegram, AnimatedSparkles } from './AnimatedIcons';
 

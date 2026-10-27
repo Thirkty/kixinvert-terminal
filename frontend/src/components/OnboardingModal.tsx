@@ -7,12 +7,8 @@ import {
   CheckCircle2,
   ArrowRight,
   ExternalLink,
-  ShieldCheck,
   Plus,
-  Trash2,
-  Calendar,
   Sparkles,
-  Bot,
   Check,
 } from 'lucide-react';
 import { BvcTicker, UserSession } from '@/types';
