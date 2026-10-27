@@ -55,11 +55,12 @@ export default function Home() {
   const [currentMode, setCurrentMode] = useState<CurrencyMode>('compare');
 
   // Market & Portfolio Data State
+  // Empty until the backend answers: no placeholder rates that could pass for real ones
   const [rates, setRates] = useState<MarketRates>({
-    bcv: 880.12,
-    usdt: 999.6,
-    brecha_pct: 13.58,
-    updated_at: new Date().toISOString(),
+    bcv: 0,
+    usdt: 0,
+    brecha_pct: 0,
+    updated_at: '',
   });
 
   const [bvcTickers, setBvcTickers] = useState<BvcTicker[]>([]);
@@ -95,29 +96,23 @@ export default function Home() {
   // Carga y sincronización de datos
   const refreshAllData = useCallback(async () => {
     setIsRefreshing(true);
-    try {
-      const [fetchedRates, fetchedTickers, fetchedIntl, fetchedPortfolio, notifData] = await Promise.all([
-        fetchRates(),
-        fetchBvcPrices(),
-        fetchInternationalQuotes(),
-        fetchPortfolio(),
-        fetchNotifications(),
-      ]);
-      setRates(fetchedRates);
-      setBvcTickers(fetchedTickers);
-      setIntlTickers(fetchedIntl);
-      if (fetchedPortfolio) {
-        setPortfolio(fetchedPortfolio);
-      }
-      if (notifData) {
-        setNotifications(notifData.notifications);
-        setUnreadNotifsCount(notifData.unread_count);
-      }
-    } catch (err) {
-      console.warn('Error sincronizando datos de mercado:', err);
-    } finally {
-      setIsRefreshing(false);
+    // Each source updates on its own; a failed one keeps its last real value instead of blocking the rest
+    const [ratesRes, tickersRes, intlRes, portfolioRes, notifRes] = await Promise.allSettled([
+      fetchRates(),
+      fetchBvcPrices(),
+      fetchInternationalQuotes(),
+      fetchPortfolio(),
+      fetchNotifications(),
+    ]);
+    if (ratesRes.status === 'fulfilled') setRates(ratesRes.value);
+    if (tickersRes.status === 'fulfilled' && tickersRes.value.length > 0) setBvcTickers(tickersRes.value);
+    if (intlRes.status === 'fulfilled' && intlRes.value.length > 0) setIntlTickers(intlRes.value);
+    if (portfolioRes.status === 'fulfilled' && portfolioRes.value) setPortfolio(portfolioRes.value);
+    if (notifRes.status === 'fulfilled' && notifRes.value) {
+      setNotifications(notifRes.value.notifications);
+      setUnreadNotifsCount(notifRes.value.unread_count);
     }
+    setIsRefreshing(false);
   }, []);
 
   useEffect(() => {
@@ -313,24 +308,29 @@ export default function Home() {
     await refreshAllData();
   };
 
-  const handleDemoLogin = () => {
-    playTerminalSound('success');
-    setSession({
-      username: 'Inversionista Demo',
-      is_demo: true,
-      has_2fa: false,
-    });
-    setCurrentView('terminal');
-  };
-
   const handleLogout = () => {
     playTerminalSound('click');
+    // Clears the HttpOnly session cookie too; the stored token alone isn't the whole session
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setAuthToken(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('kix_username');
     }
     setSession(null);
+    setPortfolio({ cash_ves: 0, cash_usd: 0, positions: [] });
+    setNotifications([]);
+    setUnreadNotifsCount(0);
     setCurrentView('welcome');
+  };
+
+  // The terminal is only for signed-in users; guests get the login dialog
+  const goToTerminal = () => {
+    if (session) {
+      setCurrentView('terminal');
+    } else {
+      setAuthMode('login');
+      setIsAuthModalOpen(true);
+    }
   };
 
   return (
@@ -339,8 +339,7 @@ export default function Home() {
       {currentView === 'welcome' && (
         <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <WelcomeLanding
-            onEnterDemo={handleDemoLogin}
-            onGoTerminal={() => setCurrentView('terminal')}
+            onGoTerminal={goToTerminal}
             session={session}
             onLogout={handleLogout}
             onOpenRegister={() => {
@@ -354,12 +353,13 @@ export default function Home() {
             bvcTickers={bvcTickers}
             intlTickers={intlTickers}
             currentEcosystem={currentEcosystem}
+            rates={rates}
           />
         </div>
       )}
 
       {/* VISTA 2: TERMINAL BURSÁTIL COMPLETO (INICIO POR DEFECTO CON TODAS LAS HERRAMIENTAS) */}
-      {currentView === 'terminal' && (
+      {currentView === 'terminal' && session && (
         <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
           {/* Barra Lateral Colapsable (Studio Admin Style con Ecosistemas y Sonido) */}
           <Sidebar
@@ -449,7 +449,7 @@ export default function Home() {
                   >
                     <span>{currentEcosystem === 'BVC' ? 'Mercado Caracas BVC' : 'Mercado Wall Street Global'}</span>
                     <span>•</span>
-                    <span>{session?.is_demo ? 'Cuenta Demo' : `Portafolio de ${session?.username || 'Inversionista'}`}</span>
+                    <span>{`Portafolio de ${session?.username || 'Inversionista'}`}</span>
                   </div>
 
                   <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
@@ -585,10 +585,6 @@ export default function Home() {
         isOpen={isAIModalOpen}
         onClose={() => setIsAIModalOpen(false)}
         session={session}
-        onOpenRegister={() => {
-          setAuthMode('register');
-          setIsAuthModalOpen(true);
-        }}
       />
 
       <AuthModal
