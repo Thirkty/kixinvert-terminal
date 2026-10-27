@@ -1,5 +1,6 @@
 import os
-import random
+import html
+import secrets
 import logging
 import datetime
 from typing import Optional, Dict, Any, List
@@ -36,8 +37,8 @@ def is_telegram_configured() -> bool:
     return bool(get_bot_token())
 
 def generate_pairing_code(db: Session, user: User) -> str:
-    """Generates a secure, human-readable 6-character linking code (e.g. KIX-4829)."""
-    code = f"KIX-{random.randint(1000, 9999)}"
+    """Generates an unguessable one-time linking code (e.g. KIX-9F3A7C21); cleared once used."""
+    code = f"KIX-{secrets.token_hex(4).upper()}"
     user.telegram_link_code = code
     db.commit()
     db.refresh(user)
@@ -404,7 +405,7 @@ def handle_incoming_telegram_message(db: Session, payload: Dict[str, Any]) -> Di
             else:
                 err_msg = (
                     "❌ <b>Código de vinculación inválido o expirado</b>\n\n"
-                    f"El código <code>{code}</code> no coincide con ninguna sesión activa de KixInvertAPP.\n"
+                    f"El código <code>{html.escape(code[:20])}</code> no coincide con ninguna sesión activa de KixInvertAPP.\n"
                     "Por favor genera un código nuevo en el panel de la aplicación web."
                 )
                 send_telegram_message(chat_id, err_msg)

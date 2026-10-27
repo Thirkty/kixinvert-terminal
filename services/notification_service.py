@@ -254,7 +254,7 @@ def get_user_notifications(
 
     query = db.query(Notification)
     if user_id is not None:
-        query = query.filter((Notification.user_id == user_id) | (Notification.user_id.is_(None)))
+        query = query.filter(Notification.user_id == user_id)
     else:
         query = query.filter(Notification.user_id.is_(None))
 
@@ -286,7 +286,7 @@ def get_unread_count(db: Session, user_id: Optional[int] = None) -> int:
     """Returns number of unread notifications for the given user."""
     query = db.query(Notification).filter(Notification.is_read == False)
     if user_id is not None:
-        query = query.filter((Notification.user_id == user_id) | (Notification.user_id.is_(None)))
+        query = query.filter(Notification.user_id == user_id)
     else:
         query = query.filter(Notification.user_id.is_(None))
     return query.count()
@@ -294,9 +294,8 @@ def get_unread_count(db: Session, user_id: Optional[int] = None) -> int:
 
 def mark_notification_read(db: Session, notification_id: int, user_id: Optional[int] = None) -> bool:
     """Marks a single notification as read."""
-    query = db.query(Notification).filter(Notification.id == notification_id)
-    if user_id is not None:
-        query = query.filter((Notification.user_id == user_id) | (Notification.user_id.is_(None)))
+    # Always scoped to the owner, so one user can never mark another user's notification
+    query = db.query(Notification).filter(Notification.id == notification_id, Notification.user_id == user_id)
     notif = query.first()
     if not notif:
         return False
@@ -309,7 +308,7 @@ def mark_all_notifications_read(db: Session, user_id: Optional[int] = None) -> i
     """Marks all notifications as read for the user."""
     query = db.query(Notification).filter(Notification.is_read == False)
     if user_id is not None:
-        query = query.filter((Notification.user_id == user_id) | (Notification.user_id.is_(None)))
+        query = query.filter(Notification.user_id == user_id)
     else:
         query = query.filter(Notification.user_id.is_(None))
     count = query.update({Notification.is_read: True}, synchronize_session=False)

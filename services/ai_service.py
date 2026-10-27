@@ -370,13 +370,28 @@ def generate_local_ai_diagnosis(portfolio_summary: Dict[str, Any], rates: Dict[s
 
     health_score = min(100, max(10, health_score))
 
-    summary_narrative = (
-        f"Tu cartera marcha muy bien con un rendimiento acumulado de +{ves_pnl_pct}% en Bolívares "
-        f"(+{usdt_pnl_pct}% real en USDT). "
-        f"Tu mayor peso está en el sector '{top_sector[0]}' ({top_sector[1]}%). "
-        f"Lidera tus ganancias {top_winner.get('ticker') if top_winner else 'N/A'} con +{top_winner.get('pnl_pct_usdt', 0)}% en USDT. "
-        f"Hoy tienes {len(tactical_sells)} acciones listas para tomar ganancia parcial y {len(tactical_holds) + len(tactical_buys)} para mantener en cartera."
-    )
+    if not positions:
+        summary_narrative = (
+            "Todavía no tienes acciones registradas. Agrega tu primera compra para recibir un diagnóstico "
+            "de rendimiento, cobertura cambiaria y señales por acción."
+        )
+    else:
+        if usdt_pnl_pct >= 0:
+            opening = f"Tu cartera rinde {ves_pnl_pct:+.2f}% en bolívares y {usdt_pnl_pct:+.2f}% real en USDT."
+        else:
+            opening = (
+                f"Tu cartera rinde {ves_pnl_pct:+.2f}% en bolívares, pero {usdt_pnl_pct:+.2f}% en USDT: "
+                f"la devaluación se está comiendo parte del rendimiento."
+            )
+        winner_line = (
+            f" Tu mejor posición es {top_winner.get('ticker')} con {float(top_winner.get('pnl_pct_usdt', 0)):+.2f}% en USDT."
+            if top_winner else ""
+        )
+        summary_narrative = (
+            f"{opening} Tu mayor peso está en el sector '{top_sector[0]}' ({top_sector[1]}%).{winner_line} "
+            f"Hoy tienes {len(tactical_sells)} posiciones candidatas a tomar ganancia parcial y "
+            f"{len(tactical_holds) + len(tactical_buys)} para mantener."
+        )
 
     return {
         "health_score": health_score,
