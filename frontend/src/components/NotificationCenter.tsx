@@ -65,7 +65,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
   return (
     <div
-      className="notif-dropdown-wrapper active"
+      className="notif-dropdown-wrapper active kx-drop"
       style={{
         position: 'fixed',
         top: '64px',

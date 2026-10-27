@@ -219,7 +219,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="modal-backdrop show"
+      className="modal-backdrop show kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

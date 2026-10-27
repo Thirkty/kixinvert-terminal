@@ -84,7 +84,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
 
   return (
     <div
-      className="modal-overlay active"
+      className="modal-overlay active kx-overlay"
       onClick={onClose}
       style={{
         position: 'fixed',

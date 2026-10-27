@@ -126,10 +126,10 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="sub-pill-content">
               <span className="sub-pill-label">Acciones (BVC)</span>
               <strong className="sub-pill-val">
-                {currentMode === 'ves' && formatVES(totalStockVes)}
-                {currentMode === 'usd_bcv' && formatUSD(totalStockUsdBcv)}
-                {currentMode === 'usdt' && formatUSDT(totalStockUsdt)}
-                {currentMode === 'compare' && formatVES(totalStockVes)}
+                {currentMode === 'ves' && <CountUp value={totalStockVes} format={formatVES} />}
+                {currentMode === 'usd_bcv' && <CountUp value={totalStockUsdBcv} format={formatUSD} />}
+                {currentMode === 'usdt' && <CountUp value={totalStockUsdt} format={formatUSDT} />}
+                {currentMode === 'compare' && <CountUp value={totalStockVes} format={formatVES} />}
               </strong>
             </div>
           </div>
@@ -139,10 +139,10 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="sub-pill-content">
               <span className="sub-pill-label">Efectivo Líquido</span>
               <strong className="sub-pill-val">
-                {currentMode === 'ves' && formatVES(portfolio.cash_ves)}
-                {currentMode === 'usd_bcv' && formatUSD(portfolio.cash_usd)}
+                {currentMode === 'ves' && <CountUp value={portfolio.cash_ves} format={formatVES} />}
+                {currentMode === 'usd_bcv' && <CountUp value={portfolio.cash_usd} format={formatUSD} />}
                 {currentMode === 'usdt' && formatUSDT((portfolio.cash_ves / (rates.usdt || 1)) + portfolio.cash_usd)}
-                {currentMode === 'compare' && formatVES(portfolio.cash_ves)}
+                {currentMode === 'compare' && <CountUp value={portfolio.cash_ves} format={formatVES} />}
               </strong>
             </div>
           </div>
@@ -151,10 +151,10 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {/* Equivalencias multi-divisa al pie */}
         <div className="kpi-footer-equivalents">
           <span className="equiv-chip" title="Equivalencia al Dólar Oficial del Banco Central de Venezuela">
-            <Landmark size={13} className="inline-icon" />BCV: <strong>{formatUSD(totalPortfolioUsdBcv)}</strong>
+            <Landmark size={13} className="inline-icon" />BCV: <strong>{<CountUp value={totalPortfolioUsdBcv} format={formatUSD} />}</strong>
           </span>
           <span className="equiv-chip chip-highlight" title="Equivalencia al Dólar Real de Binance P2P (Poder Adquisitivo)">
-            <Coins size={13} className="inline-icon" />USDT Real: <strong>{formatUSDT(totalPortfolioUsdt)}</strong>
+            <Coins size={13} className="inline-icon" />USDT Real: <strong>{<CountUp value={totalPortfolioUsdt} format={formatUSDT} />}</strong>
           </span>
         </div>
       </SpotlightCard>
@@ -191,7 +191,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                   <span className="pill-mini">VES</span>
                   <span className="tri-hero-title">Bolívares</span>
                 </div>
-                <div className={`tri-hero-val ${vesColor}`}>{vesSign}{formatVES(totals.ves.pnl)}</div>
+                <div className={`tri-hero-val ${vesColor}`}>{vesSign}{<CountUp value={totals.ves.pnl} format={formatVES} />}</div>
                 <div className={`tri-hero-sub ${vesColor}`}>{vesSign}{totals.ves.pnl_pct.toFixed(2)}% Nominal</div>
               </div>
 
@@ -201,7 +201,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                   <span className="pill-mini">BCV</span>
                   <span className="tri-hero-title">Dólar BCV</span>
                 </div>
-                <div className={`tri-hero-val ${bcvColor}`}>{bcvSign}{formatUSD(totals.usd_bcv.pnl)}</div>
+                <div className={`tri-hero-val ${bcvColor}`}>{bcvSign}{<CountUp value={totals.usd_bcv.pnl} format={formatUSD} />}</div>
                 <div className={`tri-hero-sub ${bcvColor}`}>{bcvSign}{totals.usd_bcv.pnl_pct.toFixed(2)}% BCV</div>
               </div>
 
@@ -211,7 +211,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                   <span className="pill-mini pill-crypto">USDT</span>
                   <span className="tri-hero-title">Poder Real</span>
                 </div>
-                <div className={`tri-hero-val ${usdtColor}`}>{usdtSign}{formatUSDT(totals.usdt.pnl)}</div>
+                <div className={`tri-hero-val ${usdtColor}`}>{usdtSign}{<CountUp value={totals.usdt.pnl} format={formatUSDT} />}</div>
                 <div className={`tri-hero-sub ${usdtColor}`}>{usdtSign}{totals.usdt.pnl_pct.toFixed(2)}% Real</div>
               </div>
             </div>
@@ -251,7 +251,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {currentMode === 'ves' && (
           <>
             <div className="pnl-hero-container">
-              <div className={`pnl-hero-val ${vesColor}`}>{vesSign}{formatVES(totals.ves.pnl)}</div>
+              <div className={`pnl-hero-val ${vesColor}`}>{vesSign}{<CountUp value={totals.ves.pnl} format={formatVES} />}</div>
               <div className={`pnl-verdict-pill ${isVesPos ? 'badge-success' : 'badge-danger'}`}>
                 <Shield size={13} /> <span>Rendimiento en Bolívares: {vesSign}{totals.ves.pnl_pct.toFixed(2)}% Nominal</span>
               </div>
@@ -260,15 +260,15 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-single-currency-stack">
               <div className="single-pnl-card">
                 <span className="single-lbl"><Calculator size={14} /> Capital Invertido:</span>
-                <strong className="single-val">{formatVES(totalStockVes - totals.ves.pnl)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockVes - totals.ves.pnl} format={formatVES} />}</strong>
               </div>
               <div className="single-pnl-card">
                 <span className="single-lbl"><LineChart size={14} /> Valor Actual en la BVC:</span>
-                <strong className="single-val">{formatVES(totalStockVes)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockVes} format={formatVES} />}</strong>
               </div>
               <div className="single-pnl-card single-pnl-highlight">
                 <span className="single-lbl"><ArrowUpRight size={14} /> Ganancia Nominal Neta:</span>
-                <strong className={`single-val ${vesColor}`}>{vesSign}{formatVES(totals.ves.pnl)} ({formatPercent(totals.ves.pnl_pct)})</strong>
+                <strong className={`single-val ${vesColor}`}>{vesSign}{<CountUp value={totals.ves.pnl} format={formatVES} />} ({formatPercent(totals.ves.pnl_pct)})</strong>
               </div>
             </div>
           </>
@@ -278,7 +278,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {currentMode === 'usd_bcv' && (
           <>
             <div className="pnl-hero-container">
-              <div className={`pnl-hero-val ${bcvColor}`}>{bcvSign}{formatUSD(totals.usd_bcv.pnl)}</div>
+              <div className={`pnl-hero-val ${bcvColor}`}>{bcvSign}{<CountUp value={totals.usd_bcv.pnl} format={formatUSD} />}</div>
               <div className={`pnl-verdict-pill ${isBcvPos ? 'badge-success' : 'badge-danger'}`}>
                 <Shield size={13} /> <span>Rendimiento Oficial USD: {bcvSign}{totals.usd_bcv.pnl_pct.toFixed(2)}% BCV</span>
               </div>
@@ -287,15 +287,15 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-single-currency-stack">
               <div className="single-pnl-card">
                 <span className="single-lbl"><Calculator size={14} /> Costo de Compra (Tasa BCV):</span>
-                <strong className="single-val">{formatUSD(totalStockUsdBcv - totals.usd_bcv.pnl)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockUsdBcv - totals.usd_bcv.pnl} format={formatUSD} />}</strong>
               </div>
               <div className="single-pnl-card">
                 <span className="single-lbl"><LineChart size={14} /> Valor Oficial de Cartera:</span>
-                <strong className="single-val">{formatUSD(totalStockUsdBcv)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockUsdBcv} format={formatUSD} />}</strong>
               </div>
               <div className="single-pnl-card single-pnl-highlight">
                 <span className="single-lbl"><ArrowUpRight size={14} /> Retorno Oficial en Dólares:</span>
-                <strong className={`single-val ${bcvColor}`}>{bcvSign}{formatUSD(totals.usd_bcv.pnl)} ({formatPercent(totals.usd_bcv.pnl_pct)})</strong>
+                <strong className={`single-val ${bcvColor}`}>{bcvSign}{<CountUp value={totals.usd_bcv.pnl} format={formatUSD} />} ({formatPercent(totals.usd_bcv.pnl_pct)})</strong>
               </div>
             </div>
           </>
@@ -305,7 +305,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {currentMode === 'usdt' && (
           <>
             <div className="pnl-hero-container">
-              <div className={`pnl-hero-val ${usdtColor}`}>{usdtSign}{formatUSDT(totals.usdt.pnl)}</div>
+              <div className={`pnl-hero-val ${usdtColor}`}>{usdtSign}{<CountUp value={totals.usdt.pnl} format={formatUSDT} />}</div>
               <div className={`pnl-verdict-pill ${isUsdtPos ? 'badge-success' : 'badge-danger'}`}>
                 <Shield size={13} /> <span>Rendimiento Real: {usdtSign}{totals.usdt.pnl_pct.toFixed(2)}% USDT P2P</span>
               </div>
@@ -325,15 +325,15 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-single-currency-stack">
               <div className="single-pnl-card">
                 <span className="single-lbl"><Calculator size={14} /> Inversión Real P2P:</span>
-                <strong className="single-val">{formatUSDT(totalStockUsdt - totals.usdt.pnl)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockUsdt - totals.usdt.pnl} format={formatUSDT} />}</strong>
               </div>
               <div className="single-pnl-card">
                 <span className="single-lbl"><LineChart size={14} /> Valor Real en USDT:</span>
-                <strong className="single-val">{formatUSDT(totalStockUsdt)}</strong>
+                <strong className="single-val">{<CountUp value={totalStockUsdt} format={formatUSDT} />}</strong>
               </div>
               <div className="single-pnl-card single-pnl-highlight">
                 <span className="single-lbl"><ArrowUpRight size={14} /> Poder Adquisitivo Real:</span>
-                <strong className={`single-val ${usdtColor}`}>{usdtSign}{formatUSDT(totals.usdt.pnl)} ({formatPercent(totals.usdt.pnl_pct)})</strong>
+                <strong className={`single-val ${usdtColor}`}>{usdtSign}{<CountUp value={totals.usdt.pnl} format={formatUSDT} />} ({formatPercent(totals.usdt.pnl_pct)})</strong>
               </div>
             </div>
           </>
@@ -367,7 +367,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
               <MarketCode code="VE" />
               <span className="wallet-currency-name">Bolívares (VES)</span>
             </div>
-            <strong className="wallet-pill-amount">{formatVES(portfolio.cash_ves)}</strong>
+            <strong className="wallet-pill-amount">{<CountUp value={portfolio.cash_ves} format={formatVES} />}</strong>
           </div>
 
           <div className="wallet-pill-card">
@@ -375,7 +375,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
               <MarketCode code="US" />
               <span className="wallet-currency-name">Dólares (USD)</span>
             </div>
-            <strong className="wallet-pill-amount">{formatUSD(portfolio.cash_usd)}</strong>
+            <strong className="wallet-pill-amount">{<CountUp value={portfolio.cash_usd} format={formatUSD} />}</strong>
           </div>
         </div>
 

@@ -129,7 +129,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

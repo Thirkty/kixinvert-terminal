@@ -1,9 +1,23 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+type ViewTransitionDoc = Document & { startViewTransition?: (cb: () => void) => unknown };
+
+// Runs a state change inside a View Transition (animated cross-fade between modules).
+// Falls back to a plain update where the API or motion isn't available.
+export function runViewTransition(update: () => void) {
+  const doc = typeof document !== 'undefined' ? (document as ViewTransitionDoc) : null;
+  if (!doc?.startViewTransition || prefersReducedMotion()) {
+    update();
+    return;
+  }
+  doc.startViewTransition(() => flushSync(update));
+}
 
 interface CountUpProps {
   value: number;

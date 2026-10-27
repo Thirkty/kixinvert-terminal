@@ -151,7 +151,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

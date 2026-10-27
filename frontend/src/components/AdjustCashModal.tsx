@@ -98,7 +98,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

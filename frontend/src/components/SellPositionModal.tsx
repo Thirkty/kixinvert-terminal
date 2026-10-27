@@ -186,7 +186,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

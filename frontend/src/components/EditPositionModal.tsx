@@ -91,7 +91,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,

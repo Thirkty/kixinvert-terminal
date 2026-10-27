@@ -138,7 +138,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div
+    <div className="kx-overlay"
       style={{
         position: 'fixed',
         inset: 0,
