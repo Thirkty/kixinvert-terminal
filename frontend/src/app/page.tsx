@@ -637,7 +637,6 @@ export default function Home() {
       <EditPositionModal
         isOpen={isEditPosOpen}
         position={selectedPosForEdit}
-        currentCashVes={portfolio.cash_ves}
         onClose={() => {
           setIsEditPosOpen(false);
           setSelectedPosForEdit(null);
