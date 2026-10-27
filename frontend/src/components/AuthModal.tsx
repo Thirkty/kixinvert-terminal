@@ -156,7 +156,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>
             {mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#9aa3b2', cursor: 'pointer' }}>
             <X size={20} />
           </button>
         </div>
@@ -178,8 +178,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               padding: '8px',
               borderRadius: '8px',
               border: 'none',
-              background: mode === 'login' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-              color: mode === 'login' ? '#10b981' : '#94a3b8',
+              background: mode === 'login' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+              color: mode === 'login' ? '#7c8cff' : '#9aa3b2',
               fontWeight: 700,
               fontSize: '0.85rem',
               cursor: 'pointer',
@@ -202,8 +202,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               padding: '8px',
               borderRadius: '8px',
               border: 'none',
-              background: mode === 'register' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-              color: mode === 'register' ? '#10b981' : '#94a3b8',
+              background: mode === 'register' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+              color: mode === 'register' ? '#7c8cff' : '#9aa3b2',
               fontWeight: 700,
               fontSize: '0.85rem',
               cursor: 'pointer',
@@ -214,18 +214,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {errorMsg && (
-          <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#f43f5e', fontSize: '0.82rem', marginBottom: '16px' }}>
+          <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(229, 97, 110, 0.1)', border: '1px solid rgba(229, 97, 110, 0.3)', color: '#e5616e', fontSize: '0.82rem', marginBottom: '16px' }}>
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
               Nombre de Usuario
             </label>
             <div style={{ position: 'relative' }}>
-              <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+              <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
               <input
                 type="text"
                 name="kix_auth_user"
@@ -250,11 +250,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {mode === 'register' && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                 Correo Electrónico
               </label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
                 <input
                   type="email"
                   name="kix_auth_email"
@@ -279,11 +279,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
               Contraseña
             </label>
             <div style={{ position: 'relative' }}>
-              <Lock size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+              <Lock size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#667085' }} />
               <input
                 type="password"
                 name="kix_auth_password"
@@ -308,11 +308,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {requires2FA && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#10b981', marginBottom: '6px', fontWeight: 600 }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#7c8cff', marginBottom: '6px', fontWeight: 600 }}>
                 Código 2FA (Google Authenticator)
               </label>
               <div style={{ position: 'relative' }}>
-                <ShieldCheck size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#10b981' }} />
+                <ShieldCheck size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#7c8cff' }} />
                 <input
                   type="text"
                   name="kix_auth_2fa"
@@ -325,8 +325,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     width: '100%',
                     padding: '10px 12px 10px 36px',
                     borderRadius: '10px',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    background: 'rgba(124, 140, 255, 0.08)',
+                    border: '1px solid rgba(124, 140, 255, 0.35)',
                     color: '#fff',
                     fontSize: '1rem',
                     letterSpacing: '4px',
@@ -346,8 +346,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               marginTop: '10px',
               padding: '12px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               border: 'none',
               fontWeight: 700,
               fontSize: '0.95rem',

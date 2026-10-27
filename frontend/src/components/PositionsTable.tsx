@@ -6,6 +6,7 @@ import { Position, BvcTicker, CurrencyMode, MarketRates, Ecosystem, Internationa
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
 import { SpotlightCard } from './SpotlightCard';
+import { FlashOnChange } from './Motion';
 import { AnimatedTrend, AnimatedSparkles } from './AnimatedIcons';
 import { WhatIfSimulator } from './WhatIfSimulator';
 
@@ -72,8 +73,8 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
 
   return (
     <SpotlightCard
-      spotlightColor="rgba(16, 185, 129, 0.12)"
-      borderColor="rgba(16, 185, 129, 0.35)"
+      spotlightColor="rgba(124, 140, 255, 0.12)"
+      borderColor="rgba(124, 140, 255, 0.35)"
       className="positions-container glass-panel"
       style={{ padding: '24px', marginBottom: '40px', borderRadius: '16px' }}
     >
@@ -91,9 +92,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '10px',
-            background: activeTab === 'positions' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-            border: activeTab === 'positions' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-            color: activeTab === 'positions' ? '#10b981' : '#94a3b8',
+            background: activeTab === 'positions' ? 'rgba(124, 140, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+            border: activeTab === 'positions' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+            color: activeTab === 'positions' ? '#7c8cff' : '#9aa3b2',
             fontWeight: 700,
             fontSize: '0.85rem',
             cursor: 'pointer',
@@ -115,9 +116,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '10px',
-            background: activeTab === 'market_live' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-            border: activeTab === 'market_live' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-            color: activeTab === 'market_live' ? '#10b981' : '#94a3b8',
+            background: activeTab === 'market_live' ? 'rgba(124, 140, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+            border: activeTab === 'market_live' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+            color: activeTab === 'market_live' ? '#7c8cff' : '#9aa3b2',
             fontWeight: 700,
             fontSize: '0.85rem',
             cursor: 'pointer',
@@ -140,9 +141,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '10px',
-            background: activeTab === 'whatif' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-            border: activeTab === 'whatif' ? '1px solid rgba(168, 85, 247, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-            color: activeTab === 'whatif' ? '#c084fc' : '#94a3b8',
+            background: activeTab === 'whatif' ? 'rgba(124, 140, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+            border: activeTab === 'whatif' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+            color: activeTab === 'whatif' ? '#9aa6ff' : '#9aa3b2',
             fontWeight: 700,
             fontSize: '0.85rem',
             cursor: 'pointer',
@@ -166,9 +167,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 gap: '6px',
                 padding: '7px 12px',
                 borderRadius: '9px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.35)',
-                color: '#10b981',
+                background: 'rgba(124, 140, 255, 0.15)',
+                border: '1px solid rgba(124, 140, 255, 0.35)',
+                color: '#7c8cff',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
@@ -191,9 +192,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 gap: '6px',
                 padding: '7px 12px',
                 borderRadius: '9px',
-                background: 'rgba(239, 68, 68, 0.12)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#fca5a5',
+                background: 'rgba(229, 97, 110, 0.12)',
+                border: '1px solid rgba(229, 97, 110, 0.3)',
+                color: '#f3b0b7',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
@@ -215,9 +216,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
               gap: '8px',
               padding: '8px 16px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2))',
-              border: '1px solid rgba(139, 92, 246, 0.4)',
-              color: '#c084fc',
+              background: 'linear-gradient(135deg, rgba(124, 140, 255, 0.2), rgba(124, 140, 255, 0.2))',
+              border: '1px solid rgba(124, 140, 255, 0.4)',
+              color: '#9aa6ff',
               fontWeight: 700,
               fontSize: '0.85rem',
               cursor: 'pointer',
@@ -247,7 +248,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
             <tbody>
               {positions.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#667085' }}>
                     Tu portafolio aún no tiene acciones registradas. Haz clic en "Operar / Agregar Acción" para comenzar.
                   </td>
                 </tr>
@@ -268,7 +269,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{pos.symbol}</strong>
-                          <span style={{ fontSize: '0.76rem', color: '#64748b' }}>{pos.name}</span>
+                          <span style={{ fontSize: '0.76rem', color: '#667085' }}>{pos.name}</span>
                         </div>
                       </td>
                       <td className="text-right font-mono font-bold">{pos.shares.toLocaleString()}</td>
@@ -279,10 +280,12 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                         {currentMode === 'compare' && formatVES(pos.avg_cost)}
                       </td>
                       <td className="text-right font-mono font-bold">
-                        {currentMode === 'ves' && formatVES(pos.current_price)}
-                        {currentMode === 'usd_bcv' && formatUSD(pos.current_price / (rates.bcv || 1))}
-                        {currentMode === 'usdt' && formatUSDT(pos.current_price / (rates.usdt || 1))}
-                        {currentMode === 'compare' && formatVES(pos.current_price)}
+                        <FlashOnChange value={pos.current_price}>
+                          {currentMode === 'ves' && formatVES(pos.current_price)}
+                          {currentMode === 'usd_bcv' && formatUSD(pos.current_price / (rates.bcv || 1))}
+                          {currentMode === 'usdt' && formatUSDT(pos.current_price / (rates.usdt || 1))}
+                          {currentMode === 'compare' && formatVES(pos.current_price)}
+                        </FlashOnChange>
                       </td>
                       <td className="text-right font-mono font-bold" style={{ color: '#fff' }}>
                         {currentMode === 'ves' && formatVES(totalValVes)}
@@ -317,9 +320,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                               gap: '4px',
                               padding: '4px 8px',
                               borderRadius: '7px',
-                              background: 'rgba(239, 68, 68, 0.12)',
-                              border: '1px solid rgba(239, 68, 68, 0.3)',
-                              color: '#fca5a5',
+                              background: 'rgba(229, 97, 110, 0.12)',
+                              border: '1px solid rgba(229, 97, 110, 0.3)',
+                              color: '#f3b0b7',
                               fontSize: '0.74rem',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -340,9 +343,9 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                               alignItems: 'center',
                               padding: '5px 7px',
                               borderRadius: '7px',
-                              background: 'rgba(56, 189, 248, 0.12)',
-                              border: '1px solid rgba(56, 189, 248, 0.3)',
-                              color: '#38bdf8',
+                              background: 'rgba(124, 140, 255, 0.12)',
+                              border: '1px solid rgba(124, 140, 255, 0.3)',
+                              color: '#9aa6ff',
                               cursor: 'pointer',
                               transition: 'all 0.15s ease',
                             }}
@@ -366,7 +369,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                               borderRadius: '7px',
                               background: 'transparent',
                               border: 'none',
-                              color: '#64748b',
+                              color: '#667085',
                               cursor: 'pointer',
                               transition: 'color 0.2s ease',
                             }}
@@ -402,7 +405,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 maxWidth: '420px',
               }}
             >
-              <Search size={16} style={{ color: '#64748b' }} />
+              <Search size={16} style={{ color: '#667085' }} />
               <input
                 type="text"
                 placeholder={currentEcosystem === 'BVC' ? 'Buscar en BVC (ej: BNC, CANTV, Provincial)...' : 'Buscar en Wall Street (ej: SPY, Nvidia, Apple, Tesla)...'}
@@ -418,7 +421,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                 }}
               />
             </div>
-            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.78rem', color: '#667085' }}>
               {currentEcosystem === 'BVC' ? `Mostrando ${filteredBvcTickers.length} acciones BVC` : `Mostrando ${filteredIntlQuotes.length} activos globales`}
             </span>
           </div>
@@ -457,7 +460,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                       return (
                         <tr key={t.symbol}>
                           <td><strong style={{ color: '#fff' }}>{t.symbol}</strong></td>
-                          <td style={{ color: '#94a3b8' }}>{t.name}</td>
+                          <td style={{ color: '#9aa3b2' }}>{t.name}</td>
                           <td className="text-right font-mono font-bold">{formatVES(t.price)}</td>
                           <td className="text-right font-mono text-dim">{formatUSD(t.price / (rates.bcv || 1))}</td>
                           <td className="text-right font-mono text-dim">{(t.price / (rates.usdt || 1)).toFixed(2)} USDT</td>
@@ -479,7 +482,7 @@ const PositionsTableComponent: React.FC<PositionsTableProps> = ({
                       return (
                         <tr key={t.symbol}>
                           <td><strong style={{ color: '#fff' }}>{t.symbol}</strong></td>
-                          <td style={{ color: '#94a3b8' }}>{t.name}</td>
+                          <td style={{ color: '#9aa3b2' }}>{t.name}</td>
                           <td className="text-right font-mono font-bold text-green">{formatUSD(t.price)}</td>
                           <td className="text-right font-mono text-dim">{formatVES(t.price * (rates.bcv || 1))}</td>
                           <td className="text-right font-mono text-dim">{t.price.toFixed(2)} USDT</td>

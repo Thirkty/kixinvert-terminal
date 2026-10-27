@@ -12,7 +12,8 @@ import {
   Trash2,
   Calendar,
   Sparkles,
-  Bot
+  Bot,
+  Check,
 } from 'lucide-react';
 import { BvcTicker, UserSession } from '@/types';
 import { formatVES, formatUSD } from '@/lib/formatters';
@@ -162,10 +163,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     >
       <div style={{ width: '100%', maxWidth: '580px' }}>
         <SpotlightCard
-          spotlightColor="rgba(16, 185, 129, 0.18)"
-          borderColor="rgba(16, 185, 129, 0.4)"
+          spotlightColor="rgba(124, 140, 255, 0.18)"
+          borderColor="rgba(124, 140, 255, 0.4)"
           className="glass-panel animate-fade-in"
-          style={{ padding: '32px', borderRadius: '20px', background: 'rgba(15, 23, 42, 0.96)' }}
+          style={{ padding: '32px', borderRadius: '20px', background: 'rgba(20, 24, 33, 0.96)' }}
         >
           {/* Header */}
           <div style={{ marginBottom: '24px', textAlign: 'center' }}>
@@ -176,9 +177,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 gap: '8px',
                 padding: '4px 14px',
                 borderRadius: '9999px',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#10b981',
+                background: 'rgba(124, 140, 255, 0.12)',
+                border: '1px solid rgba(124, 140, 255, 0.3)',
+                color: '#7c8cff',
                 fontSize: '0.8rem',
                 fontWeight: 800,
                 marginBottom: '10px',
@@ -187,9 +188,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <Sparkles size={14} /> BIENVENIDO A TU TERMINAL PERSONAL
             </div>
             <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
-              Hola, {session?.username || 'Inversionista'} 👋
+              Hola, {session?.username || 'Inversionista'}
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '4px' }}>
+            <p style={{ color: '#9aa3b2', fontSize: '0.88rem', marginTop: '4px' }}>
               Tu cuenta está limpia y lista. Configuremos tus datos reales en 3 sencillos pasos.
             </p>
 
@@ -216,9 +217,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       borderRadius: '50%',
                       background:
                         step === s.num
-                          ? '#10b981'
+                          ? '#7c8cff'
                           : step > s.num
-                          ? 'rgba(16, 185, 129, 0.3)'
+                          ? 'rgba(124, 140, 255, 0.3)'
                           : 'rgba(255, 255, 255, 0.08)',
                       color: step === s.num ? '#052e16' : '#fff',
                       display: 'flex',
@@ -229,13 +230,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       transition: 'all 0.2s',
                     }}
                   >
-                    {step > s.num ? '✓' : s.num}
+                    {step > s.num ? <Check size={14} /> : s.num}
                   </div>
                   <span
                     style={{
                       fontSize: '0.78rem',
                       fontWeight: 700,
-                      color: step === s.num ? '#10b981' : '#64748b',
+                      color: step === s.num ? '#7c8cff' : '#667085',
                     }}
                   >
                     {s.label}
@@ -253,8 +254,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  background: 'rgba(16, 185, 129, 0.06)',
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                  background: 'rgba(124, 140, 255, 0.06)',
+                  border: '1px solid rgba(124, 140, 255, 0.2)',
                   borderRadius: '12px',
                   padding: '14px',
                   display: 'flex',
@@ -262,14 +263,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   gap: '12px',
                 }}
               >
-                <Wallet size={24} style={{ color: '#10b981', minWidth: '24px' }} />
-                <div style={{ fontSize: '0.84rem', color: '#cbd5e1' }}>
+                <Wallet size={24} style={{ color: '#7c8cff', minWidth: '24px' }} />
+                <div style={{ fontSize: '0.84rem', color: '#b9c0cb' }}>
                   ¿Cuánto efectivo estás ingresando para invertir? Este saldo se irá <strong>liquidando automáticamente</strong> cada vez que registres compras de acciones.
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                   Fecha de Inyección / Depósito
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -293,7 +294,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                     Monto en Bolívares (VES)
                   </label>
                   <input
@@ -309,19 +310,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       borderRadius: '10px',
                       background: 'rgba(255, 255, 255, 0.05)',
                       border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#10b981',
+                      color: '#7c8cff',
                       fontWeight: 700,
                       fontSize: '1rem',
                       outline: 'none',
                     }}
                   />
-                  <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#667085', marginTop: '4px', display: 'block' }}>
                     Equivale a {formatVES(initialVes)}
                   </span>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                     Monto en Dólares (USD Opcional)
                   </label>
                   <input
@@ -337,20 +338,20 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       borderRadius: '10px',
                       background: 'rgba(255, 255, 255, 0.05)',
                       border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#38bdf8',
+                      color: '#9aa6ff',
                       fontWeight: 700,
                       fontSize: '1rem',
                       outline: 'none',
                     }}
                   />
-                  <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#667085', marginTop: '4px', display: 'block' }}>
                     Equivale a {formatUSD(initialUsd)}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                   Concepto o Referencia del Aporte
                 </label>
                 <input
@@ -379,8 +380,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     width: '100%',
                     padding: '12px',
                     borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: '#fff',
+                    background: 'var(--accent)',
+                    color: 'var(--on-accent)',
                     fontWeight: 800,
                     fontSize: '0.92rem',
                     border: 'none',
@@ -389,7 +390,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                    boxShadow: 'none',
                   }}
                 >
                   <span>Continuar al Paso 2</span>
@@ -404,8 +405,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  background: 'rgba(59, 130, 246, 0.06)',
-                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  background: 'rgba(124, 140, 255, 0.06)',
+                  border: '1px solid rgba(124, 140, 255, 0.2)',
                   borderRadius: '12px',
                   padding: '14px',
                   display: 'flex',
@@ -413,8 +414,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   gap: '12px',
                 }}
               >
-                <TrendingUp size={24} style={{ color: '#3b82f6', minWidth: '24px' }} />
-                <div style={{ fontSize: '0.84rem', color: '#cbd5e1' }}>
+                <TrendingUp size={24} style={{ color: '#7c8cff', minWidth: '24px' }} />
+                <div style={{ fontSize: '0.84rem', color: '#b9c0cb' }}>
                   ¿Posees actualmente acciones de la Bolsa de Caracas? Regístralas aquí para calcular tu costo promedio y rendimiento real.
                 </div>
               </div>
@@ -433,7 +434,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               >
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '10px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', marginBottom: '4px' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#9aa3b2', marginBottom: '4px' }}>
                       Acción BVC
                     </label>
                     <select
@@ -443,7 +444,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         width: '100%',
                         padding: '8px 10px',
                         borderRadius: '8px',
-                        background: '#1e293b',
+                        background: '#1b202b',
                         border: '1px solid rgba(255, 255, 255, 0.15)',
                         color: '#fff',
                         fontSize: '0.84rem',
@@ -470,7 +471,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', marginBottom: '4px' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#9aa3b2', marginBottom: '4px' }}>
                       Nº Acciones
                     </label>
                     <input
@@ -492,7 +493,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8', marginBottom: '4px' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#9aa3b2', marginBottom: '4px' }}>
                       Costo Bs/acc
                     </label>
                     <input
@@ -521,9 +522,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   style={{
                     padding: '8px 14px',
                     borderRadius: '8px',
-                    background: 'rgba(59, 130, 246, 0.2)',
-                    border: '1px solid rgba(59, 130, 246, 0.4)',
-                    color: '#60a5fa',
+                    background: 'rgba(124, 140, 255, 0.2)',
+                    border: '1px solid rgba(124, 140, 255, 0.4)',
+                    color: '#9aa6ff',
                     fontWeight: 700,
                     fontSize: '0.82rem',
                     cursor: 'pointer',
@@ -540,7 +541,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               {/* Acciones ya añadidas */}
               {addedStocks.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.75rem', color: '#9aa3b2', fontWeight: 700 }}>
                     Acciones registradas ({addedStocks.length}):
                   </div>
                   {addedStocks.map((s, idx) => (
@@ -552,16 +553,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         alignItems: 'center',
                         padding: '6px 12px',
                         borderRadius: '8px',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        background: 'rgba(124, 140, 255, 0.1)',
+                        border: '1px solid rgba(124, 140, 255, 0.2)',
                         fontSize: '0.8rem',
-                        color: '#a7f3d0',
+                        color: '#c9cfff',
                       }}
                     >
                       <span>
                         <strong>{s.ticker}</strong>: {s.shares.toLocaleString()} acc @ {s.price} Bs
                       </span>
-                      <span>✓ Agregada</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Check size={13} />Agregada</span>
                     </div>
                   ))}
                 </div>
@@ -580,7 +581,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     borderRadius: '10px',
                     background:
                       addedStocks.length > 0
-                        ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                        ? 'var(--accent)'
                         : 'rgba(255, 255, 255, 0.06)',
                     color: '#fff',
                     fontWeight: 700,
@@ -605,8 +606,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  background: isTelegramLinked ? 'rgba(16, 185, 129, 0.12)' : 'rgba(14, 165, 233, 0.12)',
-                  border: isTelegramLinked ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(14, 165, 233, 0.35)',
+                  background: isTelegramLinked ? 'rgba(124, 140, 255, 0.12)' : 'rgba(124, 140, 255, 0.12)',
+                  border: isTelegramLinked ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid rgba(124, 140, 255, 0.35)',
                   borderRadius: '14px',
                   padding: '16px',
                   display: 'flex',
@@ -619,11 +620,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     width: '38px',
                     height: '38px',
                     borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #0284c7, #06b6d4)',
+                    background: 'var(--accent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#fff',
+                    color: 'var(--on-accent)',
                     minWidth: '38px',
                   }}
                 >
@@ -633,7 +634,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
                     {isTelegramLinked ? '¡Telegram Conectado con Éxito!' : 'Alertas Push Móviles en 1 Clic'}
                   </h4>
-                  <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                  <p style={{ fontSize: '0.82rem', color: '#9aa3b2', lineHeight: 1.4 }}>
                     {isTelegramLinked
                       ? `Tu cuenta está enlazada con @${telegramUsername || 'tu_usuario'}. Recibirás el reporte consolidado en un solo mensaje.`
                       : 'Pulsa el botón para abrir Telegram. Solo dale a "Iniciar" en el chat y tu cuenta se vinculará sola sin buscar ningún ID.'}
@@ -652,8 +653,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       width: '100%',
                       padding: '14px',
                       borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-                      color: '#fff',
+                      background: 'var(--accent)',
+                      color: 'var(--on-accent)',
                       fontWeight: 800,
                       fontSize: '0.96rem',
                       textDecoration: 'none',
@@ -661,16 +662,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      boxShadow: '0 4px 16px rgba(6, 182, 212, 0.4)',
+                      boxShadow: 'none',
                     }}
                   >
-                    <span>📱 Conectar Telegram en 1 Clic</span>
+                    <span>Conectar Telegram en 1 clic</span>
                     <ExternalLink size={16} />
                   </a>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <AnimatedPulseBeacon color="#f59e0b" size={6} />
-                    <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                    <AnimatedPulseBeacon color="#d9a441" size={6} />
+                    <span style={{ fontSize: '0.76rem', color: '#9aa3b2' }}>
                       Esperando que presiones "Iniciar" en Telegram...
                     </span>
                   </div>
@@ -680,17 +681,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   style={{
                     padding: '14px',
                     borderRadius: '10px',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    background: 'rgba(124, 140, 255, 0.15)',
+                    border: '1px solid rgba(124, 140, 255, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
-                    color: '#a7f3d0',
+                    color: '#c9cfff',
                     fontSize: '0.88rem',
                     fontWeight: 700,
                   }}
                 >
-                  <CheckCircle2 size={20} style={{ color: '#10b981' }} />
+                  <CheckCircle2 size={20} style={{ color: '#7c8cff' }} />
                   <span>Vinculación completada exitosamente</span>
                 </div>
               )}
@@ -706,8 +707,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     width: '100%',
                     padding: '13px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: '#fff',
+                    background: 'var(--accent)',
+                    color: 'var(--on-accent)',
                     fontWeight: 800,
                     fontSize: '0.95rem',
                     border: 'none',
@@ -716,10 +717,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                    boxShadow: 'none',
                   }}
                 >
-                  <span>🚀 Abrir Mi Terminal Personal</span>
+                  <span>Abrir mi terminal</span>
                   <ArrowRight size={18} />
                 </button>
               </div>

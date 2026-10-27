@@ -1,7 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BellRing, Check, RefreshCw, X, ShieldAlert, TrendingUp, Zap, Send } from 'lucide-react';
+import {
+  BellRing,
+  Check,
+  RefreshCw,
+  X,
+  ShieldAlert,
+  TrendingUp,
+  Zap,
+  Send,
+  Target,
+} from 'lucide-react';
 import { NotificationItem } from '@/types';
 import { markNotificationRead, markAllNotificationsRead } from '@/lib/api';
 import { playTerminalSound } from '@/lib/audio';
@@ -67,8 +77,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       }}
     >
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.14)"
-        borderColor="rgba(16, 185, 129, 0.35)"
+        spotlightColor="rgba(124, 140, 255, 0.14)"
+        borderColor="rgba(124, 140, 255, 0.35)"
         className="glass-panel"
         style={{
           borderRadius: '16px',
@@ -99,9 +109,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 style={{
                   fontSize: '0.7rem',
                   fontWeight: 700,
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  color: '#f87171',
-                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  background: 'rgba(229, 97, 110, 0.2)',
+                  color: '#ee8a94',
+                  border: '1px solid rgba(229, 97, 110, 0.35)',
                   padding: '2px 8px',
                   borderRadius: '9999px',
                 }}
@@ -123,7 +133,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 height: '30px',
                 borderRadius: '8px',
                 background: 'rgba(255, 255, 255, 0.05)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -139,7 +149,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 height: '30px',
                 borderRadius: '8px',
                 background: 'rgba(255, 255, 255, 0.05)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -173,9 +183,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 fontWeight: 700,
                 padding: '4px 10px',
                 borderRadius: '6px',
-                background: selectedCategory === 'all' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
-                color: selectedCategory === 'all' ? '#10b981' : '#94a3b8',
-                border: selectedCategory === 'all' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
+                background: selectedCategory === 'all' ? 'rgba(124, 140, 255, 0.15)' : 'transparent',
+                color: selectedCategory === 'all' ? '#7c8cff' : '#9aa3b2',
+                border: selectedCategory === 'all' ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid transparent',
                 cursor: 'pointer',
               }}
             >
@@ -191,13 +201,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 fontWeight: 700,
                 padding: '4px 10px',
                 borderRadius: '6px',
-                background: selectedCategory === 'tactical' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
-                color: selectedCategory === 'tactical' ? '#10b981' : '#94a3b8',
-                border: selectedCategory === 'tactical' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
+                background: selectedCategory === 'tactical' ? 'rgba(124, 140, 255, 0.15)' : 'transparent',
+                color: selectedCategory === 'tactical' ? '#7c8cff' : '#9aa3b2',
+                border: selectedCategory === 'tactical' ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid transparent',
                 cursor: 'pointer',
               }}
             >
-              🎯 Tácticas
+              <Target size={13} className="inline-icon" style={{ color: 'inherit' }} />Tácticas
             </button>
             <button
               onClick={() => {
@@ -209,13 +219,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 fontWeight: 700,
                 padding: '4px 10px',
                 borderRadius: '6px',
-                background: selectedCategory === 'market' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
-                color: selectedCategory === 'market' ? '#10b981' : '#94a3b8',
-                border: selectedCategory === 'market' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
+                background: selectedCategory === 'market' ? 'rgba(124, 140, 255, 0.15)' : 'transparent',
+                color: selectedCategory === 'market' ? '#7c8cff' : '#9aa3b2',
+                border: selectedCategory === 'market' ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid transparent',
                 cursor: 'pointer',
               }}
             >
-              ⚡ Mercado
+              <Zap size={13} className="inline-icon" style={{ color: 'inherit' }} />Mercado
             </button>
           </div>
 
@@ -223,7 +233,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             onClick={handleMarkAllRead}
             style={{
               fontSize: '0.74rem',
-              color: '#38bdf8',
+              color: '#9aa6ff',
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -237,7 +247,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         {/* Notifications List */}
         <div style={{ maxHeight: '340px', overflowY: 'auto', padding: '12px' }}>
           {filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '36px 16px', color: '#64748b', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center', padding: '36px 16px', color: '#667085', fontSize: '0.85rem' }}>
               No tienes alertas pendientes en esta categoría.
             </div>
           ) : (
@@ -252,8 +262,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   padding: '12px 14px',
                   borderRadius: '10px',
                   marginBottom: '8px',
-                  background: item.is_read ? 'rgba(255, 255, 255, 0.02)' : 'rgba(16, 185, 129, 0.08)',
-                  border: item.is_read ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(16, 185, 129, 0.25)',
+                  background: item.is_read ? 'rgba(255, 255, 255, 0.02)' : 'rgba(124, 140, 255, 0.08)',
+                  border: item.is_read ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(124, 140, 255, 0.25)',
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
                 }}
@@ -263,11 +273,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     width: '32px',
                     height: '32px',
                     borderRadius: '8px',
-                    background: item.category === 'tactical' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                    background: item.category === 'tactical' ? 'rgba(217, 164, 65, 0.15)' : 'rgba(124, 140, 255, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: item.category === 'tactical' ? '#fbbf24' : '#60a5fa',
+                    color: item.category === 'tactical' ? '#e3b65e' : '#9aa6ff',
                     minWidth: '32px',
                   }}
                 >
@@ -279,11 +289,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#fff' }}>
                       {item.title}
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#667085' }}>
                       {item.time || 'En vivo'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '3px', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '0.78rem', color: '#9aa3b2', marginTop: '3px', lineHeight: 1.4 }}>
                     {item.desc || item.message}
                   </div>
                 </div>
@@ -294,8 +304,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                       width: '6px',
                       height: '6px',
                       borderRadius: '50%',
-                      background: '#10b981',
-                      boxShadow: '0 0 6px #10b981',
+                      background: '#7c8cff',
+                      boxShadow: '0 0 6px #7c8cff',
                       marginTop: '6px',
                       minWidth: '6px',
                     }}
@@ -317,7 +327,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             borderTop: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
-          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+          <span style={{ fontSize: '0.74rem', color: '#667085' }}>
             Monitor: BVC • Wall Street
           </span>
 
@@ -333,9 +343,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               gap: '6px',
               padding: '6px 12px',
               borderRadius: '8px',
-              background: 'rgba(6, 182, 212, 0.12)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              color: '#38bdf8',
+              background: 'rgba(124, 140, 255, 0.12)',
+              border: '1px solid rgba(124, 140, 255, 0.3)',
+              color: '#9aa6ff',
               fontSize: '0.78rem',
               fontWeight: 700,
               cursor: 'pointer',

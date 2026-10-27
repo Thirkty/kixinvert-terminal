@@ -53,9 +53,9 @@ export const AnimatedBell: React.FC<{
             right: '-2px',
             width: '8px',
             height: '8px',
-            background: '#ef4444',
+            background: '#e5616e',
             borderRadius: '50%',
-            boxShadow: '0 0 8px #ef4444',
+            boxShadow: '0 0 8px #e5616e',
             animation: 'hugeicon-pulse 1.5s ease-in-out infinite',
           }}
         />
@@ -91,7 +91,7 @@ export const AnimatedTrend: React.FC<{
         height={size}
         viewBox="0 0 24 24"
         fill="none"
-        stroke={isUp ? '#10b981' : '#f43f5e'}
+        stroke={isUp ? 'var(--up)' : 'var(--down)'}
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -127,7 +127,7 @@ export const AnimatedPulseBeacon: React.FC<{
   color?: string;
   size?: number;
   label?: string;
-}> = ({ color = '#10b981', size = 8, label }) => {
+}> = ({ color = '#7c8cff', size = 8, label }) => {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
       <span

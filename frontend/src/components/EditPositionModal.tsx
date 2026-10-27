@@ -119,9 +119,9 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Edit3 size={20} style={{ color: '#38bdf8' }} /> Editar Posición
+              <Edit3 size={20} style={{ color: '#9aa6ff' }} /> Editar Posición
             </h2>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '0.82rem', color: '#9aa3b2', margin: '4px 0 0 0' }}>
               Corrige títulos o precio promedio en <strong style={{ color: '#fff' }}>{position.symbol}</strong> ({position.name})
             </p>
           </div>
@@ -130,7 +130,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: 'none',
-              color: '#94a3b8',
+              color: '#9aa3b2',
               cursor: 'pointer',
               borderRadius: '8px',
               padding: '6px',
@@ -143,8 +143,8 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
         {/* Resumen Actual */}
         <div
           style={{
-            background: 'rgba(56, 189, 248, 0.06)',
-            border: '1px solid rgba(56, 189, 248, 0.2)',
+            background: 'rgba(124, 140, 255, 0.06)',
+            border: '1px solid rgba(124, 140, 255, 0.2)',
             borderRadius: '12px',
             padding: '12px 16px',
             marginBottom: '18px',
@@ -155,15 +155,15 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
           }}
         >
           <div>
-            <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.74rem' }}>REGISTRO ACTUAL</span>
+            <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.74rem' }}>REGISTRO ACTUAL</span>
             <strong style={{ color: '#fff' }}>{originalShares.toLocaleString()} acciones</strong>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.74rem' }}>COSTO PROMEDIO</span>
-            <strong style={{ color: '#38bdf8' }}>{formatVES(originalCost)}</strong>
+            <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.74rem' }}>COSTO PROMEDIO</span>
+            <strong style={{ color: '#9aa6ff' }}>{formatVES(originalCost)}</strong>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.74rem' }}>VALOR TOTAL REGISTRADO</span>
+            <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.74rem' }}>VALOR TOTAL REGISTRADO</span>
             <strong style={{ color: '#fff' }}>{formatVES(originalTotalCost)}</strong>
           </div>
         </div>
@@ -171,15 +171,15 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
         {errorMsg && (
           <div
             style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'rgba(229, 97, 110, 0.1)',
+              border: '1px solid rgba(229, 97, 110, 0.3)',
               borderRadius: '10px',
               padding: '10px 14px',
               marginBottom: '14px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              color: '#f87171',
+              color: '#ee8a94',
               fontSize: '0.82rem',
             }}
           >
@@ -192,10 +192,10 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
           {/* Campo de Acciones con Atajos Rápidos */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
+              <label style={{ fontSize: '0.8rem', color: '#9aa3b2', fontWeight: 600 }}>
                 Nº de Acciones Real (Títulos)
               </label>
-              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.74rem', color: '#667085' }}>
                 Antes: {originalShares.toLocaleString()}
               </span>
             </div>
@@ -225,7 +225,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
 
             {/* Atajos de corrección rápida */}
             <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.72rem', color: '#64748b', alignSelf: 'center', marginRight: '4px' }}>
+              <span style={{ fontSize: '0.72rem', color: '#667085', alignSelf: 'center', marginRight: '4px' }}>
                 Corregir:
               </span>
               <button
@@ -233,9 +233,9 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 onClick={() => handleQuickDeduct(150)}
                 title="Restar 150 acciones que agregué de más"
                 style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: '#fca5a5',
+                  background: 'rgba(229, 97, 110, 0.15)',
+                  border: '1px solid rgba(229, 97, 110, 0.3)',
+                  color: '#f3b0b7',
                   padding: '4px 8px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -254,7 +254,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 style={{
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#cbd5e1',
+                  color: '#b9c0cb',
                   padding: '4px 8px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -269,7 +269,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 style={{
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#cbd5e1',
+                  color: '#b9c0cb',
                   padding: '4px 8px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -284,7 +284,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 style={{
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#cbd5e1',
+                  color: '#b9c0cb',
                   padding: '4px 8px',
                   borderRadius: '6px',
                   fontSize: '0.74rem',
@@ -299,7 +299,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
           {/* Campo de Precio Unitario de Compra */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
+              <label style={{ fontSize: '0.8rem', color: '#9aa3b2', fontWeight: 600 }}>
                 Precio Unitario de Compra Promedio (Bs)
               </label>
               <button
@@ -308,7 +308,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#38bdf8',
+                  color: '#9aa6ff',
                   fontSize: '0.74rem',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -354,14 +354,14 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#94a3b8' }}>Diferencia de acciones:</span>
-                <strong style={{ color: sharesDiff < 0 ? '#f87171' : '#10b981' }}>
+                <span style={{ color: '#9aa3b2' }}>Diferencia de acciones:</span>
+                <strong style={{ color: sharesDiff < 0 ? 'var(--down)' : 'var(--up)' }}>
                   {sharesDiff > 0 ? `+${sharesDiff.toLocaleString()}` : sharesDiff.toLocaleString()} acciones
                 </strong>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#94a3b8' }}>Nuevo Valor Invertido:</span>
+                <span style={{ color: '#9aa3b2' }}>Nuevo Valor Invertido:</span>
                 <strong style={{ color: '#fff' }}>{formatVES(newTotalCost)}</strong>
               </div>
 
@@ -373,7 +373,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    color: costDiff > 0 ? '#a7f3d0' : '#fed7aa',
+                    color: costDiff > 0 ? '#c9cfff' : '#fed7aa',
                   }}
                 >
                   <span>{costDiff > 0 ? 'Monto a reintegrar al saldo:' : 'Monto adicional a deducir:'}</span>
@@ -394,21 +394,21 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 cursor: 'pointer',
                 padding: '10px 12px',
                 borderRadius: '10px',
-                background: adjustCash ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                border: adjustCash ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
+                background: adjustCash ? 'rgba(124, 140, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                border: adjustCash ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
                 userSelect: 'none',
               }}
             >
               {adjustCash ? (
-                <CheckSquare size={18} style={{ color: '#38bdf8' }} />
+                <CheckSquare size={18} style={{ color: '#9aa6ff' }} />
               ) : (
-                <Square size={18} style={{ color: '#64748b' }} />
+                <Square size={18} style={{ color: '#667085' }} />
               )}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.82rem', color: adjustCash ? '#e0f2fe' : '#94a3b8', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.82rem', color: adjustCash ? '#e0f2fe' : '#9aa3b2', fontWeight: 600 }}>
                   Ajustar la diferencia automáticamente en mi saldo en efectivo
                 </span>
-                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <span style={{ fontSize: '0.72rem', color: '#667085' }}>
                   {costDiff > 0
                     ? `Se sumarán ${formatVES(costDiff)} a tu saldo en efectivo disponible.`
                     : `Se deducirán ${formatVES(Math.abs(costDiff))} de tu saldo en efectivo disponible.`}
@@ -429,7 +429,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 borderRadius: '10px',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 cursor: 'pointer',
                 fontWeight: 600,
               }}
@@ -443,7 +443,7 @@ export const EditPositionModal: React.FC<EditPositionModalProps> = ({
                 flex: 2,
                 padding: '11px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                background: 'linear-gradient(135deg, #6674e6, #0369a1)',
                 color: '#fff',
                 border: 'none',
                 fontWeight: 700,

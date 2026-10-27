@@ -1,7 +1,21 @@
 'use client';
 
 import React from 'react';
-import { TrendingUp, Landmark, Coins, ArrowLeftRight, Bot, LogOut, User, RefreshCw, Cpu, DollarSign } from 'lucide-react';
+import {
+  TrendingUp,
+  Landmark,
+  Coins,
+  ArrowLeftRight,
+  Bot,
+  LogOut,
+  User,
+  RefreshCw,
+  Cpu,
+  DollarSign,
+  House,
+  LayoutDashboard,
+} from 'lucide-react';
+import { MarketCode } from './Motion';
 import { MarketRates, UserSession, Ecosystem } from '@/types';
 import { formatVES } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
@@ -51,7 +65,7 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
         alignItems: 'center',
         padding: '12px 24px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        background: 'rgba(10, 14, 23, 0.9)',
+        background: 'rgba(12, 15, 20, 0.9)',
         backdropFilter: 'blur(16px)',
         position: 'sticky',
         top: 0,
@@ -74,21 +88,21 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
+              background: 'var(--accent)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              color: 'var(--on-accent)',
+              boxShadow: 'none',
             }}
           >
             <TrendingUp size={20} />
           </div>
           <div className="brand-text">
             <span className="brand-name" style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
-              KixInvert<span style={{ color: '#10b981' }}>APP</span>
+              KixInvert<span style={{ color: '#7c8cff' }}>APP</span>
             </span>
-            <span className="brand-tag" style={{ display: 'block', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
+            <span className="brand-tag" style={{ display: 'block', fontSize: '0.68rem', color: '#9aa3b2', fontWeight: 600 }}>
               Terminal Bursátil
             </span>
           </div>
@@ -119,16 +133,16 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 gap: '6px',
                 padding: '5px 12px',
                 borderRadius: '9px',
-                background: currentView === 'welcome' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
-                border: currentView === 'welcome' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid transparent',
-                color: currentView === 'welcome' ? '#38bdf8' : '#94a3b8',
+                background: currentView === 'welcome' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+                border: currentView === 'welcome' ? '1px solid rgba(124, 140, 255, 0.4)' : '1px solid transparent',
+                color: currentView === 'welcome' ? '#9aa6ff' : '#9aa3b2',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
             >
-              <span>🏠</span>
+              <House size={15} />
               <span>Inicio</span>
             </button>
 
@@ -144,16 +158,16 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 gap: '6px',
                 padding: '5px 12px',
                 borderRadius: '9px',
-                background: currentView === 'terminal' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-                border: currentView === 'terminal' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-                color: currentView === 'terminal' ? '#a7f3d0' : '#94a3b8',
+                background: currentView === 'terminal' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+                border: currentView === 'terminal' ? '1px solid rgba(124, 140, 255, 0.4)' : '1px solid transparent',
+                color: currentView === 'terminal' ? '#c9cfff' : '#9aa3b2',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
             >
-              <span>📊</span>
+              <LayoutDashboard size={15} />
               <span>Terminal</span>
             </button>
           </div>
@@ -168,14 +182,14 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
               gap: '6px',
               padding: '4px 10px',
               borderRadius: '8px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.25)',
-              color: '#34d399',
+              background: 'rgba(124, 140, 255, 0.12)',
+              border: '1px solid rgba(124, 140, 255, 0.25)',
+              color: '#9aa6ff',
               fontSize: '0.75rem',
               fontWeight: 700,
             }}
           >
-            <AnimatedPulseBeacon color="#10b981" />
+            <AnimatedPulseBeacon color="#7c8cff" />
             <span>Terminal Privada</span>
           </div>
         )}
@@ -204,16 +218,16 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 gap: '6px',
                 padding: '5px 12px',
                 borderRadius: '8px',
-                background: currentEcosystem === 'BVC' ? 'rgba(16, 185, 129, 0.18)' : 'transparent',
-                border: currentEcosystem === 'BVC' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid transparent',
-                color: currentEcosystem === 'BVC' ? '#a7f3d0' : '#94a3b8',
+                background: currentEcosystem === 'BVC' ? 'rgba(124, 140, 255, 0.18)' : 'transparent',
+                border: currentEcosystem === 'BVC' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid transparent',
+                color: currentEcosystem === 'BVC' ? '#c9cfff' : '#9aa3b2',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
             >
-              <span>🇻🇪</span>
+              <MarketCode code="VE" />
               <span>Caracas BVC</span>
             </button>
 
@@ -228,16 +242,16 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 gap: '6px',
                 padding: '5px 12px',
                 borderRadius: '8px',
-                background: currentEcosystem === 'US' ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-                border: currentEcosystem === 'US' ? '1px solid rgba(59, 130, 246, 0.35)' : '1px solid transparent',
-                color: currentEcosystem === 'US' ? '#93c5fd' : '#94a3b8',
+                background: currentEcosystem === 'US' ? 'rgba(124, 140, 255, 0.18)' : 'transparent',
+                border: currentEcosystem === 'US' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid transparent',
+                color: currentEcosystem === 'US' ? '#b4bcff' : '#9aa3b2',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
             >
-              <span>🇺🇸</span>
+              <MarketCode code="US" />
               <span>Wall Street</span>
             </button>
           </div>
@@ -304,16 +318,16 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
             gap: '6px',
             padding: '5px 11px',
             borderRadius: '9999px',
-            background: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.28)',
-            color: '#6ee7b7',
+            background: 'rgba(124, 140, 255, 0.1)',
+            border: '1px solid rgba(124, 140, 255, 0.28)',
+            color: '#b4bcff',
             fontSize: '0.78rem',
             fontWeight: 700,
             cursor: isRefreshing ? 'wait' : 'pointer',
             transition: 'all 0.2s ease',
           }}
         >
-          <AnimatedPulseBeacon color="#10b981" size={5} />
+          <AnimatedPulseBeacon color="#7c8cff" size={5} />
           <RefreshCw size={12} className={isRefreshing ? 'spin-icon' : ''} />
           <span>{isRefreshing ? 'Sincronizando...' : 'EN VIVO'}</span>
         </button>
@@ -330,9 +344,9 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              background: unreadNotifsCount > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-              border: unreadNotifsCount > 0 ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
-              color: unreadNotifsCount > 0 ? '#f87171' : '#94a3b8',
+              background: unreadNotifsCount > 0 ? 'rgba(229, 97, 110, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+              border: unreadNotifsCount > 0 ? '1px solid rgba(229, 97, 110, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+              color: unreadNotifsCount > 0 ? '#ee8a94' : '#9aa3b2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -359,9 +373,9 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
               gap: '6px',
               padding: '6px 12px',
               borderRadius: '9999px',
-              background: 'rgba(6, 182, 212, 0.12)',
-              border: '1px solid rgba(6, 182, 212, 0.35)',
-              color: '#38bdf8',
+              background: 'rgba(124, 140, 255, 0.12)',
+              border: '1px solid rgba(124, 140, 255, 0.35)',
+              color: '#9aa6ff',
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -386,9 +400,9 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
             gap: '6px',
             padding: '6px 13px',
             borderRadius: '9999px',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2))',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-            color: '#c084fc',
+            background: 'linear-gradient(135deg, rgba(124, 140, 255, 0.2), rgba(124, 140, 255, 0.2))',
+            border: '1px solid rgba(124, 140, 255, 0.4)',
+            color: '#9aa6ff',
             fontSize: '0.82rem',
             fontWeight: 700,
             cursor: 'pointer',
@@ -412,7 +426,7 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 fontSize: '0.82rem',
               }}
             >
-              <User size={14} style={{ color: '#10b981' }} />
+              <User size={14} style={{ color: '#7c8cff' }} />
               <strong>{session.is_demo ? 'Inversionista' : session.username}</strong>
             </div>
             <button
@@ -425,9 +439,9 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
                 alignItems: 'center',
                 gap: '4px',
                 padding: '6px 11px',
-                background: 'rgba(244, 63, 94, 0.1)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                color: '#f43f5e',
+                background: 'rgba(229, 97, 110, 0.1)',
+                border: '1px solid rgba(229, 97, 110, 0.3)',
+                color: '#e5616e',
                 borderRadius: '8px',
                 fontSize: '0.82rem',
                 fontWeight: 600,
@@ -445,8 +459,8 @@ const TopHeaderComponent: React.FC<TopHeaderProps> = ({
             }}
             style={{
               padding: '7px 16px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               borderRadius: '8px',
               fontWeight: 700,
               fontSize: '0.84rem',

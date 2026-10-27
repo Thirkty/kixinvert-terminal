@@ -211,7 +211,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               width: '8px',
               height: '14px',
               marginLeft: '3px',
-              background: '#a855f7',
+              background: '#7c8cff',
               borderRadius: '2px',
               verticalAlign: 'middle',
               animation: 'aiCursorBlink 0.8s infinite',
@@ -263,10 +263,10 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          background: 'rgba(15, 23, 42, 0.96)',
-          border: '1px solid rgba(139, 92, 246, 0.35)',
+          background: 'rgba(20, 24, 33, 0.96)',
+          border: '1px solid rgba(124, 140, 255, 0.35)',
           borderRadius: '16px',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(139, 92, 246, 0.15)',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.7)',
         }}
       >
         {/* Header */}
@@ -277,7 +277,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'rgba(30, 41, 59, 0.4)',
+            background: 'rgba(27, 32, 43, 0.4)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -286,9 +286,9 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 width: '38px',
                 height: '38px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.3))',
-                border: '1px solid rgba(168, 85, 247, 0.4)',
-                color: '#c084fc',
+                background: 'linear-gradient(135deg, rgba(124, 140, 255, 0.3), rgba(124, 140, 255, 0.3))',
+                border: '1px solid rgba(124, 140, 255, 0.4)',
+                color: '#9aa6ff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -304,16 +304,16 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                     fontSize: '0.68rem',
                     padding: '2px 7px',
                     borderRadius: '10px',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    color: '#34d399',
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    background: 'rgba(124, 140, 255, 0.15)',
+                    color: '#9aa6ff',
+                    border: '1px solid rgba(124, 140, 255, 0.3)',
                     fontWeight: 600,
                   }}
                 >
                   BVC en Vivo
                 </span>
               </div>
-              <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+              <span style={{ fontSize: '0.74rem', color: '#9aa3b2' }}>
                 {isDemo ? `Modo Práctica Demo (${Math.max(0, 2 - demoQueryCount)} consultas restantes)` : 'Acceso Ilimitado'}
               </span>
             </div>
@@ -323,14 +323,14 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94a3b8',
+              color: '#9aa3b2',
               cursor: 'pointer',
               padding: '6px',
               borderRadius: '8px',
               transition: 'background 0.2s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#9aa3b2')}
           >
             <X size={20} />
           </button>
@@ -362,8 +362,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   background:
                     m.role === 'user'
-                      ? 'linear-gradient(135deg, #10b981, #059669)'
-                      : 'rgba(30, 41, 59, 0.7)',
+                      ? 'var(--accent)'
+                      : 'rgba(27, 32, 43, 0.7)',
                   border: m.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.08)',
                   color: '#fff',
                   fontSize: '0.88rem',
@@ -371,7 +371,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   whiteSpace: 'pre-wrap',
                   boxShadow:
                     m.role === 'user'
-                      ? '0 4px 14px rgba(16, 185, 129, 0.25)'
+                      ? '0 4px 14px rgba(124, 140, 255, 0.25)'
                       : '0 4px 16px rgba(0,0,0,0.25)',
                 }}
               >
@@ -387,7 +387,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                         border: '1px solid rgba(255,255,255,0.15)',
                         borderRadius: '6px',
                         padding: '3px 8px',
-                        color: '#cbd5e1',
+                        color: '#b9c0cb',
                         fontSize: '0.72rem',
                         display: 'flex',
                         alignItems: 'center',
@@ -411,9 +411,9 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 maxWidth: '90%',
                 padding: '14px 18px',
                 borderRadius: '16px 16px 16px 4px',
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(6, 182, 212, 0.08))',
-                border: '1px solid rgba(139, 92, 246, 0.35)',
-                boxShadow: '0 8px 24px rgba(139, 92, 246, 0.15)',
+                background: 'linear-gradient(135deg, rgba(124, 140, 255, 0.12), rgba(124, 140, 255, 0.08))',
+                border: '1px solid rgba(124, 140, 255, 0.35)',
+                boxShadow: 'none',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px',
@@ -425,7 +425,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                     width: '22px',
                     height: '22px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #a855f7, #06b6d4)',
+                    background: 'var(--accent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -434,7 +434,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 >
                   <Cpu size={12} color="#fff" />
                 </div>
-                <span style={{ color: '#c084fc', fontSize: '0.86rem', fontWeight: 600 }}>
+                <span style={{ color: '#9aa6ff', fontSize: '0.86rem', fontWeight: 600 }}>
                   KixInvert AI está pensando
                 </span>
                 <span style={{ display: 'inline-flex', gap: '3px', marginLeft: '2px' }}>
@@ -443,7 +443,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                       width: '4px',
                       height: '4px',
                       borderRadius: '50%',
-                      background: '#c084fc',
+                      background: '#9aa6ff',
                       display: 'inline-block',
                       animation: 'aiDotWave 1.4s infinite ease-in-out both',
                       animationDelay: '0s',
@@ -454,7 +454,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                       width: '4px',
                       height: '4px',
                       borderRadius: '50%',
-                      background: '#c084fc',
+                      background: '#9aa6ff',
                       display: 'inline-block',
                       animation: 'aiDotWave 1.4s infinite ease-in-out both',
                       animationDelay: '0.2s',
@@ -465,7 +465,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                       width: '4px',
                       height: '4px',
                       borderRadius: '50%',
-                      background: '#c084fc',
+                      background: '#9aa6ff',
                       display: 'inline-block',
                       animation: 'aiDotWave 1.4s infinite ease-in-out both',
                       animationDelay: '0.4s',
@@ -475,7 +475,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 <span
                   style={{
                     fontSize: '0.72rem',
-                    color: '#94a3b8',
+                    color: '#9aa3b2',
                     marginLeft: 'auto',
                     fontFamily: 'monospace',
                   }}
@@ -486,7 +486,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               <div
                 style={{
                   fontSize: '0.82rem',
-                  color: '#e2e8f0',
+                  color: '#d5d9e0',
                   paddingLeft: '30px',
                   fontStyle: 'italic',
                   display: 'flex',
@@ -494,7 +494,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   gap: '8px',
                 }}
               >
-                <Sparkles size={13} style={{ color: '#38bdf8', flexShrink: 0 }} />
+                <Sparkles size={13} style={{ color: '#9aa6ff', flexShrink: 0 }} />
                 <span>{THINKING_THOUGHTS[thinkingIndex]}</span>
               </div>
             </div>
@@ -506,8 +506,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               style={{
                 padding: '16px',
                 borderRadius: '12px',
-                background: 'rgba(139, 92, 246, 0.12)',
-                border: '1px solid rgba(139, 92, 246, 0.35)',
+                background: 'rgba(124, 140, 255, 0.12)',
+                border: '1px solid rgba(124, 140, 255, 0.35)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
@@ -515,11 +515,11 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                 alignItems: 'center',
               }}
             >
-              <AlertCircle size={24} style={{ color: '#c084fc' }} />
+              <AlertCircle size={24} style={{ color: '#9aa6ff' }} />
               <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>
                 ¡Has completado tus 2 consultas de práctica en modo Demo!
               </div>
-              <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: 0 }}>
+              <p style={{ color: '#9aa3b2', fontSize: '0.8rem', margin: 0 }}>
                 Para seguir disfrutando de diagnósticos bursátiles ilimitados y guardar tu portafolio, regístrate gratis.
               </p>
               <button
@@ -533,8 +533,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   gap: '6px',
                   padding: '9px 18px',
                   borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-                  color: '#fff',
+                  background: 'var(--accent)',
+                  color: 'var(--on-accent)',
                   border: 'none',
                   fontWeight: 700,
                   fontSize: '0.85rem',
@@ -557,7 +557,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               overflowX: 'auto',
               padding: '8px 20px',
               borderTop: '1px solid rgba(255,255,255,0.04)',
-              background: 'rgba(15, 23, 42, 0.6)',
+              background: 'rgba(20, 24, 33, 0.6)',
               scrollbarWidth: 'none',
             }}
           >
@@ -573,7 +573,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   borderRadius: '20px',
                   padding: '5px 12px',
                   fontSize: '0.74rem',
-                  color: '#cbd5e1',
+                  color: '#b9c0cb',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s ease',
@@ -582,14 +582,14 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
                   gap: '4px',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(139, 92, 246, 0.25)';
-                  e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                  e.currentTarget.style.background = 'rgba(124, 140, 255, 0.25)';
+                  e.currentTarget.style.borderColor = 'rgba(124, 140, 255, 0.5)';
                   e.currentTarget.style.color = '#fff';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
-                  e.currentTarget.style.color = '#cbd5e1';
+                  e.currentTarget.style.color = '#b9c0cb';
                 }}
               >
                 {sug}
@@ -630,7 +630,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               outline: 'none',
               transition: 'border-color 0.2s',
             }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.6)')}
+            onFocus={(e) => (e.currentTarget.style.borderColor = 'rgba(124, 140, 255, 0.6)')}
             onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
           />
           <button
@@ -639,8 +639,8 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
             style={{
               padding: '11px 20px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               border: 'none',
               fontWeight: 700,
               cursor: loading || isLimitReached || !prompt.trim() ? 'not-allowed' : 'pointer',
@@ -648,7 +648,7 @@ export const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, session, onOp
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+              boxShadow: 'none',
               transition: 'opacity 0.2s, transform 0.1s',
             }}
           >

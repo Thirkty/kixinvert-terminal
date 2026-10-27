@@ -15,7 +15,12 @@ import {
   LineChart,
   ArrowUpRight,
   TrendingDown,
+  Landmark,
+  Target,
+  AlertTriangle,
+  Check,
 } from 'lucide-react';
+import { MarketCode, CountUp } from './Motion';
 import { CurrencyMode, MarketRates, PortfolioData, TriMonetaryTotals } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
 import { SpotlightCard } from './SpotlightCard';
@@ -81,8 +86,8 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
           CARD 1: MI PATRIMONIO TOTAL (MICROKIT SPOTLIGHT)
          ============================================================== */}
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.16)"
-        borderColor="rgba(16, 185, 129, 0.45)"
+        spotlightColor="rgba(124, 140, 255, 0.16)"
+        borderColor="rgba(124, 140, 255, 0.45)"
         className="kpi-card glass-panel kpi-card-hero"
       >
         <div className="kpi-header">
@@ -101,10 +106,10 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {/* Valor Primario según la divisa seleccionada */}
         <div className="kpi-main-block">
           <div className="kpi-main-metric">
-            {currentMode === 'ves' && formatVES(totalPortfolioVes)}
-            {currentMode === 'usd_bcv' && formatUSD(totalPortfolioUsdBcv)}
-            {currentMode === 'usdt' && formatUSDT(totalPortfolioUsdt)}
-            {currentMode === 'compare' && formatVES(totalPortfolioVes)}
+            {currentMode === 'ves' && <CountUp value={totalPortfolioVes} format={formatVES} />}
+            {currentMode === 'usd_bcv' && <CountUp value={totalPortfolioUsdBcv} format={formatUSD} />}
+            {currentMode === 'usdt' && <CountUp value={totalPortfolioUsdt} format={formatUSDT} />}
+            {currentMode === 'compare' && <CountUp value={totalPortfolioVes} format={formatVES} />}
           </div>
           <span className="kpi-metric-sublabel">
             {currentMode === 'ves' && 'Patrimonio Total en Bolívares (VES)'}
@@ -146,10 +151,10 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         {/* Equivalencias multi-divisa al pie */}
         <div className="kpi-footer-equivalents">
           <span className="equiv-chip" title="Equivalencia al Dólar Oficial del Banco Central de Venezuela">
-            🏛️ BCV: <strong>{formatUSD(totalPortfolioUsdBcv)}</strong>
+            <Landmark size={13} className="inline-icon" />BCV: <strong>{formatUSD(totalPortfolioUsdBcv)}</strong>
           </span>
           <span className="equiv-chip chip-highlight" title="Equivalencia al Dólar Real de Binance P2P (Poder Adquisitivo)">
-            💎 USDT Real: <strong>{formatUSDT(totalPortfolioUsdt)}</strong>
+            <Coins size={13} className="inline-icon" />USDT Real: <strong>{formatUSDT(totalPortfolioUsdt)}</strong>
           </span>
         </div>
       </SpotlightCard>
@@ -158,8 +163,8 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
           CARD 2: RENDIMIENTO Y COBERTURA (MICROKIT SPOTLIGHT)
          ============================================================== */}
       <SpotlightCard
-        spotlightColor={isUsdtPos ? 'rgba(16, 185, 129, 0.16)' : 'rgba(244, 63, 94, 0.16)'}
-        borderColor={isUsdtPos ? 'rgba(16, 185, 129, 0.45)' : 'rgba(244, 63, 94, 0.45)'}
+        spotlightColor={isUsdtPos ? 'rgba(63,182,139, 0.16)' : 'rgba(229,97,110, 0.16)'}
+        borderColor={isUsdtPos ? 'rgba(63,182,139, 0.45)' : 'rgba(229,97,110, 0.45)'}
         className="kpi-card glass-panel kpi-card-pnl"
       >
         <div className="kpi-header">
@@ -222,7 +227,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                 <div className="meter-marker" style={{ left: `${markerPercent}%` }} title="Nivel de la Brecha Cambiaria"></div>
               </div>
               <div className="meter-caption">
-                <span>🎯 Cobertura cambiaria neta: <strong className={isNetCoveragePositive ? 'text-green' : 'text-amber'}>{isNetCoveragePositive ? `+${netCoverage}%` : `${netCoverage}%`} neto por encima del dólar</strong></span>
+                <span><Target size={13} className="inline-icon" />Cobertura cambiaria neta: <strong className={isNetCoveragePositive ? 'text-green' : 'text-amber'}>{isNetCoveragePositive ? `+${netCoverage}%` : `${netCoverage}%`} neto por encima del dólar</strong></span>
               </div>
             </div>
 
@@ -246,7 +251,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-hero-container">
               <div className={`pnl-hero-val ${vesColor}`}>{vesSign}{formatVES(totals.ves.pnl)}</div>
               <div className={`pnl-verdict-pill ${isVesPos ? 'badge-success' : 'badge-danger'}`}>
-                <Shield size={13} /> <span>🇻🇪 Rendimiento en Bolívares: {vesSign}{totals.ves.pnl_pct.toFixed(2)}% Nominal</span>
+                <Shield size={13} /> <span>Rendimiento en Bolívares: {vesSign}{totals.ves.pnl_pct.toFixed(2)}% Nominal</span>
               </div>
             </div>
 
@@ -273,7 +278,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-hero-container">
               <div className={`pnl-hero-val ${bcvColor}`}>{bcvSign}{formatUSD(totals.usd_bcv.pnl)}</div>
               <div className={`pnl-verdict-pill ${isBcvPos ? 'badge-success' : 'badge-danger'}`}>
-                <Shield size={13} /> <span>🏛️ Rendimiento Oficial USD: {bcvSign}{totals.usd_bcv.pnl_pct.toFixed(2)}% BCV</span>
+                <Shield size={13} /> <span>Rendimiento Oficial USD: {bcvSign}{totals.usd_bcv.pnl_pct.toFixed(2)}% BCV</span>
               </div>
             </div>
 
@@ -300,7 +305,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
             <div className="pnl-hero-container">
               <div className={`pnl-hero-val ${usdtColor}`}>{usdtSign}{formatUSDT(totals.usdt.pnl)}</div>
               <div className={`pnl-verdict-pill ${isUsdtPos ? 'badge-success' : 'badge-danger'}`}>
-                <Shield size={13} /> <span>💎 Rendimiento Real: {usdtSign}{totals.usdt.pnl_pct.toFixed(2)}% USDT P2P</span>
+                <Shield size={13} /> <span>Rendimiento Real: {usdtSign}{totals.usdt.pnl_pct.toFixed(2)}% USDT P2P</span>
               </div>
             </div>
 
@@ -337,8 +342,8 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
           CARD 3: BILLETERA Y LIQUIDEZ DISPONIBLE (MICROKIT SPOTLIGHT)
          ============================================================== */}
       <SpotlightCard
-        spotlightColor="rgba(59, 130, 246, 0.16)"
-        borderColor="rgba(59, 130, 246, 0.45)"
+        spotlightColor="rgba(124, 140, 255, 0.16)"
+        borderColor="rgba(124, 140, 255, 0.45)"
         className="kpi-card glass-panel kpi-card-wallet"
       >
         <div className="kpi-header">
@@ -357,7 +362,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
         <div className="wallet-pills-row">
           <div className="wallet-pill-card">
             <div className="wallet-pill-header">
-              <span className="flag-circle">🇻🇪</span>
+              <MarketCode code="VE" />
               <span className="wallet-currency-name">Bolívares (VES)</span>
             </div>
             <strong className="wallet-pill-amount">{formatVES(portfolio.cash_ves)}</strong>
@@ -365,7 +370,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
 
           <div className="wallet-pill-card">
             <div className="wallet-pill-header">
-              <span className="flag-circle">🇺🇸</span>
+              <MarketCode code="US" />
               <span className="wallet-currency-name">Dólares (USD)</span>
             </div>
             <strong className="wallet-pill-amount">{formatUSD(portfolio.cash_usd)}</strong>
@@ -377,9 +382,9 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
           <div className="meter-labels">
             <span>% Liquidez de Cartera: <strong className="text-blue">{liquidityPct.toFixed(2)}%</strong></span>
             {liquidityPct < 5 ? (
-              <span className="text-amber">⚠️ Liquidez baja (conviene tener 5-10% en efectivo)</span>
+              <span className="text-amber"><AlertTriangle size={13} className="inline-icon" style={{ color: 'inherit' }} />Liquidez baja (conviene tener 5-10% en efectivo)</span>
             ) : (
-              <span className="text-green">✓ Liquidez óptima</span>
+              <span className="text-green"><Check size={13} className="inline-icon" style={{ color: 'inherit' }} />Liquidez óptima</span>
             )}
           </div>
           <div className="meter-track" style={{ marginTop: '6px' }}>
@@ -387,7 +392,7 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
               className="meter-fill"
               style={{
                 width: `${Math.min(100, liquidityPct * 5)}%`,
-                background: 'linear-gradient(90deg, #3b82f6, #06b6d4)',
+                background: 'var(--accent)',
               }}
             ></div>
           </div>
@@ -404,14 +409,14 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
               justifyContent: 'center',
               gap: '6px',
               padding: '11px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
               cursor: 'pointer',
               border: 'none',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              boxShadow: 'none',
             }}
           >
             <PlusCircle size={15} /> Comprar Acción
@@ -427,9 +432,9 @@ const HeroKPIsComponent: React.FC<HeroKPIsProps> = ({
                 justifyContent: 'center',
                 gap: '6px',
                 padding: '11px',
-                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.2))',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
-                color: '#fca5a5',
+                background: 'linear-gradient(135deg, rgba(229, 97, 110, 0.2), rgba(185, 28, 28, 0.2))',
+                border: '1px solid rgba(229, 97, 110, 0.4)',
+                color: '#f3b0b7',
                 borderRadius: '10px',
                 fontWeight: 700,
                 fontSize: '0.85rem',

@@ -153,15 +153,15 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
           padding: '26px',
           borderRadius: '18px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.75)',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
+          border: '1px solid rgba(124, 140, 255, 0.3)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <PlusCircle size={20} style={{ color: '#10b981' }} /> Operar / Comprar Acción
+              <PlusCircle size={20} style={{ color: '#7c8cff' }} /> Operar / Comprar Acción
             </h2>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '0.8rem', color: '#9aa3b2', margin: '4px 0 0 0' }}>
               Registra compras con desglose de comisiones de Mercosur Casa de Bolsa
             </p>
           </div>
@@ -170,7 +170,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: 'none',
-              color: '#94a3b8',
+              color: '#9aa3b2',
               cursor: 'pointer',
               borderRadius: '8px',
               padding: '6px',
@@ -182,7 +182,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 600 }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px', fontWeight: 600 }}>
               Acción / Título BVC
             </label>
             <select
@@ -192,7 +192,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                 width: '100%',
                 padding: '10px 14px',
                 borderRadius: '10px',
-                background: '#1e293b',
+                background: '#1b202b',
                 border: '1px solid rgba(255,255,255,0.15)',
                 color: '#fff',
                 fontSize: '0.88rem',
@@ -209,7 +209,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 600 }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px', fontWeight: 600 }}>
                 Nº de Acciones
               </label>
               <input
@@ -238,7 +238,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 600 }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px', fontWeight: 600 }}>
                 Precio por Acción (Bs)
               </label>
               <input
@@ -265,7 +265,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
               Fecha de Compra
             </label>
             <input
@@ -297,7 +297,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Receipt size={16} style={{ color: '#10b981' }} />
+                <Receipt size={16} style={{ color: '#7c8cff' }} />
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>
                   Liquidación Mercosur Casa de Bolsa
                 </span>
@@ -315,8 +315,8 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                     fontSize: '0.7rem',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: feeMode === 'auto' ? '#10b981' : 'transparent',
-                    color: feeMode === 'auto' ? '#fff' : '#94a3b8',
+                    background: feeMode === 'auto' ? '#7c8cff' : 'transparent',
+                    color: feeMode === 'auto' ? '#fff' : '#9aa3b2',
                   }}
                 >
                   Automático
@@ -331,8 +331,8 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                     fontSize: '0.7rem',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: feeMode === 'manual' ? '#f59e0b' : 'transparent',
-                    color: feeMode === 'manual' ? '#fff' : '#94a3b8',
+                    background: feeMode === 'manual' ? '#d9a441' : 'transparent',
+                    color: feeMode === 'manual' ? '#fff' : '#9aa3b2',
                   }}
                 >
                   Boleto Mercosur
@@ -343,13 +343,13 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
             {feeMode === 'manual' && (
               <div
                 style={{
-                  background: 'rgba(245, 158, 11, 0.08)',
-                  border: '1px solid rgba(245, 158, 11, 0.2)',
+                  background: 'rgba(217, 164, 65, 0.08)',
+                  border: '1px solid rgba(217, 164, 65, 0.2)',
                   borderRadius: '8px',
                   padding: '8px 10px',
                   marginBottom: '10px',
                   fontSize: '0.74rem',
-                  color: '#fef3c7',
+                  color: '#f5e6c8',
                 }}
               >
                 Ajusta las comisiones o coloca el Monto Total Neto que debitó tu comprobante de Mercosur.
@@ -357,7 +357,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2' }}>
                 <span>Monto Bruto ({numShares} × {formatVES(numPrice)}):</span>
                 <span style={{ fontFamily: 'monospace', color: '#fff' }}>{formatVES(feeDetails.grossAmount)}</span>
               </div>
@@ -365,7 +365,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
               {feeMode === 'manual' ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', margin: '6px 0' }}>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       Comisión Mercosur (Bs)
                     </label>
                     <input
@@ -387,7 +387,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       IVA Comisión 16% (Bs)
                     </label>
                     <input
@@ -409,7 +409,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       Aranceles Bolsa/CVV (Bs)
                     </label>
                     <input
@@ -431,7 +431,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#f59e0b', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
+                    <label style={{ fontSize: '0.7rem', color: '#d9a441', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
                       Monto Neto Boleto (Bs)
                     </label>
                     <input
@@ -444,9 +444,9 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                         width: '100%',
                         padding: '6px 8px',
                         borderRadius: '6px',
-                        background: 'rgba(245, 158, 11, 0.1)',
-                        border: '1px solid rgba(245, 158, 11, 0.3)',
-                        color: '#fef3c7',
+                        background: 'rgba(217, 164, 65, 0.1)',
+                        border: '1px solid rgba(217, 164, 65, 0.3)',
+                        color: '#f5e6c8',
                         fontSize: '0.8rem',
                         fontWeight: 700,
                         fontFamily: 'monospace',
@@ -456,17 +456,17 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                 </div>
               ) : (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(+) Comisión Mercosur ({feeDetails.commissionPct}%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#fbbf24' }}>+{formatVES(feeDetails.commissionAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#e3b65e' }}>+{formatVES(feeDetails.commissionAmount)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(+) IVA sobre Comisión (16%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#fbbf24' }}>+{formatVES(feeDetails.ivaAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#e3b65e' }}>+{formatVES(feeDetails.ivaAmount)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(+) Aranceles BVC & CVV (0.20%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#fbbf24' }}>+{formatVES(feeDetails.marketFeesAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#e3b65e' }}>+{formatVES(feeDetails.marketFeesAmount)}</span>
                   </div>
                 </>
               )}
@@ -481,7 +481,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                 }}
               >
                 <strong style={{ color: '#fff', fontSize: '0.9rem' }}>Total Liquidado a Pagar:</strong>
-                <strong style={{ color: '#10b981', fontSize: '1.05rem', fontFamily: 'monospace' }}>
+                <strong style={{ color: '#7c8cff', fontSize: '1.05rem', fontFamily: 'monospace' }}>
                   {formatVES(totalLiquidationCost)}
                 </strong>
               </div>
@@ -498,22 +498,22 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
               cursor: 'pointer',
               padding: '10px 12px',
               borderRadius: '10px',
-              background: deductFromCash ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-              border: deductFromCash ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: deductFromCash ? 'rgba(124, 140, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+              border: deductFromCash ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
               userSelect: 'none',
             }}
           >
             {deductFromCash ? (
-              <CheckSquare size={18} style={{ color: '#10b981' }} />
+              <CheckSquare size={18} style={{ color: '#7c8cff' }} />
             ) : (
-              <Square size={18} style={{ color: '#64748b' }} />
+              <Square size={18} style={{ color: '#667085' }} />
             )}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.82rem', color: deductFromCash ? '#a7f3d0' : '#94a3b8', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.82rem', color: deductFromCash ? '#c9cfff' : '#9aa3b2', fontWeight: 600 }}>
                 Liquidar automáticamente de mi saldo en efectivo disponible
               </span>
               {deductFromCash && (
-                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <span style={{ fontSize: '0.72rem', color: '#667085' }}>
                   Saldo tras compra: {formatVES(Math.max(0, cashRemaining))}
                 </span>
               )}
@@ -530,7 +530,7 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                 borderRadius: '10px',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 cursor: 'pointer',
                 fontWeight: 600,
               }}
@@ -543,12 +543,12 @@ export const AddPositionModal: React.FC<AddPositionModalProps> = ({
                 flex: 2,
                 padding: '11px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                color: '#fff',
+                background: 'var(--accent)',
+                color: 'var(--on-accent)',
                 border: 'none',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                boxShadow: 'none',
               }}
             >
               Registrar Compra

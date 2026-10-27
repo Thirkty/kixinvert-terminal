@@ -20,7 +20,9 @@ import {
   ShieldCheck,
   Crown,
   RefreshCw,
+  House,
 } from 'lucide-react';
+import { MarketCode } from './Motion';
 import { MarketRates, UserSession, Ecosystem } from '@/types';
 import { formatVES } from '@/lib/formatters';
 import { playTerminalSound } from '@/lib/audio';
@@ -74,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`sidebar-container ${collapsed ? 'collapsed' : ''}`}
       style={{
         width: collapsed ? '74px' : '260px',
-        background: 'rgba(10, 14, 23, 0.95)',
+        background: 'rgba(12, 15, 20, 0.95)',
         backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
@@ -107,21 +109,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   width: '34px',
                   height: '34px',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'var(--accent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#fff',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                  color: 'var(--on-accent)',
+                  boxShadow: 'none',
                 }}
               >
                 <TrendingUp size={18} />
               </div>
               <div>
                 <div style={{ fontSize: '1.02rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
-                  KixInvert<span style={{ color: '#10b981' }}>APP</span>
+                  KixInvert<span style={{ color: '#7c8cff' }}>APP</span>
                 </div>
-                <div style={{ fontSize: '0.66rem', color: '#94a3b8', fontWeight: 600 }}>
+                <div style={{ fontSize: '0.66rem', color: '#9aa3b2', fontWeight: 600 }}>
                   Terminal Tri-Monetario
                 </div>
               </div>
@@ -140,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               borderRadius: '8px',
               background: 'rgba(255, 255, 255, 0.04)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
-              color: '#94a3b8',
+              color: '#9aa3b2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -168,9 +170,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 gap: '10px',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: '1px solid rgba(56, 189, 248, 0.25)',
-                background: 'rgba(56, 189, 248, 0.08)',
-                color: '#38bdf8',
+                border: '1px solid rgba(124, 140, 255, 0.25)',
+                background: 'rgba(124, 140, 255, 0.08)',
+                color: '#9aa6ff',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 width: '100%',
@@ -178,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 fontSize: '0.84rem',
               }}
             >
-              <span>🏠</span>
+              <House size={16} />
               {!collapsed && <span>Página de Inicio</span>}
             </button>
           </div>
@@ -187,7 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* SECTION 1: MERCADOS & ECOSISTEMAS */}
         <div style={{ marginBottom: '16px' }}>
           {!collapsed && (
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#667085', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
               MERCADOS
             </div>
           )}
@@ -205,20 +207,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 justifyContent: collapsed ? 'center' : 'space-between',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: currentEcosystem === 'BVC' ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid transparent',
-                background: currentEcosystem === 'BVC' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                color: currentEcosystem === 'BVC' ? '#10b981' : '#94a3b8',
+                border: currentEcosystem === 'BVC' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid transparent',
+                background: currentEcosystem === 'BVC' ? 'rgba(124, 140, 255, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                color: currentEcosystem === 'BVC' ? '#7c8cff' : '#9aa3b2',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 width: '100%',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.05rem' }}>🇻🇪</span>
+                <MarketCode code="VE" />
                 {!collapsed && <span style={{ fontSize: '0.86rem', fontWeight: 700 }}>Caracas BVC</span>}
               </div>
               {!collapsed && (
-                <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#a7f3d0', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(124, 140, 255, 0.2)', color: '#c9cfff', fontWeight: 700 }}>
                   Activo
                 </span>
               )}
@@ -237,20 +239,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 justifyContent: collapsed ? 'center' : 'space-between',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: currentEcosystem === 'US' ? '1px solid rgba(59, 130, 246, 0.35)' : '1px solid transparent',
-                background: currentEcosystem === 'US' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                color: currentEcosystem === 'US' ? '#60a5fa' : '#94a3b8',
+                border: currentEcosystem === 'US' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid transparent',
+                background: currentEcosystem === 'US' ? 'rgba(124, 140, 255, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                color: currentEcosystem === 'US' ? '#9aa6ff' : '#9aa3b2',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 width: '100%',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.05rem' }}>🇺🇸</span>
+                <MarketCode code="US" />
                 {!collapsed && <span style={{ fontSize: '0.86rem', fontWeight: 700 }}>Wall Street</span>}
               </div>
               {!collapsed && (
-                <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(124, 140, 255, 0.2)', color: '#b4bcff', fontWeight: 700 }}>
                   Global
                 </span>
               )}
@@ -261,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* SECTION 2: VISTAS DEL TERMINAL */}
         <div style={{ marginBottom: '16px' }}>
           {!collapsed && (
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#667085', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
               TERMINAL
             </div>
           )}
@@ -280,9 +282,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '100%',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: currentNav === 'dashboard' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-                background: currentNav === 'dashboard' ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
-                color: currentNav === 'dashboard' ? '#10b981' : '#94a3b8',
+                border: currentNav === 'dashboard' ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid transparent',
+                background: currentNav === 'dashboard' ? 'rgba(124, 140, 255, 0.12)' : 'transparent',
+                color: currentNav === 'dashboard' ? '#7c8cff' : '#9aa3b2',
                 cursor: 'pointer',
               }}
             >
@@ -306,9 +308,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '100%',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: currentNav === 'bvc_live' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-                background: currentNav === 'bvc_live' ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
-                color: currentNav === 'bvc_live' ? '#10b981' : '#94a3b8',
+                border: currentNav === 'bvc_live' ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid transparent',
+                background: currentNav === 'bvc_live' ? 'rgba(124, 140, 255, 0.12)' : 'transparent',
+                color: currentNav === 'bvc_live' ? '#7c8cff' : '#9aa3b2',
                 cursor: 'pointer',
               }}
             >
@@ -316,7 +318,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <TrendingUp size={17} />
                 {!collapsed && <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>Pizarra en Vivo</span>}
               </div>
-              {!collapsed && <AnimatedPulseBeacon color="#10b981" size={5} />}
+              {!collapsed && <AnimatedPulseBeacon color="#7c8cff" size={5} />}
             </button>
 
             {/* AI Analista */}
@@ -332,9 +334,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '100%',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                background: 'rgba(139, 92, 246, 0.08)',
-                border: '1px solid rgba(139, 92, 246, 0.25)',
-                color: '#c084fc',
+                background: 'rgba(124, 140, 255, 0.08)',
+                border: '1px solid rgba(124, 140, 255, 0.25)',
+                color: '#9aa6ff',
                 cursor: 'pointer',
               }}
             >
@@ -343,7 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {!collapsed && <span style={{ fontSize: '0.86rem', fontWeight: 700 }}>AI Analista</span>}
               </div>
               {!collapsed && (
-                <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(139, 92, 246, 0.25)', color: '#e9d5ff', fontWeight: 800 }}>
+                <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(124, 140, 255, 0.25)', color: '#dfe2ff', fontWeight: 800 }}>
                   PRO
                 </span>
               )}
@@ -354,7 +356,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* SECTION 3: OPERACIONES & HERRAMIENTAS */}
         <div>
           {!collapsed && (
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#667085', letterSpacing: '0.08em', marginBottom: '8px', paddingLeft: '6px' }}>
               HERRAMIENTAS
             </div>
           )}
@@ -375,13 +377,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   width: '100%',
                   padding: collapsed ? '10px 0' : '9px 12px',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: '#fff',
+                  background: 'var(--accent)',
+                  color: 'var(--on-accent)',
                   fontWeight: 700,
                   fontSize: '0.84rem',
                   cursor: 'pointer',
                   border: 'none',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  boxShadow: 'none',
                   marginBottom: '6px',
                 }}
               >
@@ -404,9 +406,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '100%',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                border: currentNav === 'whatif' ? '1px solid rgba(168, 85, 247, 0.35)' : '1px solid transparent',
-                background: currentNav === 'whatif' ? 'rgba(168, 85, 247, 0.12)' : 'transparent',
-                color: currentNav === 'whatif' ? '#c084fc' : '#94a3b8',
+                border: currentNav === 'whatif' ? '1px solid rgba(124, 140, 255, 0.35)' : '1px solid transparent',
+                background: currentNav === 'whatif' ? 'rgba(124, 140, 255, 0.12)' : 'transparent',
+                color: currentNav === 'whatif' ? '#9aa6ff' : '#9aa3b2',
                 cursor: 'pointer',
               }}
             >
@@ -429,7 +431,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 borderRadius: '10px',
                 background: 'transparent',
                 border: '1px solid transparent',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 cursor: 'pointer',
               }}
             >
@@ -444,9 +446,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     fontWeight: 800,
                     padding: '2px 6px',
                     borderRadius: '9999px',
-                    background: '#ef4444',
+                    background: '#e5616e',
                     color: '#fff',
-                    boxShadow: '0 0 8px rgba(239, 68, 68, 0.6)',
+                    boxShadow: 'none',
                   }}
                 >
                   {unreadNotifsCount}
@@ -467,9 +469,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 width: '100%',
                 padding: collapsed ? '10px 0' : '9px 12px',
                 borderRadius: '10px',
-                background: 'rgba(6, 182, 212, 0.08)',
-                border: '1px solid rgba(6, 182, 212, 0.25)',
-                color: '#38bdf8',
+                background: 'rgba(124, 140, 255, 0.08)',
+                border: '1px solid rgba(124, 140, 255, 0.25)',
+                color: '#9aa6ff',
                 cursor: 'pointer',
               }}
             >
@@ -477,7 +479,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <AnimatedTelegram size={17} />
                 {!collapsed && <span style={{ fontSize: '0.86rem', fontWeight: 700 }}>Bot Telegram</span>}
               </div>
-              {!collapsed && <AnimatedPulseBeacon color="#10b981" size={5} />}
+              {!collapsed && <AnimatedPulseBeacon color="#7c8cff" size={5} />}
             </button>
           </div>
         </div>
@@ -497,9 +499,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               justifyContent: 'center',
               padding: '6px 0',
               borderRadius: '8px',
-              background: soundEnabled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.04)',
-              border: soundEnabled ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(255, 255, 255, 0.08)',
-              color: soundEnabled ? '#10b981' : '#64748b',
+              background: soundEnabled ? 'rgba(124, 140, 255, 0.1)' : 'rgba(255, 255, 255, 0.04)',
+              border: soundEnabled ? '1px solid rgba(124, 140, 255, 0.25)' : '1px solid rgba(255, 255, 255, 0.08)',
+              color: soundEnabled ? '#7c8cff' : '#667085',
               cursor: 'pointer',
             }}
           >
@@ -522,7 +524,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 borderRadius: '8px',
                 background: 'rgba(255, 255, 255, 0.04)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 cursor: 'pointer',
               }}
             >
@@ -550,11 +552,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   width: '26px',
                   height: '26px',
                   borderRadius: '50%',
-                  background: 'rgba(16, 185, 129, 0.2)',
+                  background: 'rgba(124, 140, 255, 0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#10b981',
+                  color: '#7c8cff',
                 }}
               >
                 <User size={14} />
@@ -564,7 +566,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>
                     {session.is_demo ? 'Inversionista' : session.username}
                   </div>
-                  <div style={{ fontSize: '0.68rem', color: '#10b981' }}>KixBroker BVC</div>
+                  <div style={{ fontSize: '0.68rem', color: '#7c8cff' }}>KixBroker BVC</div>
                 </div>
               )}
             </div>
@@ -576,7 +578,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 title="Cerrar sesión"
                 style={{
-                  color: '#94a3b8',
+                  color: '#9aa3b2',
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
@@ -596,8 +598,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             style={{
               width: '100%',
               padding: collapsed ? '9px 0' : '8px 12px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               borderRadius: '8px',
               fontWeight: 700,
               fontSize: '0.8rem',

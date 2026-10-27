@@ -52,8 +52,8 @@ const TickerTapeComponent: React.FC<TickerTapeProps> = ({
 
   return (
     <div className="tape-container" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-      <div className="tape-badge" style={{ background: currentEcosystem === 'US' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: currentEcosystem === 'US' ? '#93c5fd' : '#a7f3d0' }}>
-        <span className="pulse-dot" style={{ width: '6px', height: '6px', minWidth: '6px', background: currentEcosystem === 'US' ? '#3b82f6' : '#10b981' }}></span>
+      <div className="tape-badge" style={{ background: currentEcosystem === 'US' ? 'rgba(124, 140, 255, 0.15)' : 'rgba(124, 140, 255, 0.15)', color: currentEcosystem === 'US' ? '#b4bcff' : '#c9cfff' }}>
+        <span className="pulse-dot" style={{ width: '6px', height: '6px', minWidth: '6px', background: currentEcosystem === 'US' ? '#7c8cff' : '#7c8cff' }}></span>
         <span>{currentEcosystem === 'US' ? 'WALL STREET' : 'BVC LIVE'}</span>
       </div>
       <div className="tape-viewport">

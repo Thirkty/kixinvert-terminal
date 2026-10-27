@@ -115,9 +115,9 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Wallet size={20} style={{ color: '#10b981' }} /> Control de Efectivo y Caja
+            <Wallet size={20} style={{ color: '#7c8cff' }} /> Control de Efectivo y Caja
           </h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#9aa3b2', cursor: 'pointer' }}>
             <X size={20} />
           </button>
         </div>
@@ -136,18 +136,18 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
           }}
         >
           <div>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: '0.72rem', color: '#9aa3b2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Saldo Libre VES
             </span>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#10b981' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#7c8cff' }}>
               {formatVES(cashVes)}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: '0.72rem', color: '#9aa3b2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Saldo Libre USD
             </span>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#38bdf8' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#9aa6ff' }}>
               {formatUSD(cashUsd)}
             </div>
           </div>
@@ -172,8 +172,8 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
               padding: '7px 8px',
               borderRadius: '8px',
               border: 'none',
-              background: activeTab === 'deposit' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-              color: activeTab === 'deposit' ? '#a7f3d0' : '#94a3b8',
+              background: activeTab === 'deposit' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+              color: activeTab === 'deposit' ? '#c9cfff' : '#9aa3b2',
               fontWeight: 700,
               fontSize: '0.78rem',
               cursor: 'pointer',
@@ -192,8 +192,8 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
               padding: '7px 8px',
               borderRadius: '8px',
               border: 'none',
-              background: activeTab === 'history' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
-              color: activeTab === 'history' ? '#bae6fd' : '#94a3b8',
+              background: activeTab === 'history' ? 'rgba(124, 140, 255, 0.2)' : 'transparent',
+              color: activeTab === 'history' ? '#bae6fd' : '#9aa3b2',
               fontWeight: 700,
               fontSize: '0.78rem',
               cursor: 'pointer',
@@ -213,7 +213,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
               borderRadius: '8px',
               border: 'none',
               background: activeTab === 'direct' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              color: activeTab === 'direct' ? '#fff' : '#94a3b8',
+              color: activeTab === 'direct' ? '#fff' : '#9aa3b2',
               fontWeight: 700,
               fontSize: '0.78rem',
               cursor: 'pointer',
@@ -232,7 +232,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
           <form onSubmit={handleDepositSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: '#9aa3b2', marginBottom: '4px' }}>
                   Fecha de Inyección
                 </label>
                 <input
@@ -254,7 +254,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: '#9aa3b2', marginBottom: '4px' }}>
                   Moneda
                 </label>
                 <select
@@ -264,21 +264,21 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                     width: '100%',
                     padding: '9px 12px',
                     borderRadius: '8px',
-                    background: '#1e293b',
+                    background: '#1b202b',
                     border: '1px solid rgba(255,255,255,0.15)',
                     color: '#fff',
                     fontSize: '0.84rem',
                     outline: 'none',
                   }}
                 >
-                  <option value="VES">🇻🇪 Bolívares (VES)</option>
-                  <option value="USD">💵 Dólares (USD)</option>
+                  <option value="VES">Bolívares (VES)</option>
+                  <option value="USD">Dólares (USD)</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '0.76rem', color: '#9aa3b2', marginBottom: '4px' }}>
                 Monto a Depositar ({depositCurrency})
               </label>
               <input
@@ -294,7 +294,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                   borderRadius: '10px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.12)',
-                  color: depositCurrency === 'VES' ? '#10b981' : '#38bdf8',
+                  color: depositCurrency === 'VES' ? '#7c8cff' : '#9aa6ff',
                   fontSize: '1.1rem',
                   fontWeight: 800,
                   outline: 'none',
@@ -303,7 +303,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '0.76rem', color: '#9aa3b2', marginBottom: '4px' }}>
                 Concepto / Origen de Fondos
               </label>
               <input
@@ -330,9 +330,9 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                 style={{
                   padding: '10px 12px',
                   borderRadius: '8px',
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  color: '#a7f3d0',
+                  background: 'rgba(124, 140, 255, 0.15)',
+                  border: '1px solid rgba(124, 140, 255, 0.3)',
+                  color: '#c9cfff',
                   fontSize: '0.82rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -351,8 +351,8 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                 width: '100%',
                 padding: '11px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: '#fff',
+                background: 'var(--accent)',
+                color: 'var(--on-accent)',
                 fontWeight: 800,
                 fontSize: '0.9rem',
                 border: 'none',
@@ -361,7 +361,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
-                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+                boxShadow: 'none',
               }}
             >
               <PlusCircle size={16} /> Registrar Depósito (+{depositAmount.toLocaleString()} {depositCurrency})
@@ -373,11 +373,11 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
         {activeTab === 'history' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '320px', overflowY: 'auto' }}>
             {loadingMovements ? (
-              <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '0.85rem' }}>
+              <div style={{ textAlign: 'center', padding: '24px', color: '#9aa3b2', fontSize: '0.85rem' }}>
                 Cargando historial de caja...
               </div>
             ) : movements.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '30px 16px', color: '#64748b', fontSize: '0.85rem' }}>
+              <div style={{ textAlign: 'center', padding: '30px 16px', color: '#667085', fontSize: '0.85rem' }}>
                 Aún no tienes movimientos registrados en tu libro de caja. Cada depósito o compra de acciones se reflejará aquí.
               </div>
             ) : (
@@ -402,11 +402,11 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                           width: '28px',
                           height: '28px',
                           borderRadius: '8px',
-                          background: isPositive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                          background: isPositive ? 'rgba(63,182,139, 0.15)' : 'rgba(229,97,110, 0.15)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: isPositive ? '#10b981' : '#f87171',
+                          color: isPositive ? 'var(--up)' : 'var(--down)',
                         }}
                       >
                         {isPositive ? <ArrowDownRight size={16} /> : <ArrowUpRight size={16} />}
@@ -415,7 +415,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                         <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#fff' }}>
                           {m.concept || (isPositive ? 'Depósito' : 'Liquidación')}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#667085' }}>
                           {m.movement_date ? m.movement_date.split('T')[0] : 'Fecha registrada'}
                         </div>
                       </div>
@@ -426,12 +426,12 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                         style={{
                           fontSize: '0.86rem',
                           fontWeight: 800,
-                          color: isPositive ? '#10b981' : '#f87171',
+                          color: isPositive ? 'var(--up)' : 'var(--down)',
                         }}
                       >
                         {isPositive ? '+' : '-'}{Number(m.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} {m.currency}
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#9aa3b2' }}>
                         Saldo: {Number(m.balance_after).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </div>
                     </div>
@@ -446,7 +446,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
         {activeTab === 'direct' && (
           <form onSubmit={handleDirectSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                 Saldo Total en Bolívares (VES)
               </label>
               <input
@@ -470,7 +470,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
                 Saldo Total en Dólares (USD)
               </label>
               <input
@@ -503,7 +503,7 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                   borderRadius: '10px',
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#94a3b8',
+                  color: '#9aa3b2',
                   cursor: 'pointer',
                 }}
               >
@@ -515,8 +515,8 @@ export const AdjustCashModal: React.FC<AdjustCashModalProps> = ({
                   flex: 2,
                   padding: '10px',
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                  color: '#fff',
+                  background: 'var(--accent)',
+                  color: 'var(--on-accent)',
                   border: 'none',
                   fontWeight: 700,
                   cursor: 'pointer',

@@ -95,7 +95,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
       {/* 1. FLOATING LANDING QUICK SUB-NAVBAR */}
       <nav className="welcome-nav-bar glass-panel animate-fade-in" id="welcome-subnav">
         <div className="welcome-nav-brand">
-          <AnimatedPulseBeacon color="#10b981" size={8} />
+          <AnimatedPulseBeacon color="#7c8cff" size={8} />
           <span className="welcome-nav-brand-text">
             KixInvertAPP <span className="badge-v6">v6.0</span>
           </span>
@@ -269,7 +269,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </div>
             <div className="hero-stat-divider"></div>
             <div className="hero-stat-item">
-              <span className="stat-number">🤖 AI + 📱 Bot</span>
+              <span className="stat-number">IA + Bot</span>
               <span className="stat-label">Analista IA & Push Telegram</span>
             </div>
           </div>
@@ -290,7 +290,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
         <div className="story-grid">
           {/* Story Block 1 */}
-          <SpotlightCard className="story-card" spotlightColor="rgba(244, 63, 94, 0.15)">
+          <SpotlightCard className="story-card" spotlightColor="rgba(229, 97, 110, 0.15)">
             <div className="story-card-icon bg-rose">
               <AlertTriangle size={24} />
             </div>
@@ -304,7 +304,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Story Block 2 */}
-          <SpotlightCard className="story-card highlighted-border" spotlightColor="rgba(56, 189, 248, 0.18)">
+          <SpotlightCard className="story-card highlighted-border" spotlightColor="rgba(124, 140, 255, 0.18)">
             <div className="story-card-icon bg-cyan">
               <Layers size={24} />
             </div>
@@ -316,7 +316,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Story Block 3 */}
-          <SpotlightCard className="story-card" spotlightColor="rgba(168, 85, 247, 0.15)">
+          <SpotlightCard className="story-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="story-card-icon bg-purple">
               <Globe size={24} />
             </div>
@@ -360,7 +360,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
         <div className="gallery-grid">
           {/* Card 1: Ecosistema BVC Caracas */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(16, 185, 129, 0.15)">
+          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
               <Image
                 src="/img/preview-dashboard.png"
@@ -368,7 +368,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 fill
                 style={{ objectFit: 'cover', objectPosition: 'top' }}
               />
-              <div className="img-badge">🇻🇪 Terminal BVC Caracas</div>
+              <div className="img-badge">Terminal BVC Caracas</div>
             </div>
             <div className="gallery-card-body">
               <h3>1. Terminal BVC (Bolsa de Caracas)</h3>
@@ -381,7 +381,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Card 2: Ecosistema Wall Street Global */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(59, 130, 246, 0.15)">
+          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
               <Image
                 src="/img/preview-positions.png"
@@ -389,7 +389,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 fill
                 style={{ objectFit: 'cover', objectPosition: 'top' }}
               />
-              <div className="img-badge">🇺🇸 Terminal Wall Street</div>
+              <div className="img-badge">Terminal Wall Street</div>
             </div>
             <div className="gallery-card-body">
               <h3>2. Terminal Wall Street & ETFs</h3>
@@ -402,7 +402,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Card 3: Patrimonio Consolidado & AI */}
-          <SpotlightCard className="gallery-card" spotlightColor="rgba(168, 85, 247, 0.15)">
+          <SpotlightCard className="gallery-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="gallery-img-wrapper" style={{ position: 'relative', height: '220px' }}>
               <Image
                 src="/img/preview-allocation.png"
@@ -410,7 +410,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 fill
                 style={{ objectFit: 'cover', objectPosition: 'top' }}
               />
-              <div className="img-badge">🌐 Patrimonio Consolidado</div>
+              <div className="img-badge">Patrimonio Consolidado</div>
             </div>
             <div className="gallery-card-body">
               <h3>3. Consolidación Global & AI</h3>
@@ -434,7 +434,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
         </p>
 
         <div className="features-grid-6">
-          <SpotlightCard className="feature-box" spotlightColor="rgba(16, 185, 129, 0.15)">
+          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="feature-icon bg-green">
               <Coins size={24} />
             </div>
@@ -444,7 +444,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </p>
           </SpotlightCard>
 
-          <SpotlightCard className="feature-box" spotlightColor="rgba(245, 158, 11, 0.15)">
+          <SpotlightCard className="feature-box" spotlightColor="rgba(217, 164, 65, 0.15)">
             <div className="feature-icon bg-amber">
               <TrendingUp size={24} />
             </div>
@@ -454,7 +454,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </p>
           </SpotlightCard>
 
-          <SpotlightCard className="feature-box" spotlightColor="rgba(168, 85, 247, 0.15)">
+          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="feature-icon bg-purple">
               <Bot size={24} />
             </div>
@@ -464,7 +464,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </p>
           </SpotlightCard>
 
-          <SpotlightCard className="feature-box" spotlightColor="rgba(59, 130, 246, 0.15)">
+          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="feature-icon bg-blue">
               <Globe size={24} />
             </div>
@@ -474,7 +474,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </p>
           </SpotlightCard>
 
-          <SpotlightCard className="feature-box" spotlightColor="rgba(6, 182, 212, 0.15)">
+          <SpotlightCard className="feature-box" spotlightColor="rgba(124, 140, 255, 0.15)">
             <div className="feature-icon bg-cyan">
               <Sliders size={24} />
             </div>
@@ -543,7 +543,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Plan PRO (Featured) */}
-          <SpotlightCard className="pricing-card featured-pricing" spotlightColor="rgba(56, 189, 248, 0.22)">
+          <SpotlightCard className="pricing-card featured-pricing" spotlightColor="rgba(124, 140, 255, 0.22)">
             <div className="featured-badge">
               <Crown size={14} /> MÁS POPULAR
             </div>
@@ -625,7 +625,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           {/* Release v6.0 */}
           <div className="changelog-item">
             <div className="cl-point active-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(16, 185, 129, 0.15)">
+            <SpotlightCard className="cl-card" spotlightColor="rgba(124, 140, 255, 0.15)">
               <div className="cl-header">
                 <span className="cl-version-badge badge-current">v6.0 · VERSIÓN ACTUAL</span>
                 <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
@@ -644,7 +644,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           {/* Release v5.0 */}
           <div className="changelog-item">
             <div className="cl-point"></div>
-            <SpotlightCard className="cl-card" spotlightColor="rgba(56, 189, 248, 0.12)">
+            <SpotlightCard className="cl-card" spotlightColor="rgba(124, 140, 255, 0.12)">
               <div className="cl-header">
                 <span className="cl-version-badge">v5.0</span>
                 <span className="cl-date"><Calendar size={14} /> Octubre 2026</span>
@@ -777,7 +777,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                     style={{
                       transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.3s ease',
-                      color: isOpen ? '#38bdf8' : '#94a3b8',
+                      color: isOpen ? '#9aa6ff' : '#9aa3b2',
                     }}
                   />
                 </button>
@@ -804,7 +804,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
         <div className="contact-grid">
           {/* Contact Direct Channels */}
-          <SpotlightCard className="contact-info-card" spotlightColor="rgba(56, 189, 248, 0.15)">
+          <SpotlightCard className="contact-info-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <h3>Canales Oficiales Directos</h3>
             <p className="text-dim text-sm">Nuestro equipo bursátil responde en menos de 2 horas durante ruedas de mercado.</p>
 
@@ -856,15 +856,15 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </SpotlightCard>
 
           {/* Interactive Contact Form */}
-          <SpotlightCard className="contact-form-card" spotlightColor="rgba(16, 185, 129, 0.15)">
+          <SpotlightCard className="contact-form-card" spotlightColor="rgba(124, 140, 255, 0.15)">
             <h3>Envíanos un Mensaje</h3>
             {contactSubmitted ? (
               <div style={{ padding: '32px 16px', textAlign: 'center' }}>
-                <div style={{ color: '#10b981', marginBottom: '12px' }}>
+                <div style={{ color: '#7c8cff', marginBottom: '12px' }}>
                   <ShieldCheck size={48} style={{ margin: '0 auto' }} />
                 </div>
                 <h4 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '8px' }}>¡Mensaje Enviado con Éxito!</h4>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                <p style={{ color: '#9aa3b2', fontSize: '0.9rem' }}>
                   Un asesor bursátil se comunicará contigo a tu correo en menos de 2 horas.
                 </p>
               </div>
@@ -1005,12 +1005,12 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
         </div>
 
         <div className="footer-bottom-bar" style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>
+          <p style={{ color: '#667085', fontSize: '0.8rem', margin: 0 }}>
             © 2026 KixInvertAPP. Todos los derechos reservados. Diseñado para inversionistas independientes y casas de bolsa.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ color: '#10b981', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></span>
+            <span style={{ color: '#7c8cff', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#7c8cff', boxShadow: '0 0 8px #7c8cff' }}></span>
               Sistemas Operativos 100%
             </span>
           </div>

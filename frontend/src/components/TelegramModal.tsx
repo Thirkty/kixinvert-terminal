@@ -103,13 +103,13 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
         style={{ width: '100%', maxWidth: '520px' }}
       >
         <SpotlightCard
-          spotlightColor="rgba(6, 182, 212, 0.16)"
-          borderColor="rgba(6, 182, 212, 0.45)"
+          spotlightColor="rgba(124, 140, 255, 0.16)"
+          borderColor="rgba(124, 140, 255, 0.45)"
           className="glass-panel"
           style={{
             padding: '28px',
             borderRadius: '16px',
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: 'rgba(20, 24, 33, 0.95)',
           }}
         >
           {/* Header */}
@@ -120,12 +120,12 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                   width: '42px',
                   height: '42px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #0284c7, #06b6d4)',
+                  background: 'var(--accent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#fff',
-                  boxShadow: '0 4px 14px rgba(6, 182, 212, 0.4)',
+                  color: 'var(--on-accent)',
+                  boxShadow: 'none',
                 }}
               >
                 <AnimatedTelegram size={24} />
@@ -135,8 +135,8 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                   Alertas Telegram en Vivo
                 </h2>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                  <AnimatedPulseBeacon color={status?.linked ? '#10b981' : '#f59e0b'} size={6} />
-                  <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  <AnimatedPulseBeacon color={status?.linked ? '#7c8cff' : '#d9a441'} size={6} />
+                  <span style={{ fontSize: '0.78rem', color: '#9aa3b2' }}>
                     {status?.linked ? 'Bot Vinculado & Activo' : 'Pendiente por Vincular'}
                   </span>
                 </div>
@@ -147,7 +147,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
               style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
@@ -172,7 +172,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Canal Oficial:</span>
+              <span style={{ fontSize: '0.85rem', color: '#9aa3b2' }}>Canal Oficial:</span>
               <a
                 href={telegramDirectUrl}
                 target="_blank"
@@ -181,7 +181,7 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  color: '#38bdf8',
+                  color: '#9aa6ff',
                   fontSize: '0.88rem',
                   fontWeight: 700,
                   textDecoration: 'none',
@@ -192,14 +192,14 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>ID de Chat Vinculado:</span>
-              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: status?.linked ? '#10b981' : '#64748b' }}>
+              <span style={{ fontSize: '0.85rem', color: '#9aa3b2' }}>ID de Chat Vinculado:</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: status?.linked ? '#7c8cff' : '#667085' }}>
                 {status?.linked ? status.chat_id : 'No configurado'}
               </span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Despacho de Alertas Móviles:</span>
+              <span style={{ fontSize: '0.85rem', color: '#9aa3b2' }}>Despacho de Alertas Móviles:</span>
               <button
                 onClick={handleToggle}
                 style={{
@@ -208,9 +208,9 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                   gap: '6px',
                   padding: '5px 12px',
                   borderRadius: '9999px',
-                  background: status?.alerts_enabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  border: status?.alerts_enabled ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                  color: status?.alerts_enabled ? '#10b981' : '#f87171',
+                  background: status?.alerts_enabled ? 'rgba(63,182,139, 0.15)' : 'rgba(229,97,110, 0.15)',
+                  border: status?.alerts_enabled ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid rgba(229, 97, 110, 0.3)',
+                  color: status?.alerts_enabled ? 'var(--up)' : 'var(--down)',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -236,23 +236,23 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                   justifyContent: 'center',
                   gap: '8px',
                   padding: '13px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-                  color: '#fff',
+                  background: 'var(--accent)',
+                  color: 'var(--on-accent)',
                   borderRadius: '10px',
                   fontWeight: 800,
                   fontSize: '0.94rem',
                   textDecoration: 'none',
-                  boxShadow: '0 4px 14px rgba(6, 182, 212, 0.4)',
+                  boxShadow: 'none',
                   marginBottom: '8px',
                 }}
               >
                 <AnimatedTelegram size={18} />
-                <span>📱 Conectar Telegram en 1 Clic</span>
+                <span>Conectar Telegram en 1 clic</span>
                 <ExternalLink size={15} />
               </a>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <AnimatedPulseBeacon color="#f59e0b" size={6} />
-                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                <AnimatedPulseBeacon color="#d9a441" size={6} />
+                <span style={{ fontSize: '0.76rem', color: '#9aa3b2' }}>
                   Solo dale a &quot;Iniciar&quot; en el chat y se vinculará automáticamente sin buscar ningún ID.
                 </span>
               </div>
@@ -271,14 +271,14 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
               justifyContent: 'center',
               gap: '8px',
               padding: '12px',
-              background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-              color: '#fff',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.92rem',
               cursor: isSendingTest ? 'wait' : 'pointer',
               border: 'none',
-              boxShadow: '0 4px 14px rgba(14, 165, 233, 0.35)',
+              boxShadow: 'none',
               marginBottom: '16px',
             }}
           >
@@ -302,14 +302,14 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
                 gap: '10px',
                 padding: '12px 14px',
                 borderRadius: '10px',
-                background: testResult.success ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-                border: testResult.success ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                color: testResult.success ? '#a7f3d0' : '#fca5a5',
+                background: testResult.success ? 'rgba(63,182,139, 0.12)' : 'rgba(229,97,110, 0.12)',
+                border: testResult.success ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid rgba(229, 97, 110, 0.3)',
+                color: testResult.success ? '#c9cfff' : '#f3b0b7',
                 fontSize: '0.84rem',
                 marginBottom: '16px',
               }}
             >
-              {testResult.success ? <CheckCircle2 size={18} style={{ color: '#10b981', minWidth: '18px' }} /> : <AlertCircle size={18} style={{ color: '#ef4444', minWidth: '18px' }} />}
+              {testResult.success ? <CheckCircle2 size={18} style={{ color: '#7c8cff', minWidth: '18px' }} /> : <AlertCircle size={18} style={{ color: '#e5616e', minWidth: '18px' }} />}
               <span>{testResult.message}</span>
             </div>
           )}
@@ -321,12 +321,12 @@ export const TelegramModal: React.FC<TelegramModalProps> = ({ isOpen, onClose })
               alignItems: 'center',
               gap: '8px',
               fontSize: '0.74rem',
-              color: '#64748b',
+              color: '#667085',
               borderTop: '1px solid rgba(255, 255, 255, 0.06)',
               paddingTop: '14px',
             }}
           >
-            <ShieldCheck size={14} style={{ color: '#10b981', minWidth: '14px' }} />
+            <ShieldCheck size={14} style={{ color: '#7c8cff', minWidth: '14px' }} />
             <span>Encriptación punto a punto y sin almacenar números de teléfono personales.</span>
           </div>
         </SpotlightCard>

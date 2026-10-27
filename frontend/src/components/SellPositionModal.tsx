@@ -210,16 +210,16 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
           padding: '26px',
           borderRadius: '18px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.75)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
+          border: '1px solid rgba(229, 97, 110, 0.3)',
         }}
       >
         {/* Encabezado */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <TrendingDown size={20} style={{ color: '#f87171' }} /> Registrar Venta de Acciones
+              <TrendingDown size={20} style={{ color: '#ee8a94' }} /> Registrar Venta de Acciones
             </h2>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '0.8rem', color: '#9aa3b2', margin: '4px 0 0 0' }}>
               Liquida títulos totales o parciales y calcula comisiones de Mercosur
             </p>
           </div>
@@ -228,7 +228,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: 'none',
-              color: '#94a3b8',
+              color: '#9aa3b2',
               cursor: 'pointer',
               borderRadius: '8px',
               padding: '6px',
@@ -241,15 +241,15 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
         {errorMsg && (
           <div
             style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'rgba(229, 97, 110, 0.1)',
+              border: '1px solid rgba(229, 97, 110, 0.3)',
               borderRadius: '10px',
               padding: '10px 14px',
               marginBottom: '14px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              color: '#f87171',
+              color: '#ee8a94',
               fontSize: '0.82rem',
             }}
           >
@@ -261,7 +261,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Selector de Acción */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 600 }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px', fontWeight: 600 }}>
               Acción a Vender
             </label>
             <select
@@ -271,7 +271,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 width: '100%',
                 padding: '10px 14px',
                 borderRadius: '10px',
-                background: '#1e293b',
+                background: '#1b202b',
                 border: '1px solid rgba(255,255,255,0.15)',
                 color: '#fff',
                 fontSize: '0.88rem',
@@ -304,16 +304,16 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
               }}
             >
               <div>
-                <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.72rem' }}>SALDO DISPONIBLE</span>
+                <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.72rem' }}>SALDO DISPONIBLE</span>
                 <strong style={{ color: '#fff' }}>{availableShares.toLocaleString()} acciones</strong>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.72rem' }}>COSTO PROMEDIO COMPRA</span>
-                <strong style={{ color: '#94a3b8' }}>{formatVES(currentPosition.avg_cost)}</strong>
+                <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.72rem' }}>COSTO PROMEDIO COMPRA</span>
+                <strong style={{ color: '#9aa3b2' }}>{formatVES(currentPosition.avg_cost)}</strong>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.72rem' }}>COTIZACIÓN ACTUAL</span>
-                <strong style={{ color: '#10b981' }}>{formatVES(currentPosition.current_price)}</strong>
+                <span style={{ color: '#9aa3b2', display: 'block', fontSize: '0.72rem' }}>COTIZACIÓN ACTUAL</span>
+                <strong style={{ color: '#7c8cff' }}>{formatVES(currentPosition.current_price)}</strong>
               </div>
             </div>
           )}
@@ -321,10 +321,10 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
           {/* Cantidad de acciones a vender & Botones de porcentaje */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>
+              <label style={{ fontSize: '0.78rem', color: '#9aa3b2', fontWeight: 600 }}>
                 Nº de Acciones a Vender
               </label>
-              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.74rem', color: '#667085' }}>
                 Restarán: {Math.max(0, availableShares - numShares).toLocaleString()} acc
               </span>
             </div>
@@ -344,7 +344,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 padding: '10px 14px',
                 borderRadius: '10px',
                 background: 'rgba(255,255,255,0.05)',
-                border: numShares > availableShares ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.12)',
+                border: numShares > availableShares ? '1px solid #e5616e' : '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 fontSize: '1.05rem',
                 fontWeight: 700,
@@ -354,7 +354,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
             />
 
             {numShares > availableShares && (
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: '#f87171', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: '#ee8a94', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <AlertCircle size={12} /> Excede tu saldo disponible ({availableShares.toLocaleString()} acc)
               </p>
             )}
@@ -371,7 +371,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     borderRadius: '6px',
                     background: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: pct === 100 ? '#fca5a5' : '#cbd5e1',
+                    color: pct === 100 ? '#f3b0b7' : '#b9c0cb',
                     fontSize: '0.74rem',
                     fontWeight: pct === 100 ? 700 : 500,
                     cursor: 'pointer',
@@ -386,7 +386,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
           {/* Precio de Venta Unitario */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>
+              <label style={{ fontSize: '0.78rem', color: '#9aa3b2', fontWeight: 600 }}>
                 Precio Unitario de Venta (Bs)
               </label>
               {currentPosition && (
@@ -396,7 +396,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#10b981',
+                    color: '#7c8cff',
                     fontSize: '0.74rem',
                     cursor: 'pointer',
                     textDecoration: 'underline',
@@ -439,7 +439,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Receipt size={16} style={{ color: '#fbbf24' }} />
+                <Receipt size={16} style={{ color: '#e3b65e' }} />
                 <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>
                   Liquidación Mercosur Casa de Bolsa
                 </span>
@@ -457,8 +457,8 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     fontSize: '0.7rem',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: feeMode === 'auto' ? '#10b981' : 'transparent',
-                    color: feeMode === 'auto' ? '#fff' : '#94a3b8',
+                    background: feeMode === 'auto' ? '#7c8cff' : 'transparent',
+                    color: feeMode === 'auto' ? '#fff' : '#9aa3b2',
                   }}
                 >
                   Automático
@@ -473,8 +473,8 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     fontSize: '0.7rem',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: feeMode === 'manual' ? '#f59e0b' : 'transparent',
-                    color: feeMode === 'manual' ? '#fff' : '#94a3b8',
+                    background: feeMode === 'manual' ? '#d9a441' : 'transparent',
+                    color: feeMode === 'manual' ? '#fff' : '#9aa3b2',
                   }}
                 >
                   Boleto Mercosur
@@ -485,13 +485,13 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
             {feeMode === 'manual' && (
               <div
                 style={{
-                  background: 'rgba(245, 158, 11, 0.08)',
-                  border: '1px solid rgba(245, 158, 11, 0.2)',
+                  background: 'rgba(217, 164, 65, 0.08)',
+                  border: '1px solid rgba(217, 164, 65, 0.2)',
                   borderRadius: '8px',
                   padding: '8px 10px',
                   marginBottom: '10px',
                   fontSize: '0.74rem',
-                  color: '#fef3c7',
+                  color: '#f5e6c8',
                 }}
               >
                 Ingresa los montos exactos de tu comprobante Mercosur, o coloca directamente el Monto Neto Liquidado.
@@ -500,7 +500,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
 
             {/* Desglose de Gastos */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2' }}>
                 <span>Monto Bruto de Venta:</span>
                 <span style={{ fontFamily: 'monospace', color: '#fff' }}>{formatVES(feeDetails.grossAmount)}</span>
               </div>
@@ -508,7 +508,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
               {feeMode === 'manual' ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', margin: '6px 0' }}>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       Comisión Mercosur (Bs)
                     </label>
                     <input
@@ -530,7 +530,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       IVA Comisión 16% (Bs)
                     </label>
                     <input
@@ -552,7 +552,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
+                    <label style={{ fontSize: '0.7rem', color: '#9aa3b2', display: 'block', marginBottom: '2px' }}>
                       Aranceles Bolsa/CVV (Bs)
                     </label>
                     <input
@@ -574,7 +574,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#f59e0b', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
+                    <label style={{ fontSize: '0.7rem', color: '#d9a441', display: 'block', marginBottom: '2px', fontWeight: 600 }}>
                       Monto Neto Boleto (Bs)
                     </label>
                     <input
@@ -587,9 +587,9 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                         width: '100%',
                         padding: '6px 8px',
                         borderRadius: '6px',
-                        background: 'rgba(245, 158, 11, 0.1)',
-                        border: '1px solid rgba(245, 158, 11, 0.3)',
-                        color: '#fef3c7',
+                        background: 'rgba(217, 164, 65, 0.1)',
+                        border: '1px solid rgba(217, 164, 65, 0.3)',
+                        color: '#f5e6c8',
                         fontSize: '0.8rem',
                         fontWeight: 700,
                         fontFamily: 'monospace',
@@ -599,17 +599,17 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 </div>
               ) : (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(-) Comisión Mercosur ({feeDetails.commissionPct}%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#f87171' }}>-{formatVES(feeDetails.commissionAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#ee8a94' }}>-{formatVES(feeDetails.commissionAmount)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(-) IVA sobre Comisión (16%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#f87171' }}>-{formatVES(feeDetails.ivaAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#ee8a94' }}>-{formatVES(feeDetails.ivaAmount)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.76rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9aa3b2', fontSize: '0.76rem' }}>
                     <span>(-) Aranceles BVC & CVV (0.20%):</span>
-                    <span style={{ fontFamily: 'monospace', color: '#f87171' }}>-{formatVES(feeDetails.marketFeesAmount)}</span>
+                    <span style={{ fontFamily: 'monospace', color: '#ee8a94' }}>-{formatVES(feeDetails.marketFeesAmount)}</span>
                   </div>
                 </>
               )}
@@ -624,7 +624,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 }}
               >
                 <strong style={{ color: '#fff', fontSize: '0.9rem' }}>Monto Neto a Recibir:</strong>
-                <strong style={{ color: '#10b981', fontSize: '1.05rem', fontFamily: 'monospace' }}>
+                <strong style={{ color: '#7c8cff', fontSize: '1.05rem', fontFamily: 'monospace' }}>
                   {formatVES(feeDetails.netAmountSell)}
                 </strong>
               </div>
@@ -639,8 +639,8 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                   paddingTop: '4px',
                 }}
               >
-                <span style={{ color: '#94a3b8' }}>Rendimiento realizado estimado:</span>
-                <span style={{ color: isProfit ? '#10b981' : '#f87171', fontWeight: 700, fontFamily: 'monospace' }}>
+                <span style={{ color: '#9aa3b2' }}>Rendimiento realizado estimado:</span>
+                <span style={{ color: isProfit ? 'var(--up)' : 'var(--down)', fontWeight: 700, fontFamily: 'monospace' }}>
                   {isProfit ? '+' : ''}{formatVES(realizedPnl)} ({isProfit ? '+' : ''}{realizedPnlPct.toFixed(2)}%)
                 </span>
               </div>
@@ -649,7 +649,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
 
           {/* Fecha de Operación */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: '#9aa3b2', marginBottom: '6px' }}>
               Fecha de Ejecución
             </label>
             <input
@@ -680,21 +680,21 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
               cursor: 'pointer',
               padding: '10px 12px',
               borderRadius: '10px',
-              background: creditToCash ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-              border: creditToCash ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: creditToCash ? 'rgba(124, 140, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+              border: creditToCash ? '1px solid rgba(124, 140, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
               userSelect: 'none',
             }}
           >
             {creditToCash ? (
-              <CheckSquare size={18} style={{ color: '#10b981' }} />
+              <CheckSquare size={18} style={{ color: '#7c8cff' }} />
             ) : (
-              <Square size={18} style={{ color: '#64748b' }} />
+              <Square size={18} style={{ color: '#667085' }} />
             )}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.82rem', color: creditToCash ? '#a7f3d0' : '#94a3b8', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.82rem', color: creditToCash ? '#c9cfff' : '#9aa3b2', fontWeight: 600 }}>
                 Acreditar monto neto a mi saldo de efectivo disponible
               </span>
-              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.72rem', color: '#667085' }}>
                 Tu saldo pasará de {formatVES(currentCashVes)} a {formatVES(currentCashVes + feeDetails.netAmountSell)}
               </span>
             </div>
@@ -712,7 +712,7 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 borderRadius: '10px',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                color: '#94a3b8',
+                color: '#9aa3b2',
                 cursor: 'pointer',
                 fontWeight: 600,
               }}
@@ -726,13 +726,13 @@ export const SellPositionModal: React.FC<SellPositionModalProps> = ({
                 flex: 2,
                 padding: '11px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #ef4444, #b91c1c)',
+                background: 'linear-gradient(135deg, #e5616e, #b91c1c)',
                 color: '#fff',
                 border: 'none',
                 fontWeight: 700,
                 cursor: isSubmitting || !currentPosition || numShares > availableShares ? 'not-allowed' : 'pointer',
                 opacity: isSubmitting || !currentPosition || numShares > availableShares ? 0.6 : 1,
-                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)',
+                boxShadow: 'none',
               }}
             >
               {isSubmitting ? 'Procesando Venta...' : `Ejecutar Venta de ${numShares.toLocaleString()} acc`}

@@ -57,14 +57,12 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
       totalConsolidated > 0 ? (totalCashVesEquivalent / totalConsolidated) * 100 : 0,
     ];
 
+    // Un tono de índigo distinto por posición; el efectivo siempre en gris
+    const positionShades = ['#7c8cff', '#6672d6', '#5560b3', '#454e92', '#373e74', '#2c3259', '#232842'];
+    const cashColor = '#4a5160';
     const backgroundColors = [
-      '#10b981', // green
-      '#3b82f6', // blue
-      '#8b5cf6', // purple
-      '#06b6d4', // cyan
-      '#f59e0b', // amber
-      '#ec4899', // pink
-      '#64748b', // slate (cash)
+      ...portfolio.positions.map((_, i) => positionShades[i % positionShades.length]),
+      cashColor,
     ];
 
     return {
@@ -72,9 +70,9 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
       datasets: [
         {
           data: dataValues,
-          backgroundColor: backgroundColors.slice(0, labels.length),
+          backgroundColor: backgroundColors,
           borderWidth: 2,
-          borderColor: '#0a0e17',
+          borderColor: '#0c0f14',
         },
       ],
     };
@@ -90,7 +88,7 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
       legend: {
         position: 'right' as const,
         labels: {
-          color: '#94a3b8',
+          color: '#9aa3b2',
           font: { family: 'Inter', size: 12 },
           boxWidth: 12,
         },
@@ -112,7 +110,7 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
           <span className="kpi-title">
             <PieChart size={16} /> Ponderación y Distribución de Activos
           </span>
-          <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: '#94a3b8' }}>
+          <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: '#9aa3b2' }}>
             % sobre patrimonio total
           </span>
         </div>
@@ -128,7 +126,7 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
           <span className="kpi-title">
             <Activity size={16} /> Pulso del Portafolio
           </span>
-          <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: '#94a3b8' }}>
+          <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.05)', color: '#9aa3b2' }}>
             Desempeño y Brecha Cambiaria
           </span>
         </div>
@@ -139,18 +137,18 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
             style={{
               padding: '14px',
               borderRadius: '12px',
-              background: 'rgba(16, 185, 129, 0.06)',
-              border: '1px solid rgba(16, 185, 129, 0.2)',
+              background: 'rgba(124, 140, 255, 0.06)',
+              border: '1px solid rgba(124, 140, 255, 0.2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#10b981', fontWeight: 700, marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#7c8cff', fontWeight: 700, marginBottom: '6px' }}>
               <TrendingUp size={14} /> MAYOR RENDIMIENTO REAL
             </div>
             <strong style={{ fontSize: '1.1rem', color: '#fff', display: 'block' }}>{bestPos?.pos.symbol || '---'}</strong>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ fontSize: '0.75rem', color: '#9aa3b2', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {bestPos?.pos.name || '---'}
             </span>
-            <div style={{ marginTop: '6px', fontSize: '1rem', fontWeight: 800, color: '#10b981' }}>
+            <div style={{ marginTop: '6px', fontSize: '1rem', fontWeight: 800, color: '#7c8cff' }}>
               {bestPos ? `+${bestPos.pnlPct.toFixed(2)}% USDT` : '---'}
             </div>
           </div>
@@ -160,18 +158,18 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
             style={{
               padding: '14px',
               borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.06)',
-              border: '1px solid rgba(245, 158, 11, 0.2)',
+              background: 'rgba(217, 164, 65, 0.06)',
+              border: '1px solid rgba(217, 164, 65, 0.2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#f59e0b', fontWeight: 700, marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#d9a441', fontWeight: 700, marginBottom: '6px' }}>
               <TrendingDown size={14} /> MENOR RENDIMIENTO REAL
             </div>
             <strong style={{ fontSize: '1.1rem', color: '#fff', display: 'block' }}>{worstPos?.pos.symbol || '---'}</strong>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ fontSize: '0.75rem', color: '#9aa3b2', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {worstPos?.pos.name || '---'}
             </span>
-            <div style={{ marginTop: '6px', fontSize: '1rem', fontWeight: 800, color: (worstPos?.pnlPct || 0) >= 0 ? '#10b981' : '#f43f5e' }}>
+            <div style={{ marginTop: '6px', fontSize: '1rem', fontWeight: 800, color: (worstPos?.pnlPct || 0) >= 0 ? 'var(--up)' : 'var(--down)' }}>
               {worstPos ? `${worstPos.pnlPct >= 0 ? '+' : ''}${worstPos.pnlPct.toFixed(2)}% USDT` : '---'}
             </div>
           </div>
@@ -182,17 +180,17 @@ const PortfolioPulseComponent: React.FC<PortfolioPulseProps> = ({ portfolio, rat
           style={{
             padding: '12px 16px',
             borderRadius: '10px',
-            background: 'rgba(245, 158, 11, 0.08)',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
+            background: 'rgba(217, 164, 65, 0.08)',
+            border: '1px solid rgba(217, 164, 65, 0.25)',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
           }}
         >
-          <AlertTriangle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
-          <div style={{ fontSize: '0.8rem', color: '#fcd34d', lineHeight: 1.4 }}>
+          <AlertTriangle size={20} style={{ color: '#d9a441', flexShrink: 0 }} />
+          <div style={{ fontSize: '0.8rem', color: '#ecc985', lineHeight: 1.4 }}>
             <strong>Brecha Cambiaria actual: +{rates.brecha_pct.toFixed(2)}%</strong>
-            <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+            <div style={{ color: '#9aa3b2', fontSize: '0.75rem' }}>
               La brecha entre el dólar BCV y USDT es de +{rates.brecha_pct.toFixed(2)}%. Tus acciones deben rendir por encima para mantener poder adquisitivo real.
             </div>
           </div>
