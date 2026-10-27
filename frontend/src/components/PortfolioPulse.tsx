@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { PieChart, Activity, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { Position, MarketRates, PortfolioData } from '@/types';
-import { formatPercent } from '@/lib/formatters';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 

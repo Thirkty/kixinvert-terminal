@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Lock, User, Mail, ShieldCheck } from 'lucide-react';
+import { X, Lock, User, Mail } from 'lucide-react';
 import { UserSession } from '@/types';
 import { setAuthToken } from '@/lib/api';
 
@@ -22,8 +22,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [twoFactorCode, setTwoFactorCode] = useState('');
-  const [requires2FA, setRequires2FA] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -33,8 +31,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setUsername('');
       setEmail('');
       setPassword('');
-      setTwoFactorCode('');
-      setRequires2FA(false);
       setErrorMsg('');
     }
   }, [isOpen, initialMode]);
@@ -62,7 +58,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           username_or_email: username.trim(),
           password
         };
-        if (twoFactorCode) body.two_factor_code = twoFactorCode;
 
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -79,11 +74,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
 
         if (!res.ok) {
-          if (data.requires_2fa) {
-            setRequires2FA(true);
-            setErrorMsg('Ingresa tu código de autenticación 2FA para continuar.');
-            return;
-          }
           throw new Error(formatError(data, 'Error al iniciar sesión'));
         }
 
@@ -93,7 +83,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           username: data.user?.username || username,
           token: validToken,
           is_demo: false,
-          has_2fa: data.user?.has_2fa,
         }, false);
         onClose();
       } else {
@@ -167,12 +156,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={() => {
               setMode('login');
-              setRequires2FA(false);
               setErrorMsg('');
               setUsername('');
               setEmail('');
               setPassword('');
-              setTwoFactorCode('');
             }}
             style={{
               padding: '8px',
@@ -191,12 +178,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={() => {
               setMode('register');
-              setRequires2FA(false);
               setErrorMsg('');
               setUsername('');
               setEmail('');
               setPassword('');
-              setTwoFactorCode('');
             }}
             style={{
               padding: '8px',
@@ -306,38 +291,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {requires2FA && (
-            <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: '#7c8cff', marginBottom: '6px', fontWeight: 600 }}>
-                Código 2FA (Google Authenticator)
-              </label>
-              <div style={{ position: 'relative' }}>
-                <ShieldCheck size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#7c8cff' }} />
-                <input
-                  type="text"
-                  name="kix_auth_2fa"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                  placeholder="123456"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px 10px 36px',
-                    borderRadius: '10px',
-                    background: 'rgba(124, 140, 255, 0.08)',
-                    border: '1px solid rgba(124, 140, 255, 0.35)',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    letterSpacing: '4px',
-                    textAlign: 'center',
-                    fontWeight: 700,
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
-          )}
 
           <button
             type="submit"

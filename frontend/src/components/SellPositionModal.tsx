@@ -4,12 +4,10 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   TrendingDown,
-  DollarSign,
   AlertCircle,
   CheckSquare,
   Square,
   Receipt,
-  Calendar,
 } from 'lucide-react';
 import { Position, BvcTicker } from '@/types';
 import { formatVES } from '@/lib/formatters';

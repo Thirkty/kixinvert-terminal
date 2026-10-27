@@ -413,23 +413,6 @@ export async function deletePositionApi(positionId: string | number): Promise<bo
   }
 }
 
-export async function fetchTransactionsApi(limit: number = 50) {
-  const token = getAuthToken();
-  const headers: HeadersInit = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  try {
-    const res = await fetch(`${API_BASE}/portfolio/transactions?limit=${limit}`, {
-      headers,
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
-  }
-}
-
 export async function updateCashApi(cashVes: number, cashUsd: number): Promise<boolean> {
   const token = getAuthToken();
   const headers: HeadersInit = { 'Content-Type': 'application/json' };

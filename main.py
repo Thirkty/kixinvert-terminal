@@ -5,9 +5,8 @@ import asyncio
 import re
 import json
 import hmac
-import hashlib
 import logging
-from typing import Optional, List
+from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Query, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -15,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 logger = logging.getLogger("kixinvert")
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -24,12 +23,11 @@ from slowapi.errors import RateLimitExceeded
 sys.stdout.reconfigure(encoding='utf-8')
 
 from db import get_db, engine, Base
-from models import User, Portfolio, Position, Asset, MarketQuote, AuditLog, Transaction, PaymentOrder, Notification, CashMovement
+from models import User, Portfolio, Position, Asset, AuditLog, Transaction, CashMovement
 from services.rates_service import fetch_current_rates
 from services.bvc_service import fetch_bvc_market_data
 from services.portfolio_service import get_portfolio_summary
-from services.ai_service import generate_local_ai_diagnosis, answer_bvc_ai_question
-from services.payment_service import create_binance_pay_order, activate_user_pro, BINANCE_PAY_SECRET_KEY
+from services.ai_service import answer_bvc_ai_question
 import services.notification_service as notification_service
 import services.whatif_service as whatif_service
 import services.telegram_service as telegram_service
@@ -224,18 +222,6 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=1, max_length=128)
     system_website_hp: Optional[str] = Field(None, max_length=100) # Honeypot
 
-class TwoFactorVerifyLogin(BaseModel):
-    user_uuid: str = Field(..., min_length=36, max_length=36, pattern=r"^[a-fA-F0-9-]{36}$")
-    totp_code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
-
-class TwoFactorEnableRequest(BaseModel):
-    secret: str = Field(..., min_length=16, max_length=64, pattern=r"^[A-Z2-7=]+$")
-    totp_code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
-
-class TwoFactorDisableRequest(BaseModel):
-    password: str = Field(..., min_length=1, max_length=128)
-    totp_code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
-
 class PositionCreate(BaseModel):
     ticker: str = Field(..., min_length=1, max_length=12)
     shares: float = Field(..., gt=0, le=100_000_000)
@@ -312,17 +298,6 @@ async def get_rates(db: Session = Depends(get_db)):
     rates = await fetch_current_rates(db)
     return rates
 
-@app.post("/api/rates/sync")
-@limiter.limit("20/minute")
-async def sync_all_market_data(request: Request, db: Session = Depends(get_db)):
-    rates = await fetch_current_rates(db, force_refresh=True)
-    quotes = await fetch_bvc_market_data(db, rates["bcv"], rates["usdt"], force_refresh=True)
-    return {
-        "success": True,
-        "rates": rates,
-        "quotes_count": len(quotes),
-        "message": "Datos de mercado y tasas sincronizados correctamente"
-    }
 
 @app.get("/api/quotes")
 async def get_quotes(force: bool = False, db: Session = Depends(get_db)):
@@ -455,7 +430,6 @@ async def register_user(request: Request, response: Response, item: UserRegister
             "broker": user.broker,
             "risk_profile": user.risk_profile,
             "portfolio_id": portfolio.id,
-            "two_factor_enabled": False,
             "subscription_tier": user.subscription_tier or "free",
             "is_pro": False,
             "ai_queries_used_this_month": 0,
@@ -539,17 +513,7 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
     user.locked_until = None
     db.commit()
 
-    # 4. CHECK IF 2FA IS ENABLED
-    if user.two_factor_enabled:
-        log_audit(db, "2FA_REQUIRED", user_id=user.id, request=request, details="2FA step requested")
-        return {
-            "success": True,
-            "two_factor_required": True,
-            "user_uuid": user.uuid,
-            "message": "Ingresa el código de 6 dígitos de Google Authenticator para continuar."
-        }
-
-    # 5. NO 2FA -> ISSUE JWT ACCESS TOKEN & SECURE COOKIE
+    # 4. ISSUE JWT ACCESS TOKEN & SECURE COOKIE
     portfolio = db.query(Portfolio).filter(Portfolio.user_id == user.id).first()
     if not portfolio:
         portfolio = Portfolio(
@@ -579,13 +543,12 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
         path="/"
     )
 
-    log_audit(db, "LOGIN_SUCCESS", user_id=user.id, request=request, details="Successful login without 2FA")
+    log_audit(db, "LOGIN_SUCCESS", user_id=user.id, request=request, details="Successful login")
 
     is_pro = check_and_refresh_user_subscription(user, db)
 
     return {
         "success": True,
-        "two_factor_required": False,
         "message": f"¡Bienvenido de vuelta, {user.full_name}!",
         "token": token,
         "access_token": token,
@@ -599,7 +562,6 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
             "broker": user.broker,
             "risk_profile": user.risk_profile,
             "portfolio_id": portfolio.id,
-            "two_factor_enabled": False,
             "subscription_tier": user.subscription_tier or "free",
             "subscription_expires_at": user.subscription_expires_at.isoformat() if user.subscription_expires_at else None,
             "is_pro": is_pro,
@@ -608,119 +570,6 @@ async def login_user(request: Request, response: Response, item: UserLogin, db: 
         }
     }
 
-@app.post("/api/auth/2fa/verify-login")
-@limiter.limit("10/minute")
-async def verify_2fa_login(request: Request, response: Response, item: TwoFactorVerifyLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.uuid == item.user_uuid).first()
-    if not user or not user.two_factor_enabled or not user.two_factor_secret:
-        raise HTTPException(status_code=400, detail="Solicitud de 2FA no válida.")
-
-    # Decrypt TOTP secret from database
-    decrypted_secret = security.decrypt_sensitive_data(user.two_factor_secret)
-
-    if not security.verify_totp_code(decrypted_secret, item.totp_code):
-        log_audit(db, "2FA_LOGIN_FAILED", user_id=user.id, request=request, details="Invalid 2FA code")
-        raise HTTPException(status_code=401, detail="Código 2FA incorrecto o expirado. Verifica la hora de tu dispositivo.")
-
-    portfolio = db.query(Portfolio).filter(Portfolio.user_id == user.id).first()
-
-    token = security.create_access_token({
-        "sub": str(user.id),
-        "username": user.username,
-        "uuid": user.uuid,
-        "role": user.role
-    })
-
-    response.set_cookie(
-        key="kix_token",
-        value=token,
-        httponly=True,
-        secure=COOKIE_SECURE,
-        samesite=COOKIE_SAMESITE,
-        max_age=86400,
-        path="/"
-    )
-
-    log_audit(db, "2FA_LOGIN_SUCCESS", user_id=user.id, request=request, details="Successful login with 2FA TOTP")
-
-    is_pro = check_and_refresh_user_subscription(user, db)
-
-    return {
-        "success": True,
-        "message": f"¡Autenticación en dos pasos exitosa! Bienvenido, {user.full_name}",
-        "token": token,
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "uuid": user.uuid,
-            "username": user.username,
-            "email": user.email,
-            "full_name": user.full_name,
-            "broker": user.broker,
-            "risk_profile": user.risk_profile,
-            "portfolio_id": portfolio.id if portfolio else None,
-            "two_factor_enabled": True,
-            "subscription_tier": user.subscription_tier or "free",
-            "subscription_expires_at": user.subscription_expires_at.isoformat() if user.subscription_expires_at else None,
-            "is_pro": is_pro,
-            "ai_queries_used_this_month": user.ai_queries_used_this_month or 0,
-            "ai_queries_limit": None if is_pro else 10
-        }
-    }
-
-@app.post("/api/auth/2fa/setup")
-@limiter.limit("10/minute")
-async def setup_2fa(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    secret = security.generate_totp_secret()
-    uri = security.get_totp_provisioning_uri(secret, current_user.email)
-    qr_b64 = security.generate_qr_code_base64(uri)
-
-    return {
-        "secret": secret,
-        "qr_code_base64": qr_b64,
-        "manual_entry_key": " ".join([secret[i:i+4] for i in range(0, len(secret), 4)])
-    }
-
-@app.post("/api/auth/2fa/enable")
-@limiter.limit("10/minute")
-async def enable_2fa(item: TwoFactorEnableRequest, request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not security.verify_totp_code(item.secret, item.totp_code):
-        raise HTTPException(status_code=400, detail="Código de verificación incorrecto. Asegúrate de escanear el código y escribir los 6 dígitos actuales.")
-
-    # Encrypt 2FA secret at rest before persisting to PostgreSQL
-    current_user.two_factor_secret = security.encrypt_sensitive_data(item.secret)
-    current_user.two_factor_enabled = True
-    db.commit()
-
-    log_audit(db, "2FA_ENABLED", user_id=current_user.id, request=request, details="2FA TOTP activated with field encryption")
-
-    return {
-        "success": True,
-        "message": "¡Verificación en Dos Pasos (2FA) activada con éxito en tu cuenta!"
-    }
-
-@app.post("/api/auth/2fa/disable")
-@limiter.limit("10/minute")
-async def disable_2fa(item: TwoFactorDisableRequest, request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    is_valid, _ = security.verify_and_maybe_upgrade_password(item.password, current_user.password_hash)
-    if not is_valid:
-        raise HTTPException(status_code=401, detail="Contraseña incorrecta.")
-
-    decrypted_secret = security.decrypt_sensitive_data(current_user.two_factor_secret)
-    if not security.verify_totp_code(decrypted_secret, item.totp_code):
-        raise HTTPException(status_code=400, detail="Código 2FA incorrecto.")
-
-    current_user.two_factor_enabled = False
-    current_user.two_factor_secret = None
-    db.commit()
-
-    log_audit(db, "2FA_DISABLED", user_id=current_user.id, request=request, details="2FA TOTP deactivated")
-
-    return {
-        "success": True,
-        "message": "Autenticación de Dos Pasos desactivada correctamente."
-    }
 
 @app.post("/api/auth/logout")
 async def logout_user(response: Response, current_user: Optional[User] = Depends(get_optional_current_user), db: Session = Depends(get_db)):
@@ -742,7 +591,6 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
         "broker": current_user.broker,
         "risk_profile": current_user.risk_profile,
         "role": current_user.role,
-        "two_factor_enabled": current_user.two_factor_enabled,
         "portfolio_id": portfolio.id if portfolio else None,
         "subscription_tier": current_user.subscription_tier or "free",
         "subscription_expires_at": current_user.subscription_expires_at.isoformat() if current_user.subscription_expires_at else None,
@@ -751,23 +599,6 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
         "ai_queries_limit": None if is_pro else 10
     }
 
-@app.get("/api/audit-logs")
-async def get_user_audit_logs(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # STRICT ROW LEVEL SECURITY: Only returns current user's audit entries
-    logs = db.query(AuditLog).filter(
-        AuditLog.user_id == current_user.id
-    ).order_by(AuditLog.created_at.desc()).limit(25).all()
-
-    return [
-        {
-            "id": log.id,
-            "action": log.action,
-            "ip_address": log.ip_address,
-            "details": log.details,
-            "created_at": log.created_at.strftime("%d/%m/%Y %H:%M:%S") if log.created_at else ""
-        }
-        for log in logs
-    ]
 
 # ==========================================================
 # SECURE PORTFOLIO & TRADING (BLINDADO CONTRA IDOR)
@@ -1206,37 +1037,6 @@ async def sell_position(
         "cash_usd": float(portfolio.cash_usd or 0.0)
     }
 
-@app.get("/api/portfolio/transactions")
-@limiter.limit("30/minute")
-def get_portfolio_transactions(
-    request: Request,
-    limit: int = Query(50, ge=1, le=200),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    portfolio = db.query(Portfolio).filter(Portfolio.user_id == current_user.id).first()
-    if not portfolio:
-        return []
-
-    txs = db.query(Transaction).filter(
-        Transaction.portfolio_id == portfolio.id
-    ).order_by(Transaction.executed_at.desc()).limit(limit).all()
-
-    return [
-        {
-            "id": t.id,
-            "ticker": t.ticker,
-            "tx_type": t.tx_type,
-            "shares": float(t.shares),
-            "price_ves": float(t.price_ves),
-            "fee_ves": float(t.fee_ves or 0.0),
-            "rate_bcv": float(t.rate_bcv) if t.rate_bcv else None,
-            "rate_usdt": float(t.rate_usdt) if t.rate_usdt else None,
-            "notes": t.notes,
-            "executed_at": t.executed_at.isoformat() if t.executed_at else None
-        }
-        for t in txs
-    ]
 
 @app.delete("/api/positions/{position_id}")
 @limiter.limit("30/minute")
@@ -1423,29 +1223,6 @@ async def get_popular_international_stocks():
         results.append(q if q else info)
     return results
 
-@app.get("/api/international/quote/{ticker}")
-async def get_single_international_quote(ticker: str):
-    """Fetches real-time quote for a specific international ticker."""
-    from services.international_service import fetch_international_quote
-    clean_ticker = security.sanitize_ticker(ticker)
-    if not clean_ticker:
-        raise HTTPException(status_code=400, detail="Ticker inválido")
-    q = fetch_international_quote(clean_ticker)
-    if not q:
-        raise HTTPException(status_code=404, detail=f"No se pudo obtener cotización para {clean_ticker}")
-    return q
-
-@app.post("/api/ai/diagnosis")
-@limiter.limit("15/minute")
-async def get_ai_diagnosis(
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    rates = await fetch_current_rates(db)
-    summary = get_portfolio_summary(db, rates["bcv"], rates["usdt"], user_id=current_user.id)
-    diagnosis = generate_local_ai_diagnosis(summary, rates)
-    return diagnosis
 
 @app.post("/api/ai/chat")
 @limiter.limit("15/minute")
@@ -1498,130 +1275,6 @@ async def chat_with_bvc_ai(
     }
 
 # ==========================================================
-# BINANCE PAY PAYMENTS & PRO SUBSCRIPTION ENDPOINTS
-# ==========================================================
-
-# Prices live on the server; whatever amount the browser sends is ignored
-PLAN_PRICES_USDT = {"pro_monthly": 5.00}
-
-class CreateOrderRequest(BaseModel):
-    plan: Optional[str] = "pro_monthly"
-
-@app.post("/api/payments/create-binance-order")
-@limiter.limit("15/minute")
-async def api_create_binance_order(
-    item: CreateOrderRequest,
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    plan = item.plan or "pro_monthly"
-    if plan not in PLAN_PRICES_USDT:
-        raise HTTPException(status_code=400, detail="Plan no disponible.")
-    order_data = create_binance_pay_order(
-        db,
-        current_user,
-        plan=plan,
-        amount_usdt=PLAN_PRICES_USDT[plan]
-    )
-    return {
-        "success": True,
-        "order": order_data
-    }
-
-@app.get("/api/payments/order-status/{order_id}")
-async def api_get_order_status(
-    order_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    order = db.query(PaymentOrder).filter(
-        PaymentOrder.order_id == order_id, 
-        PaymentOrder.user_id == current_user.id
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail="Orden de pago no encontrada.")
-    
-    is_pro = check_and_refresh_user_subscription(current_user, db)
-    return {
-        "order_id": order.order_id,
-        "status": order.status,
-        "amount_usdt": float(order.amount_usdt),
-        "is_pro": is_pro,
-        "expires_at": current_user.subscription_expires_at.isoformat() if current_user.subscription_expires_at else None
-    }
-
-@app.post("/api/payments/simulate-binance-success/{order_id}")
-async def api_simulate_binance_success(
-    order_id: str,
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    # Sandbox only: never available in production or when real Binance Pay is configured
-    if ENVIRONMENT != "development" or BINANCE_PAY_SECRET_KEY:
-        raise HTTPException(status_code=404, detail="Not Found")
-    order = db.query(PaymentOrder).filter(
-        PaymentOrder.order_id == order_id,
-        PaymentOrder.user_id == current_user.id
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail="Orden no encontrada.")
-    if order.status == "PAID":
-        raise HTTPException(status_code=400, detail="Esta orden ya fue pagada.")
-
-    result = activate_user_pro(db, current_user, order)
-    return result
-
-@app.post("/api/payments/binance-webhook")
-async def api_binance_webhook(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    # Without a configured secret nobody can prove a payment happened: reject everything
-    if not BINANCE_PAY_SECRET_KEY:
-        raise HTTPException(status_code=503, detail="Pagos no configurados.")
-
-    body_bytes = await request.body()
-    body_str = body_bytes.decode("utf-8")
-    timestamp = request.headers.get("BinancePay-Timestamp", "")
-    nonce = request.headers.get("BinancePay-Nonce", "")
-    signature = request.headers.get("BinancePay-Signature", "")
-    expected_sig = hmac.new(
-        BINANCE_PAY_SECRET_KEY.encode("utf-8"),
-        f"{timestamp}\n{nonce}\n{body_str}\n".encode("utf-8"),
-        hashlib.sha512
-    ).hexdigest().upper()
-    if not signature or not hmac.compare_digest(signature.upper(), expected_sig):
-        log_audit(db, "PAYMENT_WEBHOOK_REJECTED", request=request, details="Invalid Binance Pay signature")
-        raise HTTPException(status_code=400, detail="Firma inválida")
-
-    try:
-        payload = json.loads(body_str) if body_str else {}
-        data = payload.get("data", {})
-        if isinstance(data, str):
-            data = json.loads(data)
-        merchant_trade_no = data.get("merchantTradeNo")
-
-        if payload.get("bizStatus") == "PAY_SUCCESS" and merchant_trade_no:
-            order = db.query(PaymentOrder).filter(PaymentOrder.order_id == merchant_trade_no).first()
-            paid_amount = float(data.get("totalFee") or data.get("orderAmount") or 0)
-            if order and order.status != "PAID":
-                # The paid amount must cover the order price set by the server
-                if paid_amount + 0.001 < float(order.amount_usdt):
-                    log_audit(db, "PAYMENT_AMOUNT_MISMATCH", user_id=order.user_id, request=request,
-                              details=f"Order {order.order_id}: paid {paid_amount} < {order.amount_usdt}")
-                    return {"returnCode": "FAIL", "returnMessage": "Amount mismatch"}
-                user = db.query(User).filter(User.id == order.user_id).first()
-                if user:
-                    activate_user_pro(db, user, order)
-
-        return {"returnCode": "SUCCESS", "returnMessage": None}
-    except Exception:
-        logger.exception("Binance Pay webhook processing failed")
-        return {"returnCode": "FAIL", "returnMessage": "Processing error"}
-
-# ==========================================================
 # NOTIFICATIONS & ALERTS API
 # ==========================================================
 
@@ -1662,24 +1315,9 @@ async def api_mark_all_notifications_read(
     count = notification_service.mark_all_notifications_read(db, user_id=user_id)
     return {"status": "ok", "marked_read": count, "unread_count": 0}
 
-@app.post("/api/notifications/refresh")
-async def api_refresh_notifications(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    user_id = current_user.id if current_user else None
-    generated = notification_service.generate_smart_notifications(db, user_id=user_id)
-    notifications = notification_service.get_user_notifications(db, user_id=user_id, limit=30)
-    unread_count = notification_service.get_unread_count(db, user_id=user_id)
-    return {
-        "status": "ok",
-        "generated_count": len(generated),
-        "unread_count": unread_count,
-        "notifications": notifications
-    }
 
 # ==========================================================
-# WHAT-IF STRESS SIMULATOR & EXECUTIVE REPORT API
+# WHAT-IF STRESS SIMULATOR API
 # ==========================================================
 
 @app.post("/api/portfolio/simulate-what-if")
@@ -1706,16 +1344,6 @@ async def api_simulate_what_if(
     )
     return result
 
-@app.get("/api/portfolio/executive-report")
-async def api_get_executive_report(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    user_id = current_user.id if current_user else None
-    report_data = whatif_service.generate_executive_report_data(db, user_id=user_id)
-    if not report_data:
-        raise HTTPException(status_code=404, detail="No se pudo compilar el reporte ejecutivo.")
-    return report_data
 
 # ==========================================================
 # TELEGRAM BOT INTEGRATION API (@KixInvertAlertsBot)

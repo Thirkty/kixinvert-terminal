@@ -2,14 +2,10 @@
 
 import React, { useState } from 'react';
 import {
-  BellRing,
-  Check,
   RefreshCw,
   X,
-  ShieldAlert,
   TrendingUp,
   Zap,
-  Send,
   Target,
 } from 'lucide-react';
 import { NotificationItem } from '@/types';

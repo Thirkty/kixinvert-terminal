@@ -24,7 +24,6 @@ import { MarketCode, CountUp } from './Motion';
 import { CurrencyMode, MarketRates, PortfolioData, TriMonetaryTotals } from '@/types';
 import { formatVES, formatUSD, formatUSDT, formatPercent } from '@/lib/formatters';
 import { SpotlightCard } from './SpotlightCard';
-import { AnimatedTrend } from './AnimatedIcons';
 
 interface HeroKPIsProps {
   currentMode: CurrencyMode;

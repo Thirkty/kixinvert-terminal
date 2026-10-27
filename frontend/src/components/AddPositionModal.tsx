@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { X, PlusCircle, CheckSquare, Square, Calendar, Receipt } from 'lucide-react';
+import { X, PlusCircle, CheckSquare, Square, Receipt } from 'lucide-react';
 import { BvcTicker, Position } from '@/types';
 import { formatVES } from '@/lib/formatters';
 import { calculateMercosurFees } from '@/lib/mercosurFees';

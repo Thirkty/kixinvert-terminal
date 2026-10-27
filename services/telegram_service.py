@@ -8,7 +8,7 @@ import httpx
 import asyncio
 from sqlalchemy.orm import Session
 
-from models import User, Portfolio, Notification, MarketQuote, ExchangeRate
+from models import User, Portfolio, Notification, ExchangeRate
 from services.portfolio_service import get_portfolio_summary
 
 logger = logging.getLogger("telegram_service")
@@ -44,38 +44,6 @@ def generate_pairing_code(db: Session, user: User) -> str:
     db.refresh(user)
     return code
 
-def format_alert_html(
-    title: str,
-    message: str,
-    severity: str = "info",
-    ticker: Optional[str] = None,
-    action_url: Optional[str] = None
-) -> str:
-    """Formats a message with financial-grade styling and emojis for Telegram."""
-    icon_map = {
-        "critical": "🚨 <b>ALERTA CRÍTICA</b>",
-        "warning": "⚠️ <b>AVISO ESTRATÉGICO</b>",
-        "success": "🎯 <b>SEÑAL TÁCTICA EJECUTIVA</b>",
-        "info": "📊 <b>NOTIFICACIÓN DE MERCADO</b>"
-    }
-    header_icon = icon_map.get(severity.lower(), "🔔 <b>KIXINVERT ALERTA</b>")
-    ticker_tag = f" · <code>{ticker}</code>" if ticker else ""
-
-    lines = [
-        f"{header_icon}{ticker_tag}",
-        "━━━━━━━━━━━━━━━━━━━━━━",
-        f"<b>{title}</b>",
-        "",
-        message,
-        "",
-        "━━━━━━━━━━━━━━━━━━━━━━",
-        "<i>💡 Terminal Bursátil BVC Tri-Monetario</i>"
-    ]
-    if action_url:
-        full_url = action_url if action_url.startswith("http") else f"http://127.0.0.1:8000{action_url}"
-        lines.append(f'🔗 <a href="{full_url}">Ver detalle en la Plataforma</a>')
-
-    return "\n".join(lines)
 
 def send_telegram_message(chat_id: str, text: str, parse_mode: str = "HTML") -> Dict[str, Any]:
     """
@@ -362,9 +330,6 @@ def dispatch_consolidated_digest(
 
     return dispatched
 
-def send_notification_to_telegram(db: Session, notif: Notification) -> int:
-    """Dispatches a single notification as a clean unified message."""
-    return dispatch_consolidated_digest(db, [notif], user_id=notif.user_id)
 
 def handle_incoming_telegram_message(db: Session, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
